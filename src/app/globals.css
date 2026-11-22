@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Palette stored as RGB channels so Tailwind opacity modifiers work (bg-cocoa/10). */
+  --cream: 255 248 240; /* #FFF8F0 background */
+  --blush: 244 192 209; /* #F4C0D1 */
+  --sage: 207 227 208; /* #CFE3D0 */
+  --butter: 248 227 163; /* #F8E3A3 */
+  --berry: 212 83 126; /* #D4537E accent (large text and decoration only) */
+  --berry-dark: 166 59 99; /* #A63B63 darker berry, safe for small text */
+  --cocoa: 59 47 47; /* #3B2F2F text */
+}
+
+@layer base {
+  html {
+    background-color: rgb(var(--cream));
+    color: rgb(var(--cocoa));
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply font-sans antialiased;
+    min-height: 100dvh;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-serif;
+    font-variation-settings: "SOFT" 100;
+  }
+
+  :focus-visible {
+    outline: 3px solid rgb(var(--berry));
+    outline-offset: 3px;
+  }
+
+  ::selection {
+    background: rgb(var(--blush));
+  }
+}
+
+@layer utilities {
+  /* Calm graph-paper texture used by the Studio side. */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgb(var(--cocoa) / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--cocoa) / 0.06) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

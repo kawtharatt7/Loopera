@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { useRef } from "react";
+import { useT } from "@/lib/i18n/client";
 import { BRAND_LABEL, type CardBrand } from "@/lib/shop/card";
 
 export type CardField = "number" | "name" | "expiry" | "cvc" | null;
@@ -66,6 +67,7 @@ function Digits({ text, placeholder }: { text: string; placeholder: string }) {
  */
 export function PaymentCard({ number, name, expiry, cvc, brand, focused }: PaymentCardProps) {
   const reduce = useReducedMotion() ?? false;
+  const { t } = useT();
   const ref = useRef<HTMLDivElement>(null);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -94,6 +96,7 @@ export function PaymentCard({ number, name, expiry, cvc, brand, focused }: Payme
         my.set(0);
       }}
       className="mx-auto w-full max-w-[400px] [perspective:1200px]"
+      dir="ltr"
       role="img"
       aria-label={`${BRAND_LABEL[brand]} ending ${number.replace(/\D/g, "").slice(-4) || "not entered yet"}`}
     >
@@ -139,11 +142,11 @@ export function PaymentCard({ number, name, expiry, cvc, brand, focused }: Payme
               </div>
               <div className="flex items-end justify-between gap-4 text-sm">
                 <div className="min-w-0">
-                  <p className="text-[10px] opacity-70">Card holder</p>
-                  <p className={`truncate uppercase ${focused === "name" ? "underline decoration-rose underline-offset-4" : ""}`}>{name || "Your name"}</p>
+                  <p className="text-[10px] opacity-70">{t.checkout.cardHolder}</p>
+                  <p className={`truncate uppercase ${focused === "name" ? "underline decoration-rose underline-offset-4" : ""}`}>{name || t.checkout.yourName}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-[10px] opacity-70">Expires</p>
+                  <p className="text-[10px] opacity-70">{t.checkout.expires}</p>
                   <p className={`font-mono ${focused === "expiry" ? "underline decoration-rose underline-offset-4" : ""}`}>{expiry || "MM/YY"}</p>
                 </div>
               </div>
@@ -156,7 +159,7 @@ export function PaymentCard({ number, name, expiry, cvc, brand, focused }: Payme
             <div className="mx-[7%] mt-[7%] flex h-[16%] items-center justify-end rounded bg-[repeating-linear-gradient(-45deg,rgb(255_246_241),rgb(255_246_241)_6px,rgb(240_226_220)_6px,rgb(240_226_220)_12px)] pr-4">
               <span className="font-mono text-lg tracking-[0.2em] text-[rgb(43_15_20)]">{cvc.padEnd(brand === "amex" ? 4 : 3, "•")}</span>
             </div>
-            <p className="mx-[7%] mt-4 text-[11px] leading-snug opacity-75">Test card only. Loopera never stores card numbers.</p>
+            <p className="mx-[7%] mt-4 text-[11px] leading-snug opacity-75">{t.checkout.testOnly}</p>
           </div>
         </motion.div>
       </motion.div>

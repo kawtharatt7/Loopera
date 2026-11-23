@@ -2,13 +2,13 @@
 
 import { useSyncExternalStore } from "react";
 import { z } from "zod";
-import { getProduct, stockFor } from "@/lib/demo/products";
+import { getProduct, stockFor } from "./catalog";
 
-// The cart lives in this browser until accounts arrive; then it moves to the database.
+// The bag lives in this browser until accounts arrive; then it moves to the database.
 // Prices are always re-read from the catalog, never trusted from storage.
 
-const KEY = "loopera-cart-v1";
-const ORDERS_KEY = "loopera-orders-v1";
+const KEY = "loopera-bag-v2";
+const ORDERS_KEY = "loopera-orders-v2";
 
 const LineSchema = z.object({
   slug: z.string().min(1).max(80),
@@ -27,7 +27,7 @@ const OrderSchema = z.object({
   cardBrand: z.string(),
   name: z.string(),
   city: z.string(),
-  lines: z.array(LineSchema.extend({ title: z.string(), unitPrice: z.number(), maker: z.string() })),
+  lines: z.array(LineSchema.extend({ unitPrice: z.number() })),
   total: z.number(),
 });
 export type Order = z.infer<typeof OrderSchema>;
@@ -47,17 +47,23 @@ function write(key: string, value: unknown) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
-    // Storage full or blocked: the cart still works for this visit.
+    // Storage full or blocked: the bag still works for this visit.
   }
   emit();
 }
 
 const listeners = new Set<() => void>();
+let cache: CartLine[] | null = null;
+let ordersCache: Order[] | null = null;
+const EMPTY: CartLine[] = [];
+const NO_ORDERS: Order[] = [];
+
 function emit() {
   cache = null;
   ordersCache = null;
   listeners.forEach((l) => l());
 }
+
 function subscribe(l: () => void) {
   listeners.add(l);
   const onStorage = (e: StorageEvent) => {
@@ -69,11 +75,6 @@ function subscribe(l: () => void) {
     window.removeEventListener("storage", onStorage);
   };
 }
-
-let cache: CartLine[] | null = null;
-let ordersCache: Order[] | null = null;
-const EMPTY: CartLine[] = [];
-const NO_ORDERS: Order[] = [];
 
 function getCart(): CartLine[] {
   if (cache === null) cache = read(KEY, z.array(LineSchema), EMPTY);
@@ -93,15 +94,18 @@ export function useOrders(): Order[] {
 }
 
 export function priceOf(line: CartLine): number {
-  const p = getProduct(line.slug);
-  return p?.sizes.find((s) => s.label === line.size)?.price ?? 0;
+  return getProduct(line.slug)?.sizes.find((s) => s.id === line.size)?.price ?? 0;
 }
 
 export function cartTotal(lines: CartLine[]): number {
   return lines.reduce((sum, l) => sum + priceOf(l) * l.qty, 0);
 }
 
-/** Adds a piece. Returns false when that color and size has no stock left. */
+export function cartCount(lines: CartLine[]): number {
+  return lines.reduce((a, l) => a + l.qty, 0);
+}
+
+/** Adds pieces. Returns false when that color and size has no stock left. */
 export function addToCart(line: Omit<CartLine, "qty">, qty = 1): boolean {
   const p = getProduct(line.slug);
   if (!p) return false;
@@ -131,14 +135,11 @@ export function clearCart() {
   write(KEY, []);
 }
 
-/** Records a test-mode order. Card details never reach this function, only the last 4 digits and brand. */
+/** Records a test-mode order. Card details never reach this function, only the last 4 digits and network. */
 export function placeTestOrder(input: { name: string; city: string; cardLast4: string; cardBrand: string }): Order | null {
   const lines = getCart();
   if (lines.length === 0) return null;
-  const detailed = lines.flatMap((l) => {
-    const p = getProduct(l.slug);
-    return p ? [{ ...l, title: p.title, maker: p.maker, unitPrice: priceOf(l) }] : [];
-  });
+  const detailed = lines.filter((l) => getProduct(l.slug)).map((l) => ({ ...l, unitPrice: priceOf(l) }));
   const order: Order = {
     id: `LP-${Date.now().toString(36).toUpperCase()}`,
     createdAt: new Date().toISOString(),

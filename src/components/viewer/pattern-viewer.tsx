@@ -6,8 +6,10 @@ import { useEffect, useMemo, useState } from "react";
 import type { EnginePart, Pattern } from "@/lib/engine/types";
 import type { Terms } from "@/lib/engine/terms";
 import { hasWebGL } from "@/lib/webgl";
+import { useT } from "@/lib/i18n/client";
+import { partNameAr } from "@/lib/engine/arabic";
 import { FlatChart, ProfileView } from "./flat-views";
-import { PatternList } from "./pattern-list";
+import { PatternList, type RoundProgress } from "./pattern-list";
 import { SPEEDS, usePlayback, type Speed } from "./use-playback";
 
 const StitchScene = dynamic(() => import("./stitch-scene"), {
@@ -23,6 +25,8 @@ interface PatternViewerProps {
   onCanvas?: (canvas: HTMLCanvasElement | null) => void;
   /** Level 3 pieces get a written draft only, no 3D. */
   allow3D?: boolean;
+  /** Tick boxes for finished rounds. */
+  progress?: RoundProgress;
 }
 
 function Icon({ d }: { d: string }) {
@@ -33,8 +37,10 @@ function Icon({ d }: { d: string }) {
   );
 }
 
-export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, allow3D = true }: PatternViewerProps) {
+export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, allow3D = true, progress }: PatternViewerProps) {
   const reduce = useReducedMotion() ?? false;
+  const { t, locale } = useT();
+  const ar = locale === "ar";
   const [webgl, setWebgl] = useState<boolean | null>(null);
   const [compact, setCompact] = useState(false);
   const [activeId, setActiveId] = useState(pattern.parts[0]?.partId ?? "");
@@ -104,7 +110,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
               }`}
             >
               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: p.colorHex }} aria-hidden="true" />
-              {p.name}
+              {ar ? partNameAr(p.name) : p.name}
             </button>
           ))}
           {allow3D && webgl && hasRevolution && hasAttachments && (
@@ -120,7 +126,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
                 view === "assembly" ? "bg-primary text-primary-fg" : "border border-line/15 bg-surface/60 hover:bg-surface-2"
               }`}
             >
-              Assembly
+              {ar ? "التركيب" : "Assembly"}
             </button>
           )}
         </div>
@@ -140,18 +146,18 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
           )}
           {view === "part" && (
             <div className="pointer-events-none absolute left-4 top-4 rounded-full bg-surface/85 px-3 py-1.5 text-sm backdrop-blur">
-              <span className="text-muted-foreground">{active.kind === "rectangle" ? "Row" : "Round"}</span>{" "}
+              <span className="text-muted-foreground">{active.kind === "rectangle" ? t.creator.row : t.creator.round}</span>{" "}
               <span className="font-medium tabular-nums">
                 {round + 1} / {total}
               </span>
               <span className="text-muted-foreground">, </span>
-              <span className="tabular-nums">{active.rounds[round]?.stitches} st</span>
+              <span className="tabular-nums">{active.rounds[round]?.stitches} {ar ? "غرزة" : "st"}</span>
             </div>
           )}
           {view === "assembly" && (
             <label className="absolute bottom-4 left-4 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full bg-surface/85 px-4 text-sm backdrop-blur">
               <input type="checkbox" checked={explode} onChange={(e) => setExplode(e.target.checked)} className="h-4 w-4 accent-[rgb(var(--primary))]" />
-              Exploded view
+              {ar ? "عرض مفصول" : "Exploded view"}
             </label>
           )}
         </div>
@@ -162,13 +168,13 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
             <button
               type="button"
               onClick={toggle}
-              aria-label={playing ? "Pause" : "Play the build round by round"}
+              aria-label={playing ? (ar ? "إيقاف" : "Pause") : ar ? "شغّلي البناء راوند راوند" : "Play the build round by round"}
               className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-fg transition-transform active:scale-95"
             >
               {playing ? <Icon d="M6 4h3v12H6zM11 4h3v12h-3z" /> : <Icon d="M6 4l10 6-10 6z" />}
             </button>
             <label className="flex min-w-[10rem] flex-1 items-center gap-3">
-              <span className="sr-only">Scrub to round</span>
+              <span className="sr-only">{ar ? "انتقلي لراوند" : "Scrub to round"}</span>
               <input
                 type="range"
                 min={1}
@@ -183,7 +189,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
               />
             </label>
             <label className="flex items-center gap-2 text-sm text-muted-foreground">
-              Speed
+              {ar ? "السرعة" : "Speed"}
               <select
                 value={speed}
                 onChange={(e) => setSpeed(Number(e.target.value) as Speed)}
@@ -209,6 +215,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
           assembly={pattern.assembly}
           onPick={pick}
           follow={playing}
+          progress={progress}
         />
       </div>
     </div>

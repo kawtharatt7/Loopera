@@ -10,7 +10,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   return (
     <>
       <SiteHeader />
-      <main id="main" className="px-5 pb-24 pt-28 sm:px-8">
+      <main id="main" className="px-5 pb-24 pt-32 sm:px-8 sm:pt-28">
         <div className="mx-auto max-w-4xl">
           <Suspense fallback={<div className="h-40 animate-pulse rounded-2xl bg-surface" />}>
             <OrderDetail id={id} />

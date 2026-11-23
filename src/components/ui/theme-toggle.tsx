@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { useT } from "@/lib/i18n/client";
 import { applyTheme, readTheme, type Theme } from "@/lib/theme";
 
 export function useTheme(): Theme {
@@ -17,14 +18,16 @@ export function useTheme(): Theme {
 
 export function ThemeToggle({ className = "" }: { className?: string }) {
   const theme = useTheme();
+  const { t } = useT();
   const next: Theme = theme === "dark" ? "light" : "dark";
+  const label = next === "dark" ? t.nav.dark : t.nav.light;
 
   return (
     <button
       type="button"
       onClick={() => applyTheme(next)}
-      aria-label={`Switch to ${next} mode`}
-      title={`Switch to ${next} mode`}
+      aria-label={label}
+      title={label}
       className={`relative inline-flex h-11 w-11 cursor-pointer items-center justify-center overflow-hidden rounded-xl text-fg transition-colors hover:bg-surface-2 ${className}`}
     >
       <AnimatePresence mode="wait" initial={false}>

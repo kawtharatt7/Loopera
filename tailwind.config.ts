@@ -38,8 +38,9 @@ const config: Config = {
         destructive: { DEFAULT: token("ember"), foreground: token("fg") },
       },
       fontFamily: {
-        serif: ["var(--font-display)", "Georgia", "serif"],
-        sans: ["var(--font-body)", "system-ui", "sans-serif"],
+        // Alexandria for headings, IBM Plex Sans Arabic for text; both cover Arabic and Latin.
+        serif: ["Alexandria", "Tahoma", "sans-serif"],
+        sans: ["IBM Plex Sans Arabic", "Tahoma", "system-ui", "sans-serif"],
       },
       borderRadius: {
         "4xl": "2rem",

@@ -2,9 +2,21 @@
 
 import { MotionConfig } from "framer-motion";
 import type { ReactNode } from "react";
+import { BagProvider } from "@/components/bag/bag-context";
+import { BagDrawer } from "@/components/bag/bag-drawer";
+import type { Locale } from "@/lib/i18n/config";
+import { LocaleProvider } from "@/lib/i18n/client";
 
-// Makes every Framer Motion animation respect the visitor's
-// "reduce motion" system setting (transform animations are skipped).
-export function Providers({ children }: { children: ReactNode }) {
-  return <MotionConfig reducedMotion="user">{children}</MotionConfig>;
+// Language, the slide-in bag, and Framer Motion respecting "reduce motion".
+export function Providers({ locale, children }: { locale: Locale; children: ReactNode }) {
+  return (
+    <LocaleProvider locale={locale}>
+      <MotionConfig reducedMotion="user">
+        <BagProvider>
+          {children}
+          <BagDrawer />
+        </BagProvider>
+      </MotionConfig>
+    </LocaleProvider>
+  );
 }

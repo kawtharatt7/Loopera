@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getProduct, formatSar } from "@/lib/demo/products";
+import { formatSar, getProduct } from "@/lib/shop/catalog";
+import { useT } from "@/lib/i18n/client";
 import { cartTotal, placeTestOrder, priceOf, useCart } from "@/lib/shop/cart";
 import { BRAND_LABEL, cvcValid, detectBrand, digitsOnly, expiryValid, formatCardNumber, formatExpiry, luhnValid } from "@/lib/shop/card";
 import { PaymentCard, type CardField } from "./payment-card";
@@ -47,19 +48,20 @@ export function CheckoutForm() {
   const [name, setName] = useState("");
   const [expiry, setExpiry] = useState("");
   const [cvc, setCvc] = useState("");
-  const [city, setCity] = useState("Riyadh");
+  const [city, setCity] = useState("");
   const [focused, setFocused] = useState<CardField>(null);
   const [errors, setErrors] = useState<Errors>({});
   const [paying, setPaying] = useState(false);
   const brand = detectBrand(number);
+  const { t, bi, locale } = useT();
   const total = cartTotal(lines);
 
   if (lines.length === 0 && !paying) {
     return (
       <div className="py-20 text-center">
-        <p className="text-2xl">Your cart is empty.</p>
+        <p className="text-2xl">{t.checkout.emptyCart}</p>
         <Link href="/shop" className="mt-4 inline-block underline underline-offset-4">
-          Find something to buy
+          {t.checkout.findSomething}
         </Link>
       </div>
     );
@@ -67,11 +69,11 @@ export function CheckoutForm() {
 
   const validate = (): Errors => {
     const e: Errors = {};
-    if (!luhnValid(number)) e.number = "Check the card number. For testing, use 4242 4242 4242 4242.";
-    if (name.trim().length < 2) e.name = "Write the name as it appears on the card.";
-    if (!expiryValid(expiry)) e.expiry = "Use a future month, as MM/YY.";
-    if (!cvcValid(cvc, brand)) e.cvc = brand === "amex" ? "Four digits, on the front." : "Three digits, on the back.";
-    if (city.trim().length < 2) e.city = "Tell us which city to ship to.";
+    if (!luhnValid(number)) e.number = t.checkout.errNumber;
+    if (name.trim().length < 2) e.name = t.checkout.errName;
+    if (!expiryValid(expiry)) e.expiry = t.checkout.errExpiry;
+    if (!cvcValid(cvc, brand)) e.cvc = t.checkout.errCvc;
+    if (city.trim().length < 2) e.city = t.checkout.errCity;
     return e;
   };
 
@@ -97,10 +99,10 @@ export function CheckoutForm() {
         <PaymentCard number={formatCardNumber(number)} name={name} expiry={expiry} cvc={cvc} brand={brand} focused={focused} />
 
         <p className="rounded-xl bg-surface px-4 py-3 text-sm">
-          <strong className="font-medium">Test mode.</strong> No money is taken. Use card <span className="font-mono">4242 4242 4242 4242</span>, any future date and any three digits. Card details stay in your browser.
+          {t.checkout.testMode}
         </p>
 
-        <Field label="Card number" id={`${uid}-number`} error={errors.number}>
+        <Field label={t.checkout.number} id={`${uid}-number`} error={errors.number}>
           <input
             id={`${uid}-number`}
             className={input}
@@ -115,7 +117,7 @@ export function CheckoutForm() {
             aria-describedby={errors.number ? `${uid}-number-err` : undefined}
           />
         </Field>
-        <Field label="Name on card" id={`${uid}-name`} error={errors.name}>
+        <Field label={t.checkout.name} id={`${uid}-name`} error={errors.name}>
           <input
             id={`${uid}-name`}
             className={input}
@@ -129,7 +131,7 @@ export function CheckoutForm() {
           />
         </Field>
         <div className="grid grid-cols-2 gap-4">
-          <Field label="Expiry" id={`${uid}-expiry`} error={errors.expiry}>
+          <Field label={t.checkout.expiry} id={`${uid}-expiry`} error={errors.expiry}>
             <input
               id={`${uid}-expiry`}
               className={input}
@@ -143,7 +145,7 @@ export function CheckoutForm() {
               aria-invalid={!!errors.expiry}
             />
           </Field>
-          <Field label="Security code" id={`${uid}-cvc`} error={errors.cvc}>
+          <Field label={t.checkout.cvc} id={`${uid}-cvc`} error={errors.cvc}>
             <input
               id={`${uid}-cvc`}
               className={input}
@@ -158,38 +160,38 @@ export function CheckoutForm() {
             />
           </Field>
         </div>
-        <Field label="Ship to city" id={`${uid}-city`} error={errors.city}>
+        <Field label={t.checkout.city} id={`${uid}-city`} error={errors.city}>
           <input id={`${uid}-city`} className={input} autoComplete="address-level2" value={city} maxLength={60} onChange={(e) => setCity(e.target.value)} />
         </Field>
 
         <Button type="submit" size="lg" className="w-full" disabled={paying}>
-          {paying ? "Paying…" : `Pay ${formatSar(total)}`}
+          {paying ? t.checkout.paying : t.checkout.pay(formatSar(total, locale))}
         </Button>
       </form>
 
       <aside className="order-1 lg:order-2">
-        <h2 className="text-2xl">Your order</h2>
+        <h2 className="text-2xl">{t.checkout.yourOrder}</h2>
         <ul className="mt-5 divide-y divide-line/10">
           {lines.map((l) => {
             const p = getProduct(l.slug);
             return (
               <li key={`${l.slug}-${l.color}-${l.size}`} className="flex justify-between gap-4 py-3">
                 <span>
-                  {p?.title}
+                  {p ? bi(p.title) : l.slug}
                   <span className="block text-sm text-muted-foreground">
-                    {l.color}, {l.size}, × {l.qty}
+                    {[p && bi(p.colors.find((c) => c.id === l.color)?.name ?? { en: l.color, ar: l.color }), p && bi(p.sizes.find((z) => z.id === l.size)?.label ?? { en: l.size, ar: l.size }), `× ${l.qty}`].filter(Boolean).join(locale === "ar" ? "، " : ", ")}
                   </span>
                 </span>
-                <span className="tabular-nums">{formatSar(priceOf(l) * l.qty)}</span>
+                <span className="tabular-nums">{formatSar(priceOf(l) * l.qty, locale)}</span>
               </li>
             );
           })}
         </ul>
         <div className="mt-2 flex justify-between border-t border-line/20 pt-4 text-lg">
-          <span>Total</span>
-          <span className="tabular-nums">{formatSar(total)}</span>
+          <span>{t.checkout.total}</span>
+          <span className="tabular-nums">{formatSar(total, locale)}</span>
         </div>
-        <p className="mt-2 text-sm text-muted-foreground">Shipping inside Saudi Arabia is free for this demo.</p>
+        <p className="mt-2 text-sm text-muted-foreground">{t.checkout.freeShipping}</p>
       </aside>
     </div>
   );

@@ -2,6 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Self-hosted fonts (files in /public/fonts), both with Arabic and Latin subsets. */
+@font-face {
+  font-family: "Alexandria";
+  src: url("/fonts/alexandria-arabic-wght-normal.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/ibm-plex-sans-arabic-arabic-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/ibm-plex-sans-arabic-arabic-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0897-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC;
+}
+@font-face {
+  font-family: "Alexandria";
+  src: url("/fonts/alexandria-latin-wght-normal.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/ibm-plex-sans-arabic-latin-400-normal.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/ibm-plex-sans-arabic-latin-500-normal.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face {
+  font-family: "IBM Plex Sans Arabic";
+  src: url("/fonts/ibm-plex-sans-arabic-latin-600-normal.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+
 /*
   Loopera design tokens. Every color in the app comes from here.
   Values are RGB channels so Tailwind opacity modifiers work (bg-surface/60).
@@ -29,6 +95,8 @@
   --ring: 226 155 106;
   --paper: 251 237 232; /* printed pattern card */
   --on-paper: 43 15 20;
+  --fabric-opacity: 0.55; /* woven linen texture over the background */
+  --fabric-blend: soft-light;
   color-scheme: dark;
 }
 
@@ -45,6 +113,8 @@
   --ring: 142 21 35;
   --paper: 255 255 255;
   --on-paper: 43 15 20;
+  --fabric-opacity: 0.22;
+  --fabric-blend: multiply;
   color-scheme: light;
 }
 
@@ -92,13 +162,35 @@
   body {
     @apply font-sans antialiased;
     min-height: 100dvh;
+    position: relative;
+  }
+
+  /* The page background is a woven linen fabric (generated texture, tiles seamlessly). */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: url("/textures/linen.webp");
+    background-size: 512px 512px;
+    opacity: var(--fabric-opacity);
+    mix-blend-mode: var(--fabric-blend);
   }
 
   h1,
   h2,
   h3 {
-    @apply font-serif font-normal;
-    letter-spacing: -0.015em;
+    @apply font-serif;
+    font-weight: 700;
+    line-height: 1.15;
+  }
+  :lang(en) h1,
+  :lang(en) h2 {
+    letter-spacing: -0.02em;
+  }
+  :lang(ar) body {
+    line-height: 1.75;
   }
 
   :focus-visible {
@@ -126,4 +218,13 @@
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Bag sizes are words ("One size", "كبيرة"), not shoe numbers: let the chip grow into a pill. */
+.loopera-piece .snp-size {
+  width: auto;
+  min-width: max(32px, 3.1cqw);
+  padding-inline: 0.9em;
+  border-radius: 999px;
+  white-space: nowrap;
 }

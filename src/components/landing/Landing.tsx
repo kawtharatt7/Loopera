@@ -2,25 +2,18 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
+import { useBag } from "@/components/bag/bag-context";
+import { useRecolored } from "@/lib/shop/recolor";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { useT } from "@/lib/i18n/client";
-import { byCategory, CATEGORIES, formatSar, fromPrice, getProduct, PRODUCTS, type Category } from "@/lib/shop/catalog";
+import { byCategory, CATEGORIES, formatSar, fromPrice, getProduct, PRODUCTS, type Category, type Product } from "@/lib/shop/catalog";
 
-type WordKey = "graduation" | "bags" | "clothes" | "dolls";
-
-// The pieces that stand in the opening: real pieces, cut out of their photos.
-const STAGE: { slug: string; word: WordKey }[] = [
-  { slug: "wine-shell-bag", word: "bags" },
-  { slug: "graduation-bouquet", word: "graduation" },
-  { slug: "checker-dress", word: "clothes" },
-  { slug: "cocoa-luxe-bag", word: "bags" },
-  { slug: "grad-cups", word: "graduation" },
-  { slug: "star-flower-bag", word: "bags" },
-];
-const SPEED = 5200;
+// The pieces on the opening stage, all photographed on the same studio background.
+const STAGE = ["checker-dress", "wine-shell-bag", "graduation-bouquet", "white-poncho", "cocoa-luxe-bag", "grad-keychains", "yellow-mesh-poncho", "bow-bag"];
+const SPEED = 5000;
 const SHOWN: Category[] = ["clothes", "bags", "graduation", "wall", "dolls", "flowers"];
 
 /**
@@ -30,187 +23,14 @@ const SHOWN: Category[] = ["clothes", "bags", "graduation", "wall", "dolls", "fl
  */
 export function Landing() {
   const { t, bi, locale } = useT();
-  const reduce = useReducedMotion() ?? false;
-  const items = STAGE.map((s) => ({ ...s, product: getProduct(s.slug)! })).filter((s) => s.product?.cutout);
-  const [i, setI] = useState(0);
-  const [dir, setDir] = useState(1);
-  const [playing, setPlaying] = useState(true);
-  const [hover, setHover] = useState(false);
-  const item = items[i];
-
-  const go = useCallback(
-    (d: number) => {
-      setDir(d);
-      setI((x) => (x + d + items.length) % items.length);
-    },
-    [items.length],
-  );
-
-  useEffect(() => {
-    if (!playing || hover || reduce) return;
-    const id = window.setTimeout(() => go(1), SPEED);
-    return () => clearTimeout(id);
-  }, [i, playing, hover, reduce, go]);
-
-  // Tilt toward the pointer.
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const sx = useSpring(mx, { stiffness: 120, damping: 18 });
-  const sy = useSpring(my, { stiffness: 120, damping: 18 });
-  const rotY = useTransform(sx, [-0.5, 0.5], [-12, 12]);
-  const rotX = useTransform(sy, [-0.5, 0.5], [8, -8]);
-  const wordX = useTransform(sx, [-0.5, 0.5], [30, -30]);
-  const stage = useRef<HTMLDivElement>(null);
-  const onMove = (e: React.PointerEvent) => {
-    if (e.pointerType !== "mouse" || reduce || !stage.current) return;
-    const r = stage.current.getBoundingClientRect();
-    mx.set((e.clientX - r.left) / r.width - 0.5);
-    my.set((e.clientY - r.top) / r.height - 0.5);
-  };
-
   const strip = PRODUCTS.filter((p) => p.photos[0]?.src.startsWith("/photos/"));
   const sections = SHOWN.map((id) => ({ id, label: bi(CATEGORIES.find((c) => c.id === id)!.label), product: byCategory(id)[0] })).filter((s) => s.product);
-  const ease = [0.16, 1, 0.3, 1] as const;
 
   return (
     <>
       <SiteHeader overlay />
       <main id="main">
-        <section
-          ref={stage}
-          onPointerMove={onMove}
-          onPointerEnter={() => setHover(true)}
-          onPointerLeave={() => {
-            setHover(false);
-            mx.set(0);
-            my.set(0);
-          }}
-          aria-roledescription="carousel"
-          aria-label={t.landing.kicker}
-          className="relative flex min-h-[100svh] flex-col overflow-hidden pt-24"
-        >
-          {/* The big word behind the piece */}
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center" aria-hidden="true">
-            <AnimatePresence mode="popLayout" initial={false}>
-              <motion.span
-                key={item.word + i}
-                style={{ x: wordX }}
-                initial={reduce ? false : { opacity: 0, y: 60, filter: "blur(12px)" }}
-                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                exit={reduce ? undefined : { opacity: 0, y: -60, filter: "blur(12px)" }}
-                transition={{ duration: 0.9, ease }}
-                className="select-none whitespace-nowrap font-serif text-[30vw] font-extrabold leading-none tracking-[-0.06em] text-primary/[0.16] md:text-[22vw]"
-              >
-                {t.landing.words[item.word]}
-              </motion.span>
-            </AnimatePresence>
-          </div>
-
-          {/* The piece */}
-          <div className="relative flex flex-1 items-center justify-center" style={{ perspective: 1000 }}>
-            <AnimatePresence mode="popLayout" initial={false} custom={dir}>
-              <motion.div
-                key={item.slug}
-                custom={dir}
-                initial={reduce ? false : { opacity: 0, x: dir * 220, rotate: dir * 8, filter: "blur(10px)" }}
-                animate={{ opacity: 1, x: 0, rotate: 0, filter: "blur(0px)" }}
-                exit={reduce ? undefined : { opacity: 0, x: dir * -220, rotate: dir * -8, filter: "blur(10px)" }}
-                transition={{ duration: 0.95, ease }}
-                className="relative h-[min(58svh,560px)] w-[min(78vw,460px)]"
-              >
-                <motion.div className="relative h-full w-full" style={{ rotateX: rotX, rotateY: rotY, transformStyle: "preserve-3d" }}>
-                  <motion.div
-                    className="relative h-full w-full"
-                    animate={reduce ? undefined : { y: [0, -14, 0] }}
-                    transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
-                  >
-                    <Image src={item.product.cutout!} alt={bi(item.product.photos[0].alt)} fill priority sizes="(min-width: 768px) 460px, 78vw" className="object-contain drop-shadow-[0_30px_40px_rgba(0,0,0,0.45)]" />
-                  </motion.div>
-                </motion.div>
-                <motion.span
-                  aria-hidden="true"
-                  className="absolute -bottom-6 left-1/2 h-6 w-2/3 -translate-x-1/2 rounded-[50%] bg-black/40 blur-md"
-                  animate={reduce ? undefined : { scaleX: [1, 0.86, 1], opacity: [0.55, 0.35, 0.55] }}
-                  transition={{ duration: 4.2, repeat: Infinity, ease: "easeInOut" }}
-                />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* Text and controls */}
-          <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-6 px-5 pb-8 sm:px-8 md:grid-cols-[1fr_auto] md:items-end md:pb-12">
-            <div>
-              <p className="text-sm text-muted-foreground">{t.landing.kicker}</p>
-              <h1 className="mt-2 max-w-[18ch] text-balance text-4xl leading-[1.1] sm:text-5xl">{t.landing.headline}</h1>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link href="/shop" className="inline-flex min-h-12 items-center rounded-sm bg-primary px-8 text-[15px] font-medium text-primary-fg transition-transform hover:-translate-y-0.5">
-                  {t.landing.storeTitle}
-                </Link>
-                <Link href="/creator" className="inline-flex min-h-12 items-center rounded-sm border border-fg/40 px-8 text-[15px] font-medium transition-colors hover:border-fg hover:bg-fg hover:text-bg">
-                  {t.landing.creatorTitle}
-                </Link>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3 md:min-w-[340px]">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={item.slug} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.4 }}>
-                  <Link href={`/shop/${item.slug}`} className="group flex items-baseline justify-between gap-4">
-                    <span className="font-serif text-xl underline-offset-4 group-hover:underline">{bi(item.product.title)}</span>
-                    <span className="tabular-nums text-muted-foreground">{formatSar(fromPrice(item.product), locale)}</span>
-                  </Link>
-                </motion.div>
-              </AnimatePresence>
-              <div className="flex items-center gap-2">
-                <button type="button" onClick={() => go(-1)} aria-label={t.landing.prev} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm border border-fg/25 hover:border-fg">
-                  <svg viewBox="0 0 26 14" className="h-3.5 w-6 rtl:-scale-x-100" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M25 7H1M7 1L1 7l6 6" />
-                  </svg>
-                </button>
-                <div className="flex flex-1 gap-1.5" role="tablist">
-                  {items.map((it, k) => (
-                    <button
-                      key={it.slug}
-                      type="button"
-                      role="tab"
-                      aria-selected={k === i}
-                      aria-label={bi(it.product.title)}
-                      onClick={() => {
-                        setDir(k > i ? 1 : -1);
-                        setI(k);
-                      }}
-                      className="group flex h-11 flex-1 items-center"
-                    >
-                      <span className="relative block h-[2px] w-full overflow-hidden bg-fg/15 transition-transform group-hover:scale-y-150">
-                        <span
-                          key={k === i ? `${i}-${playing && !hover}` : "x"}
-                          className={`absolute inset-0 origin-left bg-fg rtl:origin-right ${k < i ? "scale-x-100 opacity-40" : k === i ? (playing && !hover && !reduce ? "hero-fill" : "scale-x-100") : "scale-x-0"}`}
-                          style={{ animationDuration: `${SPEED}ms` }}
-                        />
-                      </span>
-                    </button>
-                  ))}
-                </div>
-                <button type="button" onClick={() => go(1)} aria-label={t.landing.next} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm border border-fg/25 hover:border-fg">
-                  <svg viewBox="0 0 26 14" className="h-3.5 w-6 rtl:-scale-x-100" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M1 7h24M19 1l6 6-6 6" />
-                  </svg>
-                </button>
-                <button type="button" onClick={() => setPlaying((p) => !p)} aria-pressed={playing} aria-label={playing ? t.landing.pause : t.landing.play} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm hover:bg-fg/10">
-                  {playing ? (
-                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
-                      <path d="M6.5 4.5h3.5v15H6.5zM14 4.5h3.5v15H14z" />
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
-                      <path d="M7 4.5v15l12.5-7.5z" />
-                    </svg>
-                  )}
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
+        <HeroStage />
 
         {/* A moving strip of real pieces, two rows in opposite directions */}
         <section aria-label={t.landing.browse} className="overflow-hidden py-10" dir="ltr">
@@ -249,4 +69,197 @@ export function Landing() {
       <SiteFooter />
     </>
   );
+}
+
+/**
+ * The opening, after "Try the Look": a stage with the current piece in front and its neighbours
+ * standing back in the blur, a numbered progress bar per piece that runs on its own, and a panel
+ * where the piece can be repainted in another yarn color and added to the bag.
+ */
+function HeroStage() {
+  const { t, bi, locale } = useT();
+  const { add } = useBag();
+  const reduce = useReducedMotion() ?? false;
+  const items = STAGE.map((slug) => getProduct(slug)).filter((p): p is NonNullable<typeof p> => !!p);
+  const n = items.length;
+  const [i, setI] = useState(0);
+  const [playing, setPlaying] = useState(true);
+  const [hold, setHold] = useState(false);
+  const [colorBy, setColorBy] = useState<Record<string, string>>({});
+  const [added, setAdded] = useState<string | null>(null);
+  const p = items[i];
+  const colorId = colorBy[p.slug] ?? p.colors[0].id;
+  const color = p.colors.find((c) => c.id === colorId) ?? p.colors[0];
+  const go = useCallback((d: number) => setI((x) => (x + d + n) % n), [n]);
+
+  useEffect(() => {
+    if (!playing || hold || reduce) return;
+    const id = window.setTimeout(() => go(1), SPEED);
+    return () => clearTimeout(id);
+  }, [i, playing, hold, reduce, go]);
+
+  const num = (k: number) => String(k + 1).padStart(2, "0");
+  const slot = (k: number) => {
+    let d = k - i;
+    if (d > n / 2) d -= n;
+    if (d < -n / 2) d += n;
+    return d;
+  };
+
+  return (
+    <section aria-roledescription="carousel" aria-label={t.landing.kicker} className="relative isolate overflow-hidden pt-16">
+      <div className="mx-auto grid max-w-[1500px] grid-cols-1 lg:grid-cols-[minmax(0,1fr)_400px]">
+        <div className="relative flex min-w-0 flex-col">
+          <div className="px-5 pt-8 sm:px-10 sm:pt-12">
+            <h1 className="max-w-[20ch] text-balance text-4xl leading-[1.08] sm:text-6xl">{t.landing.headline}</h1>
+            <p className="mt-3 max-w-md text-muted-foreground">{t.landing.sub}</p>
+          </div>
+
+          {/* Stage: neighbours stand back in the blur, the current piece in front */}
+          <div className="relative h-[min(62svh,600px)] min-h-[380px] overflow-hidden" onPointerEnter={() => setHold(true)} onPointerLeave={() => setHold(false)}>
+            {items.map((it, k) => {
+              const d = slot(k);
+              const abs = Math.abs(d);
+              const visible = abs <= 2;
+              return (
+                <motion.button
+                  key={it.slug}
+                  type="button"
+                  tabIndex={-1}
+                  aria-hidden={d !== 0}
+                  onClick={() => (d === 0 ? undefined : setI(k))}
+                  className="absolute bottom-6 left-1/2 aspect-[4/5] h-[66%] overflow-hidden sm:h-[86%] rounded-sm bg-[#E8E3DE] shadow-[0_30px_60px_-30px_rgba(0,0,0,0.6)]"
+                  style={{ zIndex: 10 - abs, pointerEvents: visible ? "auto" : "none" }}
+                  initial={false}
+                  animate={{
+                    x: `calc(-50% + ${d * (locale === "ar" ? -1 : 1) * 62}%)`,
+                    scale: 1 - abs * 0.16,
+                    opacity: visible ? 1 - abs * 0.3 : 0,
+                    filter: `blur(${abs * 2.5}px)`,
+                  }}
+                  transition={reduce ? { duration: 0 } : { duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <StagePhoto product={it} hex={(it.colors.find((c) => c.id === (colorBy[it.slug] ?? it.colors[0].id))?.hex) ?? null} />
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Progress: one bar per piece, the current one filling */}
+          <div className="flex items-center gap-3 px-5 pb-6 sm:px-10">
+            <button type="button" onClick={() => go(-1)} aria-label={t.landing.prev} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm border border-fg/25 hover:border-fg">
+              <svg viewBox="0 0 26 14" className="h-3.5 w-6 rtl:-scale-x-100" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M25 7H1M7 1L1 7l6 6" />
+              </svg>
+            </button>
+            <div className="flex min-w-0 flex-1 gap-1.5 overflow-hidden">
+              {items.map((it, k) => (
+                <button
+                  key={it.slug}
+                  type="button"
+                  aria-current={k === i}
+                  aria-label={`${num(k)} ${bi(it.title)}`}
+                  onClick={() => setI(k)}
+                  className={`group flex h-11 min-w-[14px] flex-col justify-center gap-2 text-start text-[10px] tabular-nums text-muted-foreground transition-[flex-basis] duration-700 ${k === i ? "flex-[0_0_120px] text-fg sm:flex-[0_0_180px]" : "flex-[0_1_44px]"}`}
+                >
+                  <span className="relative block h-[2px] w-full overflow-hidden bg-fg/15 group-hover:scale-y-150">
+                    <span
+                      key={k === i ? `${i}-${playing && !hold}` : "x"}
+                      className={`absolute inset-0 origin-left bg-fg rtl:origin-right ${k < i ? "scale-x-100 opacity-40" : k === i ? (playing && !hold && !reduce ? "hero-fill" : "scale-x-100") : "scale-x-0"}`}
+                      style={{ animationDuration: `${SPEED}ms` }}
+                    />
+                  </span>
+                  <span className="truncate">
+                    {num(k)}
+                    {k === i && <>&nbsp;&nbsp;{bi(it.title)}</>}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <button type="button" onClick={() => setPlaying((x) => !x)} aria-pressed={playing} aria-label={playing ? t.landing.pause : t.landing.play} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm hover:bg-fg/10">
+              <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
+                <path d={playing ? "M6.5 4.5h3.5v15H6.5zM14 4.5h3.5v15H14z" : "M7 4.5v15l12.5-7.5z"} />
+              </svg>
+            </button>
+            <button type="button" onClick={() => go(1)} aria-label={t.landing.next} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-sm border border-fg/25 hover:border-fg">
+              <svg viewBox="0 0 26 14" className="h-3.5 w-6 rtl:-scale-x-100" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M1 7h24M19 1l6 6-6 6" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* The piece on stage: name, color, add */}
+        <aside className="flex flex-col gap-5 border-line/15 bg-bg/70 p-6 backdrop-blur-sm lg:border-s lg:p-8 lg:pt-12" onPointerEnter={() => setHold(true)} onPointerLeave={() => setHold(false)}>
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-lg">{t.landing.inThisLook}</h2>
+            <span className="text-xs tabular-nums text-muted-foreground">{t.landing.pieceOf(num(i), num(n - 1))}</span>
+          </div>
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div key={p.slug} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.45 }} className="flex flex-col gap-5">
+              <div>
+                <p className="text-sm text-muted-foreground">{t.common.by(bi(p.maker))}</p>
+                <h3 className="mt-1 text-2xl">{bi(p.title)}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{bi(p.description)}</p>
+                <p className="mt-3 text-lg tabular-nums">{formatSar(fromPrice(p), locale)}</p>
+              </div>
+              {p.colors.length > 1 && (
+                <fieldset>
+                  <legend className="text-sm">
+                    {t.common.color}: <span className="text-muted-foreground">{bi(color.name)}</span>
+                  </legend>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {p.colors.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        aria-pressed={c.id === colorId}
+                        aria-label={bi(c.name)}
+                        onClick={() => {
+                          setPlaying(false);
+                          setColorBy((m) => ({ ...m, [p.slug]: c.id }));
+                        }}
+                        className={`h-9 w-9 rounded-full border-2 p-0.5 ${c.id === colorId ? "border-fg" : "border-transparent hover:border-line/50"}`}
+                      >
+                        <span className="block h-full w-full rounded-full ring-1 ring-line/20" style={{ background: c.hex === "transparent" ? (p.recolor?.from ?? "#999") : c.hex }} />
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (add({ slug: p.slug, color: colorId, size: p.sizes[0].id })) setAdded(p.slug + colorId);
+                  }}
+                  className="min-h-12 rounded-sm bg-primary px-6 font-medium text-primary-fg hover:opacity-90"
+                >
+                  {added === p.slug + colorId ? t.common.added : t.common.addToBag}
+                </button>
+                <Link href={`/shop/${p.slug}`} className="inline-flex min-h-11 items-center justify-center rounded-sm border border-fg/25 text-sm hover:border-fg">
+                  {t.landing.seePiece}
+                </Link>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+          <div className="mt-auto flex gap-3 border-t border-line/10 pt-5 text-sm">
+            <Link href="/shop" className="underline underline-offset-4">
+              {t.landing.storeTitle}
+            </Link>
+            <Link href="/creator" className="underline underline-offset-4">
+              {t.landing.creatorTitle}
+            </Link>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function StagePhoto({ product, hex }: { product: Product; hex: string | null }) {
+  const { bi } = useT();
+  const src = useRecolored(product.photos[0].src, product.recolor, hex === "transparent" ? null : hex);
+  // eslint-disable-next-line @next/next/no-img-element -- local studio photo or its repainted copy
+  return <img src={src} alt={bi(product.title)} className="h-full w-full object-cover" draggable={false} />;
 }

@@ -110,6 +110,8 @@ const C = {
   olive: { id: "olive", name: { en: "Olive", ar: "زيتي" }, hex: "#7C8A4A" },
 } satisfies Record<string, ColorOption>;
 
+/** Alt text for the studio shot (the product page also shows the original photo with its own alt). */
+const ALT_STUDIO: Bi = { en: "The piece on a plain studio background", ar: "القطعة على خلفية استوديو سادة" };
 const AS_SHOWN: ColorOption = { id: "as-shown", name: { en: "As in the photo", ar: "مثل الصورة" }, hex: "#C9785C" };
 /** The yarn colors every recolorable piece can be ordered in. The first is the photo itself. */
 const RECOLOR: ColorOption[] = [
@@ -139,24 +141,8 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: WEAR(240),
     colors: RECOLOR,
-    recolor: { from: "#D8C46E", mask: "/photos/mask/yellow-mesh-poncho.png" },
-    photos: [{ src: "/photos/yellow-mesh-poncho.webp", alt: { en: "A woman wearing a yellow crochet mesh poncho top", ar: "امرأة تلبس بلوزة بونشو كروشيه شبك صفراء" }, credit: "Loopera", kind: "model" }],
-  },
-  {
-    slug: "green-mesh-poncho",
-    category: "clothes",
-    title: { en: "Olive mesh top", ar: "بلوزة شبك زيتية" },
-    maker: MAKERS.loopera,
-    description: { en: "The same open mesh, cut wider, in a deep olive cotton.", ar: "نفس الشبك المفتوح بقصّة أوسع، بقطن زيتي غامق." },
-    details: [{ en: "Cotton yarn, hand crocheted", ar: "خيط قطن، كروشيه باليد" }, { en: "Made in the color you pick", ar: "ينشغل باللون اللي تختارينه" }],
-    madeToOrder: true,
-    leadTimeDays: 10,
-    rating: 4.9,
-    reviews: 0,
-    sizes: WEAR(240),
-    colors: RECOLOR,
-    recolor: { from: "#7B8C3A", mask: "/photos/mask/green-mesh-poncho.png" },
-    photos: [{ src: "/photos/green-mesh-poncho.webp", alt: { en: "A woman wearing an olive crochet mesh top", ar: "امرأة تلبس بلوزة كروشيه شبك زيتية" }, credit: "Loopera", kind: "model" }],
+    recolor: { from: "#D8C46E", mask: "/photos/mask/studio-yellow-mesh-poncho.png" },
+    photos: [{ src: "/photos/studio/yellow-mesh-poncho.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/yellow-mesh-poncho.webp", alt: { en: "A woman wearing a yellow crochet mesh poncho top", ar: "امرأة تلبس بلوزة بونشو كروشيه شبك صفراء" }, credit: "Loopera", kind: "model" }],
   },
   {
     slug: "checker-dress",
@@ -172,8 +158,8 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: WEAR(620),
     colors: RECOLOR,
-    recolor: { from: "#9E1B2C", mask: "/photos/mask/checker-dress.png" },
-    photos: [{ src: "/photos/checker-dress.webp", alt: { en: "A woman in a long red and cream checkered crochet dress", ar: "امرأة بفستان كروشيه طويل بمربعات حمراء وكريمية" }, credit: "Loopera", kind: "model" }],
+    recolor: { from: "#9E1B2C", mask: "/photos/mask/studio-checker-dress.png" },
+    photos: [{ src: "/photos/studio/checker-dress.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/checker-dress.webp", alt: { en: "A woman in a long red and cream checkered crochet dress", ar: "امرأة بفستان كروشيه طويل بمربعات حمراء وكريمية" }, credit: "Loopera", kind: "model" }],
   },
   {
     slug: "white-poncho",
@@ -188,8 +174,8 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: WEAR(290),
     colors: RECOLOR,
-    recolor: { from: "#EDEBE6", mask: "/photos/mask/white-poncho.png" },
-    photos: [{ src: "/photos/white-poncho.webp", alt: { en: "A woman wearing a white crochet poncho", ar: "امرأة تلبس بونشو كروشيه أبيض" }, credit: "Loopera", kind: "model" }],
+    recolor: { from: "#EDEBE6", mask: "/photos/mask/studio-white-poncho.png" },
+    photos: [{ src: "/photos/studio/white-poncho.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/white-poncho.webp", alt: { en: "A woman wearing a white crochet poncho", ar: "امرأة تلبس بونشو كروشيه أبيض" }, credit: "Loopera", kind: "model" }],
   },
   {
     slug: "fringe-poncho-top",
@@ -204,8 +190,8 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: WEAR(260),
     colors: RECOLOR,
-    recolor: { from: "#E2D6C0", mask: "/photos/mask/fringe-poncho-top.png" },
-    photos: [{ src: "/photos/fringe-poncho-top.webp", alt: { en: "A woman taking a mirror selfie in a cream fringe poncho", ar: "امرأة تصور سيلفي بالمراية لابسة بونشو كريمي بشراشيب" }, credit: "Loopera", kind: "model" }],
+    recolor: { from: "#E2D6C0", mask: "/photos/mask/studio-fringe-poncho-top.png" },
+    photos: [{ src: "/photos/studio/fringe-poncho-top.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/fringe-poncho-top.webp", alt: { en: "A woman taking a mirror selfie in a cream fringe poncho", ar: "امرأة تصور سيلفي بالمراية لابسة بونشو كريمي بشراشيب" }, credit: "Loopera", kind: "model" }],
   },
   {
     slug: "cream-cherry-vest",
@@ -220,7 +206,7 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: WEAR(280),
     colors: [AS_SHOWN],
-    photos: [{ src: "/photos/cream-cherry-vest.webp", alt: { en: "A woman in a cream crochet vest with red trim", ar: "امرأة بصديري كروشيه كريمي بحافة حمراء" }, credit: "Loopera", kind: "model" }],
+    photos: [{ src: "/photos/studio/cream-cherry-vest.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/cream-cherry-vest.webp", alt: { en: "A woman in a cream crochet vest with red trim", ar: "امرأة بصديري كروشيه كريمي بحافة حمراء" }, credit: "Loopera", kind: "model" }],
   },
 
   // Bags
@@ -238,11 +224,12 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(420, 3),
     colors: RECOLOR,
-    recolor: { from: "#5A1E35", mask: "/photos/mask/wine-shell-bag.png" },
-    photos: [{ src: "/photos/wine-shell-bag.webp", alt: { en: "A wine crochet handbag with gold shells and pearls in a gift box", ar: "شنطة يد كروشيه نبيتية بأصداف ذهبية ولؤلؤ في علبة هدية" }, credit: "Loopera", kind: "product" }],
+    recolor: { from: "#5A1E35", mask: "/photos/mask/studio-wine-shell-bag.png" },
+    photos: [{ src: "/photos/studio/wine-shell-bag.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/wine-shell-bag.webp", alt: { en: "A wine crochet handbag with gold shells and pearls in a gift box", ar: "شنطة يد كروشيه نبيتية بأصداف ذهبية ولؤلؤ في علبة هدية" }, credit: "Loopera", kind: "product" }],
   },
   {
     slug: "teal-handbag",
+    cutout: "/photos/cutout/teal-handbag-u2.webp",
     category: "bags",
     title: { en: "Puff handbag", ar: "شنطة يد منفوخة" },
     maker: MAKERS.loopera,
@@ -254,8 +241,8 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(320, 4),
     colors: RECOLOR,
-    recolor: { from: "#4F6467", mask: "/photos/mask/teal-handbag.png" },
-    photos: [{ src: "/photos/teal-handbag.webp", alt: { en: "Two puff crochet handbags, teal and wine, on a sofa", ar: "شنطتين يد كروشيه منفوخة، تركوازية ونبيتية، على كنبة" }, credit: "Loopera", kind: "product" }],
+    recolor: { from: "#4F6467", mask: "/photos/mask/studio-teal-handbag.png" },
+    photos: [{ src: "/photos/studio/teal-handbag.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/teal-handbag.webp", alt: { en: "Two puff crochet handbags, teal and wine, on a sofa", ar: "شنطتين يد كروشيه منفوخة، تركوازية ونبيتية، على كنبة" }, credit: "Loopera", kind: "product" }],
   },
   {
     slug: "cocoa-luxe-bag",
@@ -271,8 +258,8 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(460, 2),
     colors: RECOLOR,
-    recolor: { from: "#4A2A22", mask: "/photos/mask/cocoa-luxe-bag.png" },
-    photos: [{ src: "/photos/cocoa-luxe-bag.webp", alt: { en: "A brown crochet top-handle bag held in leather-gloved hands", ar: "شنطة كروشيه بنية بيد علوية بين يدين بقفازات جلد" }, credit: "Loopera", kind: "product" }],
+    recolor: { from: "#4A2A22", mask: "/photos/mask/studio-cocoa-luxe-bag.png" },
+    photos: [{ src: "/photos/studio/cocoa-luxe-bag.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/cocoa-luxe-bag.webp", alt: { en: "A brown crochet top-handle bag held in leather-gloved hands", ar: "شنطة كروشيه بنية بيد علوية بين يدين بقفازات جلد" }, credit: "Loopera", kind: "product" }],
   },
   {
     slug: "cocoa-pocket-bag",
@@ -288,8 +275,8 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(390, 3),
     colors: RECOLOR,
-    recolor: { from: "#3F2420", mask: "/photos/mask/cocoa-pocket-bag.png" },
-    photos: [{ src: "/photos/cocoa-pocket-bag.webp", alt: { en: "A brown crochet bag with front pockets and a pink flower, by the sea", ar: "شنطة كروشيه بنية بجيوب أمامية ووردة وردية، على البحر" }, credit: "Loopera", kind: "product" }],
+    recolor: { from: "#3F2420", mask: "/photos/mask/studio-cocoa-pocket-bag.png" },
+    photos: [{ src: "/photos/studio/cocoa-pocket-bag.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/cocoa-pocket-bag.webp", alt: { en: "A brown crochet bag with front pockets and a pink flower, by the sea", ar: "شنطة كروشيه بنية بجيوب أمامية ووردة وردية، على البحر" }, credit: "Loopera", kind: "product" }],
   },
   {
     slug: "bow-bag",
@@ -305,8 +292,8 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(280, 4),
     colors: RECOLOR,
-    recolor: { from: "#8A4A2C", mask: "/photos/mask/bow-bag.png" },
-    photos: [{ src: "/photos/bow-bag.webp", alt: { en: "A brown crochet bow bag held up in a park", ar: "شنطة كروشيه بنية على شكل فيونكة في حديقة" }, credit: "Loopera", kind: "product" }],
+    recolor: { from: "#8A4A2C", mask: "/photos/mask/studio-bow-bag.png" },
+    photos: [{ src: "/photos/studio/bow-bag.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/bow-bag.webp", alt: { en: "A brown crochet bow bag held up in a park", ar: "شنطة كروشيه بنية على شكل فيونكة في حديقة" }, credit: "Loopera", kind: "product" }],
   },
   {
     slug: "star-flower-bag",
@@ -322,8 +309,8 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(260, 3),
     colors: RECOLOR,
-    recolor: { from: "#C94A5E", mask: "/photos/mask/star-flower-bag.png" },
-    photos: [{ src: "/photos/star-flower-bag.webp", alt: { en: "A pink crochet bag shaped like a star flower", ar: "شنطة كروشيه وردية على شكل زهرة نجمة" }, credit: "Loopera", kind: "product" }],
+    recolor: { from: "#C94A5E", mask: "/photos/mask/studio-star-flower-bag.png" },
+    photos: [{ src: "/photos/studio/star-flower-bag.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/star-flower-bag.webp", alt: { en: "A pink crochet bag shaped like a star flower", ar: "شنطة كروشيه وردية على شكل زهرة نجمة" }, credit: "Loopera", kind: "product" }],
   },
   {
     slug: "blue-granny-bag",
@@ -339,11 +326,12 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(220, 5),
     colors: RECOLOR,
-    recolor: { from: "#A9C3DA", mask: "/photos/mask/blue-granny-bag.png" },
-    photos: [{ src: "/photos/blue-granny-bag.webp", alt: { en: "A blue and cream granny square crochet bag", ar: "شنطة كروشيه مربعات جراني سماوي وكريمي" }, credit: "Loopera", kind: "product" }],
+    recolor: { from: "#A9C3DA", mask: "/photos/mask/studio-blue-granny-bag.png" },
+    photos: [{ src: "/photos/studio/blue-granny-bag.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/blue-granny-bag.webp", alt: { en: "A blue and cream granny square crochet bag", ar: "شنطة كروشيه مربعات جراني سماوي وكريمي" }, credit: "Loopera", kind: "product" }],
   },
   {
     slug: "ruffle-bag",
+    cutout: "/photos/cutout/ruffle-bag-u2.webp",
     category: "bags",
     title: { en: "Ruffle mini bag", ar: "شنطة كشكش صغيرة" },
     maker: MAKERS.loopera,
@@ -355,8 +343,8 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(190, 5),
     colors: RECOLOR,
-    recolor: { from: "#F0B9C2", mask: "/photos/mask/ruffle-bag.png" },
-    photos: [{ src: "/photos/ruffle-bag.webp", alt: { en: "A pink crochet mini bag with cream ruffles", ar: "شنطة كروشيه وردية صغيرة بكشكش كريمي" }, credit: "Loopera", kind: "product" }],
+    recolor: { from: "#F0B9C2", mask: "/photos/mask/studio-ruffle-bag.png" },
+    photos: [{ src: "/photos/studio/ruffle-bag.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/ruffle-bag.webp", alt: { en: "A pink crochet mini bag with cream ruffles", ar: "شنطة كروشيه وردية صغيرة بكشكش كريمي" }, credit: "Loopera", kind: "product" }],
   },
   {
     slug: "tulip-granny-bag",
@@ -371,13 +359,29 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(240, 3),
     colors: RECOLOR,
-    recolor: { from: "#E7A9B4", mask: "/photos/mask/tulip-granny-bag.png" },
-    photos: [{ src: "/photos/tulip-granny-bag.webp", alt: { en: "A pink and green tulip granny square bag", ar: "شنطة مربعات توليب وردي وأخضر" }, credit: "Loopera", kind: "product" }],
+    recolor: { from: "#E7A9B4", mask: "/photos/mask/studio-tulip-granny-bag.png" },
+    photos: [{ src: "/photos/studio/tulip-granny-bag.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/tulip-granny-bag.webp", alt: { en: "A pink and green tulip granny square bag", ar: "شنطة مربعات توليب وردي وأخضر" }, credit: "Loopera", kind: "product" }],
   },
 
   // Dolls
   {
+    slug: "luffy-doll",
+    category: "dolls",
+    title: { en: "Straw-hat pirate doll", ar: "دمية القرصان بقبعة القش" },
+    maker: MAKERS.loopera,
+    description: { en: "A fan-made amigurumi of the straw-hat captain, with his red vest and sandals.", ar: "أميغورومي من صنع المعجبين لقائد قبعة القش، بصديريّته الحمراء وصندله." },
+    details: [{ en: "About 20 cm tall", ar: "الطول تقريباً ٢٠ سم" }, { en: "Any character on request", ar: "أي شخصية حسب الطلب" }],
+    madeToOrder: true,
+    leadTimeDays: 12,
+    rating: 5,
+    reviews: 0,
+    sizes: ONE(260, 3),
+    colors: [AS_SHOWN],
+    photos: [{ src: "/photos/luffy-doll.webp", alt: { en: "A crochet doll of a boy in a straw hat and red vest", ar: "دمية كروشيه لولد بقبعة قش وصديري أحمر" }, credit: "Loopera", kind: "product" }],
+  },
+  {
     slug: "paw-keychain",
+    cutout: "/photos/cutout/paw-keychain.webp",
     category: "dolls",
     title: { en: "Paw keychain", ar: "ميدالية الكفّ" },
     maker: MAKERS.loopera,
@@ -389,7 +393,7 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(55, 12),
     colors: [AS_SHOWN],
-    photos: [{ src: "/photos/paw-keychain.webp", alt: { en: "A cream and brown crochet paw keychain", ar: "ميدالية كروشيه على شكل كفّ قطة كريمي وبني" }, credit: "Loopera", kind: "product" }],
+    photos: [{ src: "/photos/studio/paw-keychain.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/paw-keychain.webp", alt: { en: "A cream and brown crochet paw keychain", ar: "ميدالية كروشيه على شكل كفّ قطة كريمي وبني" }, credit: "Loopera", kind: "product" }],
   },
   {
     slug: "penguin-family",
@@ -448,7 +452,7 @@ const ALL: Product[] = [
   // Graduation (the maker's own photo)
   {
     slug: "graduation-bouquet",
-    cutout: "/photos/cutout/graduation-bouquet-full.webp",
+    cutout: "/photos/cutout/graduation-bouquet.webp",
     category: "graduation",
     title: { en: "Graduation doll bouquet", ar: "بوكيه دمية التخرّج" },
     maker: { en: "Loopera", ar: "لوبيرا" },
@@ -468,6 +472,7 @@ const ALL: Product[] = [
     sizes: ONE(280, 5),
     colors: [{ id: "as-shown", name: { en: "As in the photo", ar: "مثل الصورة" }, hex: "#F2C230" }],
     photos: [
+      { src: "/photos/studio/graduation-bouquet.webp", alt: { en: "The graduation doll bouquet on a plain studio background", ar: "بوكيه دمية التخرّج على خلفية استوديو سادة" }, credit: "Loopera", kind: "product" },
       { src: "/photos/graduation-bouquet.webp", alt: { en: "A crocheted graduate doll with curly hair in a bouquet of crochet sunflowers and daisies", ar: "دمية خرّيجة كروشيه بشعر كيرلي في بوكيه دوّار شمس وأقحوان كروشيه" }, credit: "Loopera", kind: "product" },
       { src: "/photos/graduation-bouquet-full.webp", alt: { en: "The whole bouquet held in a hand, with its ribbon", ar: "البوكيه كامل باليد مع الشريطة" }, credit: "Loopera", kind: "product" },
     ],
@@ -501,10 +506,11 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(180, 6),
     colors: [AS_SHOWN],
-    photos: [{ src: "/photos/grad-cups.webp", alt: { en: "Two crochet graduate dolls in flower cups", ar: "دميتين خرّيجين كروشيه في كاسات ورد" }, credit: "Loopera", kind: "product" }],
+    photos: [{ src: "/photos/studio/grad-cups.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/grad-cups.webp", alt: { en: "Two crochet graduate dolls in flower cups", ar: "دميتين خرّيجين كروشيه في كاسات ورد" }, credit: "Loopera", kind: "product" }],
   },
   {
     slug: "grad-keychains",
+    cutout: "/photos/cutout/grad-keychains.webp",
     category: "graduation",
     title: { en: "Graduate keychains", ar: "ميداليات الخرّيجين" },
     maker: MAKERS.loopera,
@@ -516,7 +522,7 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(90, 10),
     colors: [AS_SHOWN],
-    photos: [{ src: "/photos/grad-keychains.webp", alt: { en: "Two crochet graduate keychains in caps and gowns", ar: "ميداليتين خرّيجين كروشيه بالقبعة والروب" }, credit: "Loopera", kind: "product" }],
+    photos: [{ src: "/photos/studio/grad-keychains.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/grad-keychains.webp", alt: { en: "Two crochet graduate keychains in caps and gowns", ar: "ميداليتين خرّيجين كروشيه بالقبعة والروب" }, credit: "Loopera", kind: "product" }],
   },
   {
     slug: "grad-chicks",
@@ -546,10 +552,40 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: ONE(45, 20),
     colors: [AS_SHOWN],
-    photos: [{ src: "/photos/grad-rose.webp", alt: { en: "A hand holding a crochet red rose with a graduation cap", ar: "يد ماسكة وردة كروشيه حمراء بقبعة تخرّج" }, credit: "Loopera", kind: "product" }],
+    photos: [{ src: "/photos/studio/grad-rose.webp", alt: ALT_STUDIO, credit: "Loopera", kind: "product" }, { src: "/photos/grad-rose.webp", alt: { en: "A hand holding a crochet red rose with a graduation cap", ar: "يد ماسكة وردة كروشيه حمراء بقبعة تخرّج" }, credit: "Loopera", kind: "product" }],
   },
 
   // Wall hangings
+  {
+    slug: "wall-noface",
+    category: "wall",
+    title: { en: "Masked spirit", ar: "الروح المقنّعة" },
+    maker: MAKERS.loopera,
+    description: { en: "A quiet masked spirit on sky blue.", ar: "روح مقنّعة هادية على أزرق سماوي." },
+    details: [{ en: "Tapestry crochet, ready to hang", ar: "تابستري كروشيه، جاهزة للتعليق" }],
+    madeToOrder: true,
+    leadTimeDays: 12,
+    rating: 5,
+    reviews: 0,
+    sizes: WALL(300),
+    colors: [AS_SHOWN],
+    photos: [{ src: "/photos/wall-noface.webp", alt: { en: "A crochet wall hanging of a masked figure on blue", ar: "لوحة كروشيه لشخصية بقناع على أزرق" }, credit: "Loopera", kind: "product" }],
+  },
+  {
+    slug: "wall-black-cat",
+    category: "wall",
+    title: { en: "Black cat", ar: "القطة السودا" },
+    maker: MAKERS.loopera,
+    description: { en: "A big-eared black cat on cream, hung from a wooden rod.", ar: "قطة سودا بأذان كبيرة على كريمي، معلّقة على عصا خشب." },
+    details: [{ en: "Tapestry crochet, ready to hang", ar: "تابستري كروشيه، جاهزة للتعليق" }],
+    madeToOrder: true,
+    leadTimeDays: 12,
+    rating: 5,
+    reviews: 0,
+    sizes: WALL(260),
+    colors: [AS_SHOWN],
+    photos: [{ src: "/photos/wall-black-cat.webp", alt: { en: "A cream crochet wall hanging with a black cat", ar: "لوحة كروشيه كريمية عليها قطة سودا" }, credit: "Loopera", kind: "product" }],
+  },
   {
     slug: "wall-sabr",
     category: "wall",
@@ -809,6 +845,21 @@ const ALL: Product[] = [
   },
 
   // Home
+  {
+    slug: "ghibli-blanket",
+    category: "home",
+    title: { en: "Story squares blanket", ar: "بطانية مربعات الحكايات" },
+    maker: MAKERS.loopera,
+    description: { en: "Twenty tapestry squares, each with a favourite film character.", ar: "عشرين مربع تابستري، كل مربع فيه شخصية من فيلم محبوب." },
+    details: [{ en: "About 110 × 140 cm", ar: "تقريباً ١١٠ × ١٤٠ سم" }],
+    madeToOrder: true,
+    leadTimeDays: 12,
+    rating: 5,
+    reviews: 0,
+    sizes: ONE(1200, 1),
+    colors: [AS_SHOWN],
+    photos: [{ src: "/photos/ghibli-blanket.webp", alt: { en: "A blanket of colorful crochet squares with animated film characters", ar: "بطانية مربعات كروشيه ملونة عليها شخصيات أفلام كرتون" }, credit: "Loopera", kind: "product" }],
+  },
   {
     slug: "sunset-granny-blanket",
     category: "home",

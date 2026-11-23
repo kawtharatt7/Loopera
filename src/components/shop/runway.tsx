@@ -244,7 +244,7 @@ export function Runway({ products }: { products: Product[] }) {
         role="region"
         aria-roledescription="carousel"
         aria-label={`${t.shop.clothesHeadline} ${t.shop.runwayHint}`}
-        className="runway-stage relative h-[min(66svh,560px)] min-h-[420px] sm:h-[min(78svh,760px)] sm:min-h-[460px] touch-pan-y select-none overflow-hidden bg-surface outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+        className="runway-stage relative isolate h-[min(66svh,560px)] min-h-[420px] sm:h-[min(78svh,760px)] sm:min-h-[460px] touch-pan-y select-none overflow-hidden bg-surface outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
       >
         {bodies.map((i) => {
           const prod = products[i % n];

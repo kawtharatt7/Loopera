@@ -10,7 +10,7 @@ import { SiteHeader } from "@/components/layout/site-header";
 import { useT } from "@/lib/i18n/client";
 import { byCategory, CATEGORIES, formatSar, stockFor, type Product } from "@/lib/shop/catalog";
 import { TAPESTRIES } from "@/lib/tapestry/designs";
-import { BagsHero } from "./bags-hero";
+import { BagShowcase } from "./bag-showcase";
 import { PieceImage } from "./piece-image";
 import { CardRow } from "./product-card";
 
@@ -188,7 +188,7 @@ export function ProductPage({ product }: { product: Product }) {
       <main id="main" className="pt-28 sm:pt-16">
         {product.category === "bags" ? (
           <>
-            <BagsHero bags={[product]} mode="single" />
+            <BagShowcase bags={[product]} linkToPage={false} />
             <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8">{details}</div>
           </>
         ) : (

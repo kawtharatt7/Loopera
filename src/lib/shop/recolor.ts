@@ -57,7 +57,7 @@ export function recolorPixels(data: Uint8ClampedArray, mask: Uint8ClampedArray |
     if (m <= 0.01) continue;
     const [L, a, b] = rgbToLab(data[i], data[i + 1], data[i + 2]);
     const dab = Math.hypot(a - s[1], b - s[2]);
-    const w = m * Math.min(1, Math.max(0, 1 - (dab - t0) / (t1 - t0))) * Math.min(1, Math.max(0, 1 - (Math.abs(L - s[0]) - 45) / 25));
+    const w = m * Math.min(1, Math.max(0, 1 - (dab - t0) / (t1 - t0))) * Math.min(1, Math.max(0, 1 - (Math.abs(L - s[0]) - 55) / 30));
     if (w <= 0.01) continue;
     const [r, g, bl] = labToRgb(Math.min(100, Math.max(0, L + dL)), a + da, b + db);
     data[i] = data[i] + (r - data[i]) * w;

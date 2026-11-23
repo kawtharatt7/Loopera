@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { useT } from "@/lib/i18n/client";
 import { byCategory, CATEGORIES, type Category } from "@/lib/shop/catalog";
-import { BagsHero } from "./bags-hero";
+import { BagShowcase } from "./bag-showcase";
 import { CardRow } from "./product-card";
 import { Runway } from "./runway";
 import { GraduationFeature, ProductGrid, WallCustom } from "./store-sections";
@@ -75,7 +75,7 @@ export function StorePage() {
         </Section>
 
         <Section id="bags" title={label("bags")} blurb={blurb("bags")} bleed>
-          <BagsHero bags={byCategory("bags")} mode="collection" collectionTitle={t.shop.bagsHeadline} collectionBlurb={blurb("bags")} />
+          <BagShowcase bags={byCategory("bags")} />
           <div className="mx-auto mt-10 max-w-7xl px-5 sm:px-8">
             <CardRow products={byCategory("bags")} />
           </div>

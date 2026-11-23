@@ -48,9 +48,16 @@ export function WallCustom({ products }: { products: Product[] }) {
     <div className="grid gap-10 md:grid-cols-2 lg:gap-16">
       <div className="max-w-lg">
         <p className="text-lg leading-relaxed">{t.shop.wallText}</p>
-        <Link href="/creator?type=wall" className="mt-8 inline-flex min-h-12 items-center rounded-sm bg-primary px-7 font-medium text-primary-fg hover:opacity-90">
-          {t.shop.wallCta}
-        </Link>
+        <div className="mt-8 flex flex-wrap gap-3">
+          {products.length >= 3 && (
+            <Link href="/shop/wall" className="inline-flex min-h-12 items-center rounded-sm bg-primary px-7 font-medium text-primary-fg hover:opacity-90">
+              {t.shop.wallEnter}
+            </Link>
+          )}
+          <Link href="/creator?type=wall" className="inline-flex min-h-12 items-center rounded-sm border border-fg/40 px-7 font-medium hover:border-fg">
+            {t.shop.wallCta}
+          </Link>
+        </div>
         <p className="mt-3 text-sm text-muted-foreground">{t.shop.wallNote}</p>
       </div>
       <ul className="border-t border-line/15">
@@ -62,7 +69,7 @@ export function WallCustom({ products }: { products: Product[] }) {
       </ul>
       {products.length > 0 && (
         <ul className="grid grid-cols-2 gap-5 md:col-span-2 md:grid-cols-4">
-          {products.map((p) => (
+          {products.slice(0, 8).map((p) => (
             <li key={p.slug}>
               <ProductCard product={p} />
             </li>

@@ -89,7 +89,7 @@ function labelTexture(maker: string, title: string, meta: string, ink: string, r
 }
 
 export interface Piece {
-  image: HTMLCanvasElement; // the drawn hanging (transparent background)
+  image: HTMLCanvasElement | HTMLImageElement; // the drawn hanging, or a photo of the real piece
   maker: string;
   title: string;
   meta: string;
@@ -130,7 +130,8 @@ export function buildRoom(scene: THREE.Scene, colors: RoomColors, pieces: Piece[
 
   // One texture and label per piece, shared by every copy on the walls.
   const pieceTex = pieces.map((p) => {
-    const t = keep(new THREE.CanvasTexture(p.image));
+    const t = keep(p.image instanceof HTMLCanvasElement ? new THREE.CanvasTexture(p.image) : new THREE.Texture(p.image));
+    t.needsUpdate = true;
     t.colorSpace = THREE.SRGBColorSpace;
     t.anisotropy = maxAniso;
     return t;

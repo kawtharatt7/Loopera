@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useBag } from "@/components/bag/bag-context";
 import { useT } from "@/lib/i18n/client";
-import { formatSar, photoFor, type Product } from "@/lib/shop/catalog";
+import { formatSar, type Product } from "@/lib/shop/catalog";
+import { useRecolored } from "@/lib/shop/recolor";
 import { optimizedSrc } from "@/lib/shop/image";
 
 /*
@@ -44,6 +45,7 @@ export function Runway({ products }: { products: Product[] }) {
   const go = (delta: number) => {
     state.current.target = Math.round(state.current.target) + delta;
   };
+  const swatch = (prod: Product, hex: string) => (hex === "transparent" ? (prod.recolor?.from ?? "#999") : hex);
 
   useEffect(() => {
     const el = stage.current;
@@ -180,6 +182,16 @@ export function Runway({ products }: { products: Product[] }) {
     const enter = (e: PointerEvent) => e.pointerType === "mouse" && ring.current?.classList.add("is-on");
     const leave = () => ring.current?.classList.remove("is-on");
 
+    let idleUntil = 0;
+    const touch = () => (idleUntil = performance.now() + 9000);
+    const auto = window.setInterval(() => {
+      if (calm || down || !visible || document.hidden || performance.now() < idleUntil) return;
+      s.target = Math.round(s.target) + 1;
+    }, 4500);
+    el.addEventListener("pointerdown", touch);
+    el.addEventListener("wheel", touch, { passive: true });
+    el.addEventListener("keydown", touch);
+    el.addEventListener("pointerenter", touch);
     const io = new IntersectionObserver(([en]) => {
       visible = en.isIntersecting;
       if (visible && !raf) raf = requestAnimationFrame(frame);
@@ -200,6 +212,11 @@ export function Runway({ products }: { products: Product[] }) {
     return () => {
       cancelAnimationFrame(raf);
       clearTimeout(wheelT);
+      clearInterval(auto);
+      el.removeEventListener("pointerdown", touch);
+      el.removeEventListener("wheel", touch);
+      el.removeEventListener("keydown", touch);
+      el.removeEventListener("pointerenter", touch);
       io.disconnect();
       ro.disconnect();
       el.removeEventListener("pointermove", onMove);
@@ -231,7 +248,7 @@ export function Runway({ products }: { products: Product[] }) {
       >
         {bodies.map((i) => {
           const prod = products[i % n];
-          const src = photoFor(prod, colorBy[prod.slug] ?? prod.colors[0].id);
+          const hex = prod.colors.find((c) => c.id === colorBy[prod.slug])?.hex ?? null;
           return (
             <div
               key={i}
@@ -243,9 +260,8 @@ export function Runway({ products }: { products: Product[] }) {
               className="absolute left-0 top-0 origin-top-left will-change-transform"
               style={{ opacity: 0 }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element -- resized by the Next image optimizer */}
-              <img src={optimizedSrc(src, 828)} alt="" draggable={false} className="pointer-events-none h-full w-full object-cover" />
-              <span className="absolute -bottom-[1.6%] left-[8%] right-[8%] h-[3.6%] rounded-[50%] bg-[radial-gradient(closest-side,rgba(40,20,20,.28),transparent)]" />
+              <BodyPhoto product={prod} hex={hex} />
+              <span className="absolute -bottom-[1.6%] left-[8%] right-[8%] h-[3.6%] rounded-[50%] bg-[radial-gradient(closest-side,rgba(0,0,0,.35),transparent)]" />
             </div>
           );
         })}
@@ -301,7 +317,7 @@ export function Runway({ products }: { products: Product[] }) {
               <legend className="text-sm font-medium">
                 {t.common.color}: <span className="font-normal text-muted-foreground">{bi(p.colors.find((c) => c.id === colorId)!.name)}</span>
               </legend>
-              <div className="mt-2 flex gap-2">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {p.colors.map((c) => (
                   <button
                     key={c.id}
@@ -311,7 +327,7 @@ export function Runway({ products }: { products: Product[] }) {
                     onClick={() => setColorBy((m) => ({ ...m, [p.slug]: c.id }))}
                     className={`h-9 w-9 rounded-full border-2 ${c.id === colorId ? "border-fg" : "border-transparent"}`}
                   >
-                    <span className="block h-full w-full rounded-full border border-line/20" style={{ background: c.hex }} />
+                    <span className="block h-full w-full rounded-full border border-line/20" style={{ background: swatch(p, c.hex) }} />
                   </button>
                 ))}
               </div>
@@ -354,4 +370,11 @@ export function Runway({ products }: { products: Product[] }) {
       </aside>
     </div>
   );
+}
+
+/** One look on the line: the photo, repainted when a yarn color is picked. */
+function BodyPhoto({ product, hex }: { product: Product; hex: string | null }) {
+  const src = useRecolored(product.photos[0].src, product.recolor, hex);
+  // eslint-disable-next-line @next/next/no-img-element -- local photo or a repainted data URL
+  return <img src={src.startsWith("data:") ? src : optimizedSrc(src, 828)} alt="" draggable={false} className="pointer-events-none h-full w-full object-cover" />;
 }

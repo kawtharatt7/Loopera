@@ -87,6 +87,9 @@ export function StorePage() {
 
         <Section id="graduation" title={t.shop.gradHeadline}>
           <GraduationFeature products={byCategory("graduation")} />
+          <div className="mt-14">
+            <ProductGrid products={byCategory("graduation").slice(1)} />
+          </div>
         </Section>
 
         <Section id="flowers" title={t.shop.flowersHeadline}>

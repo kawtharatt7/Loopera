@@ -38,13 +38,19 @@ function focusPose(slot: Slot, th: number): Pose {
   return slot.wall === "outer" ? { th, r: R - d, yaw: Math.PI / 2, y, pitch: 0 } : { th, r: RIN + d, yaw: -Math.PI / 2, y, pitch: 0 };
 }
 
+/** The picture of a hanging: its photo, or drawn from its chart. */
+function usePieceSrc(product: Product, cell: number): string | null {
+  const drawn = useTapestryImage(product.tapestry, cell);
+  return product.tapestry ? drawn : (product.photos[0]?.src ?? null);
+}
+
 /** One hanging's page, opened over the gallery. */
 function PiecePanel({ product, onClose, onOpen, imageRef, detailsShown }: { product: Product; onClose: () => void; onOpen: (p: Product) => void; imageRef: (el: HTMLDivElement | null) => void; detailsShown: boolean }) {
   const { t, bi, locale } = useT();
   const { add } = useBag();
   const [sizeId, setSizeId] = useState(product.sizes[0].id);
   const [qty, setQty] = useState(1);
-  const src = useTapestryImage(product.tapestry, 14);
+  const src = usePieceSrc(product, 14);
   const size = product.sizes.find((s) => s.id === sizeId) ?? product.sizes[0];
   const left = stockFor(product, product.colors[0].id, sizeId);
   const rest = byCategory("wall").filter((p) => p.slug !== product.slug);
@@ -143,7 +149,7 @@ function PiecePanel({ product, onClose, onOpen, imageRef, detailsShown }: { prod
 
 function CollectionCard({ product, onOpen }: { product: Product; onOpen: (p: Product) => void }) {
   const { bi, locale } = useT();
-  const src = useTapestryImage(product.tapestry, 8);
+  const src = usePieceSrc(product, 8);
   return (
     <button type="button" onClick={() => onOpen(product)} className="group block w-full text-start">
       <div className="aspect-[3/4.2] rounded-sm bg-surface p-[6%] transition-transform duration-300 group-hover:-translate-y-1">
@@ -342,9 +348,13 @@ export function WallGallery() {
       api.current!.lastIndex = index;
       setDetailsShown(false);
       setOpenSlug(product.slug);
-      const canvas = document.createElement("canvas");
-      const d = TAPESTRIES[product.tapestry!];
-      drawHanging(canvas, d.grid, d.palette.map((p) => p.hex), { cell: 10, fringe: true, dowel: true });
+      let flySrc = product.photos[0]?.src ?? "";
+      if (product.tapestry) {
+        const canvas = document.createElement("canvas");
+        const d = TAPESTRIES[product.tapestry];
+        drawHanging(canvas, d.grid, d.palette.map((p) => p.hex), { cell: 10, fringe: true, dowel: true });
+        flySrc = canvas.toDataURL();
+      }
       requestAnimationFrame(() =>
         requestAnimationFrame(() => {
           const box = panelImage.current?.getBoundingClientRect();
@@ -354,7 +364,7 @@ export function WallGallery() {
           }
           const inner = new DOMRect(box.left + box.width * 0.06, box.top + box.height * 0.06, box.width * 0.88, box.height * 0.88);
           const fly = document.createElement("img");
-          fly.src = canvas.toDataURL();
+          fly.src = flySrc;
           fly.alt = "";
           Object.assign(fly.style, { position: "fixed", left: `${from.left}px`, top: `${from.top}px`, width: `${from.width}px`, height: `${from.height}px`, objectFit: "contain", zIndex: "46", pointerEvents: "none" });
           document.body.appendChild(fly);
@@ -412,12 +422,22 @@ export function WallGallery() {
       await document.fonts.ready;
       if (disposed) return;
       const ink = tokenHex("fg");
-      const pieces = products.map((p) => {
-        const d = TAPESTRIES[p.tapestry!];
-        const c = document.createElement("canvas");
-        drawHanging(c, d.grid, d.palette.map((x) => x.hex), { cell: 16, fringe: true, dowel: true });
-        return { image: c, maker: bi(p.maker), title: bi(p.title), meta: `${formatSar(fromPrice(p), locale)}` };
-      });
+      const pieces = await Promise.all(
+        products.map(async (p) => {
+          let image: HTMLCanvasElement | HTMLImageElement;
+          if (p.tapestry) {
+            const d = TAPESTRIES[p.tapestry];
+            image = document.createElement("canvas");
+            drawHanging(image, d.grid, d.palette.map((x) => x.hex), { cell: 16, fringe: true, dowel: true });
+          } else {
+            image = new Image();
+            image.src = p.photos[0].src;
+            await image.decode().catch(() => undefined);
+          }
+          return { image, maker: bi(p.maker), title: bi(p.title), meta: `${formatSar(fromPrice(p), locale)}` };
+        }),
+      );
+      if (disposed) return;
       const bg = tokenHex("bg");
       const s1 = tokenHex("surface");
       const s2 = tokenHex("surface-2");

@@ -122,18 +122,71 @@ export function revolutionCounts(part: EnginePart, gauge: Gauge): number[] {
   return counts;
 }
 
+/**
+ * Height of each round along the part, for the 3D viewer. Closed rounded parts follow an
+ * elliptical cap at each end with a straight section for the plain rounds, so a ball looks like
+ * a stuffed ball. Cylinders get flat disks; open parts (cones, ears) rise one row per round.
+ */
+export function roundHeights(part: EnginePart, counts: number[], gauge: Gauge): number[] {
+  return roundShape(part, counts, gauge).map((s) => s.y);
+}
+
+/**
+ * Display position of each round: height and ring radius in cm. Radius follows the stitch count,
+ * except on the rounded caps of balls and bodies, where stuffing pushes the fabric into a curve.
+ */
+export function roundShape(part: EnginePart, counts: number[], gauge: Gauge): { y: number; r: number }[] {
+  const radii = counts.map((c) => (c * gauge.stitchWidthCm) / (2 * Math.PI));
+  const ys = rawHeights(part, counts, gauge);
+  const rounded = part.shape === "sphere" || part.shape === "ellipsoid" || part.shape === "capsule";
+  if (!rounded) return ys.map((y, i) => ({ y, r: radii[i] }));
+  const R = Math.max(...radii);
+  const n = counts.length;
+  const first = counts.indexOf(Math.max(...counts));
+  const last = counts.lastIndexOf(Math.max(...counts));
+  return ys.map((y, i) => {
+    let j = 1;
+    if (i < first) j = first === 0 ? 1 : (i + 0.35) / (first + 0.35);
+    else if (i > last) j = (n - 1 - i + 0.35) / (n - 1 - last + 0.35);
+    return { y, r: Math.max(radii[i], R * Math.sin((j * Math.PI) / 2)) };
+  });
+}
+
+function rawHeights(part: EnginePart, counts: number[], gauge: Gauge): number[] {
+  const n = counts.length;
+  if (part.shape === "cone" || part.shape === "ear") {
+    return counts.map((_, i) => i * gauge.rowHeightCm);
+  }
+  const first = counts.indexOf(Math.max(...counts));
+  const last = counts.lastIndexOf(Math.max(...counts));
+  if (part.shape === "cylinder") {
+    const wall = (last - first) * gauge.rowHeightCm;
+    return counts.map((_, i) => (i <= first ? 0 : i >= last ? wall : (i - first) * gauge.rowHeightCm));
+  }
+  const plateau = (last - first) * gauge.rowHeightCm;
+  const total = Math.max(part.heightCm, plateau + 2 * gauge.rowHeightCm, (n - 1) * gauge.rowHeightCm * 0.5);
+  const cap = Math.max((total - plateau) / 2, gauge.rowHeightCm * 0.5);
+  // Rounds are spread evenly in angle around each cap, which closely follows a stuffed ball.
+  return counts.map((_, i) => {
+    if (i <= first) {
+      const j = first === 0 ? 1 : i / first;
+      return cap * (1 - Math.cos((j * Math.PI) / 2));
+    }
+    if (i >= last) {
+      const j = n - 1 === last ? 0 : (i - last) / (n - 1 - last);
+      return cap + plateau + cap * Math.sin((j * Math.PI) / 2);
+    }
+    return cap + (i - first) * gauge.rowHeightCm;
+  });
+}
+
 export function buildRevolutionPart(part: EnginePart, gauge: Gauge): PartPattern {
   const counts = revolutionCounts(part, gauge);
+  const shape = roundShape(part, counts, gauge);
   const rounds: Round[] = [];
-  let y = 0;
-  let prevRadius = 0;
   counts.forEach((count, idx) => {
-    const radiusCm = (count * gauge.stitchWidthCm) / (2 * Math.PI);
-    // Each round advances one row height along the surface; the part of it that goes
-    // outward (a change in radius) does not add height, so flat disks stay flat.
-    const dr = Math.abs(radiusCm - prevRadius);
-    if (idx > 0) y += Math.sqrt(Math.max(0, gauge.rowHeightCm ** 2 - dr ** 2));
-    prevRadius = radiusCm;
+    const radiusCm = shape[idx].r;
+    const y = shape[idx].y;
     if (idx === 0) {
       rounds.push({
         number: 1,

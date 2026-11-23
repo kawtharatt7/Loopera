@@ -21,7 +21,9 @@ describe("yarn ball helpers", () => {
     for (let i = 0; i < 300; i++) {
       stepThread(t, [0.2, 0.1, 0], 1 / 60, { gravity: 3, damping: 0.96, wind: [0.5, 0, 0], iterations: 8 });
     }
-    expect([t.pos[0], t.pos[1], t.pos[2]]).toEqual([0.2, expect.closeTo(0.1, 5), 0]);
+    expect(t.pos[0]).toBeCloseTo(0.2, 5);
+    expect(t.pos[1]).toBeCloseTo(0.1, 5);
+    expect(t.pos[2]).toBeCloseTo(0, 5);
     for (let i = 0; i < t.count - 1; i++) {
       const d = Math.hypot(t.pos[i * 3 + 3] - t.pos[i * 3], t.pos[i * 3 + 4] - t.pos[i * 3 + 1], t.pos[i * 3 + 5] - t.pos[i * 3 + 2]);
       expect(d).toBeGreaterThan(0.08);

@@ -50,7 +50,7 @@ export interface Round {
   instruction: string;
   /** Structured run-length form used by the validator and the 3D viewer. */
   runs: RunGroup[];
-  /** Ring radius in cm, used by the 3D viewer. */
+  /** Ring radius in cm as displayed by the 3D viewer (stuffed shape). */
   radiusCm: number;
   /** Height of the ring along the part axis in cm, used by the 3D viewer. */
   yCm: number;

@@ -2,22 +2,60 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  /* Palette stored as RGB channels so Tailwind opacity modifiers work (bg-cocoa/10). */
-  --cream: 255 248 240; /* #FFF8F0 background */
-  --blush: 244 192 209; /* #F4C0D1 */
-  --sage: 207 227 208; /* #CFE3D0 */
-  --butter: 248 227 163; /* #F8E3A3 */
-  --berry: 212 83 126; /* #D4537E accent (large text and decoration only) */
-  --berry-dark: 166 59 99; /* #A63B63 darker berry, safe for small text */
-  --cocoa: 59 47 47; /* #3B2F2F text */
+/*
+  Loopera design tokens. Every color in the app comes from here.
+  Values are RGB channels so Tailwind opacity modifiers work (bg-surface/60).
+  Dark is the default; light applies when <html data-theme="light">.
+*/
+:root,
+[data-theme="dark"] {
+  /* Brand palette (same in both modes) */
+  --wine: 142 21 35; /* #8E1523 */
+  --ember: 206 79 47; /* #CE4F2F, large text, icons and focus only */
+  --peach: 226 155 106; /* #E29B6A */
+  --rose: 243 182 182; /* #F3B6B6 */
+  --on-wine: 251 237 232; /* text on wine, 8:1 */
+
+  /* Semantic, dark mode */
+  --bg: 26 11 14; /* #1A0B0E */
+  --surface: 42 18 23; /* #2A1217 */
+  --surface-2: 56 25 31; /* #38191F */
+  --fg: 251 237 232; /* #FBEDE8 */
+  --muted-fg: 216 185 180; /* #D8B9B4, 10:1 on bg */
+  --border: 251 237 232; /* used at low opacity */
+  --primary: 226 155 106; /* peach buttons */
+  --on-primary: 26 11 14; /* 8.3:1 */
+  --accent-text: 243 182 182; /* rose for small accent text, 11:1 */
+  --ring: 226 155 106;
+  --grid-line: 251 237 232;
+  --glow: 206 79 47;
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg: 255 246 241; /* #FFF6F1 */
+  --surface: 251 230 224; /* #FBE6E0 */
+  --surface-2: 246 215 207; /* #F6D7CF */
+  --fg: 43 15 20; /* #2B0F14 */
+  --muted-fg: 107 52 58; /* #6B343A, 8:1 on bg */
+  --border: 43 15 20;
+  --primary: 142 21 35; /* wine buttons */
+  --on-primary: 255 246 241; /* 8.6:1 */
+  --accent-text: 142 21 35;
+  --ring: 142 21 35;
+  --grid-line: 43 15 20;
+  --glow: 226 155 106;
+  color-scheme: light;
 }
 
 @layer base {
   html {
-    background-color: rgb(var(--cream));
-    color: rgb(var(--cocoa));
+    background-color: rgb(var(--bg));
+    color: rgb(var(--fg));
     -webkit-text-size-adjust: 100%;
+    transition:
+      background-color 300ms ease,
+      color 300ms ease;
   }
 
   body {
@@ -33,22 +71,35 @@
   }
 
   :focus-visible {
-    outline: 3px solid rgb(var(--berry));
+    outline: 3px solid rgb(var(--ring));
     outline-offset: 3px;
   }
 
   ::selection {
-    background: rgb(var(--blush));
+    background: rgb(var(--rose) / 0.45);
   }
 }
 
 @layer utilities {
-  /* Calm graph-paper texture used by the Studio side. */
+  /* Calm graph-paper texture for the Studio side. */
   .bg-grid {
     background-image:
-      linear-gradient(rgb(var(--cocoa) / 0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(var(--cocoa) / 0.06) 1px, transparent 1px);
+      linear-gradient(rgb(var(--grid-line) / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(var(--grid-line) / 0.06) 1px, transparent 1px);
     background-size: 24px 24px;
+  }
+
+  /* Very soft grain, like the surface of yarn. */
+  .bg-grain {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 .06 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  .glow-soft {
+    box-shadow: 0 24px 80px -32px rgb(var(--glow) / 0.45);
+  }
+
+  .text-balance {
+    text-wrap: balance;
   }
 }
 

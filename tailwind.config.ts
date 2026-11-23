@@ -1,21 +1,40 @@
 import type { Config } from "tailwindcss";
 
-// Colors come from CSS variables defined in src/app/globals.css.
-// They are stored as RGB channels so opacity modifiers like bg-cocoa/10 work.
+// Every color is a CSS variable from src/app/globals.css (RGB channels), so the whole look,
+// in both dark and light mode, changes by editing the tokens there.
+const token = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        cream: "rgb(var(--cream) / <alpha-value>)",
-        blush: "rgb(var(--blush) / <alpha-value>)",
-        sage: "rgb(var(--sage) / <alpha-value>)",
-        butter: "rgb(var(--butter) / <alpha-value>)",
-        berry: {
-          DEFAULT: "rgb(var(--berry) / <alpha-value>)",
-          dark: "rgb(var(--berry-dark) / <alpha-value>)",
-        },
-        cocoa: "rgb(var(--cocoa) / <alpha-value>)",
+        // Brand palette
+        wine: token("wine"),
+        ember: token("ember"),
+        peach: token("peach"),
+        rose: token("rose"),
+        "on-wine": token("on-wine"),
+        // Semantic tokens
+        bg: token("bg"),
+        surface: { DEFAULT: token("surface"), 2: token("surface-2") },
+        fg: token("fg"),
+        line: token("border"),
+        primary: { DEFAULT: token("primary"), fg: token("on-primary"), foreground: token("on-primary") },
+        /** Small accent text: rose in dark mode, wine in light mode. */
+        brand: token("accent-text"),
+        // shadcn-style aliases, so copied UI components (bg-background, text-foreground…) follow the theme
+        background: token("bg"),
+        foreground: token("fg"),
+        card: { DEFAULT: token("surface"), foreground: token("fg") },
+        popover: { DEFAULT: token("surface"), foreground: token("fg") },
+        muted: { DEFAULT: token("surface-2"), foreground: token("muted-fg") },
+        accent: { DEFAULT: token("surface-2"), foreground: token("fg") },
+        border: token("border"),
+        input: token("border"),
+        ring: token("ring"),
+        secondary: { DEFAULT: token("surface-2"), foreground: token("fg") },
+        destructive: { DEFAULT: token("ember"), foreground: token("fg") },
       },
       fontFamily: {
         serif: ["var(--font-fraunces)", "Georgia", "serif"],
@@ -24,6 +43,12 @@ const config: Config = {
       borderRadius: {
         "4xl": "2rem",
         "5xl": "2.5rem",
+      },
+      keyframes: {
+        shimmer: { "100%": { transform: "translateX(100%)" } },
+      },
+      animation: {
+        shimmer: "shimmer 1.6s infinite",
       },
     },
   },

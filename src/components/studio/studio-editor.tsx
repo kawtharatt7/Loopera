@@ -186,10 +186,10 @@ export function StudioEditor({ initial, onBeforePdf, onChange, saveState = "idle
           {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved" : saveState === "error" ? "Not saved, will retry" : ""}
         </span>
         <div className="flex items-center gap-1 rounded-full border border-line/15 bg-surface/60 p-1">
-          <button type="button" onClick={() => dispatch({ type: "undo" })} disabled={history.past.length === 0} aria-label="Undo" title="Undo (Ctrl+Z)" className="h-10 w-10 cursor-pointer rounded-full hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40">
+          <button type="button" onClick={() => dispatch({ type: "undo" })} disabled={history.past.length === 0} aria-label="Undo" title="Undo (Ctrl+Z)" className="h-10 w-10 cursor-pointer rounded-sm hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40">
             <svg viewBox="0 0 20 20" className="mx-auto h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="M7 5 3 9l4 4M3 9h9a5 5 0 0 1 0 10h-2" /></svg>
           </button>
-          <button type="button" onClick={() => dispatch({ type: "redo" })} disabled={history.future.length === 0} aria-label="Redo" title="Redo (Ctrl+Shift+Z)" className="h-10 w-10 cursor-pointer rounded-full hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40">
+          <button type="button" onClick={() => dispatch({ type: "redo" })} disabled={history.future.length === 0} aria-label="Redo" title="Redo (Ctrl+Shift+Z)" className="h-10 w-10 cursor-pointer rounded-sm hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40">
             <svg viewBox="0 0 20 20" className="mx-auto h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true"><path d="m13 5 4 4-4 4M17 9H8a5 5 0 0 0 0 10h2" /></svg>
           </button>
         </div>
@@ -201,7 +201,7 @@ export function StudioEditor({ initial, onBeforePdf, onChange, saveState = "idle
               role="radio"
               aria-checked={doc.terms === t}
               onClick={() => update({ ...doc, terms: t })}
-              className={`min-h-10 cursor-pointer rounded-full px-4 ${doc.terms === t ? "bg-primary text-primary-fg" : "hover:bg-surface-2"}`}
+              className={`min-h-10 cursor-pointer rounded-sm px-4 ${doc.terms === t ? "bg-primary text-primary-fg" : "hover:bg-surface-2"}`}
             >
               {t.toUpperCase()}
             </button>
@@ -210,7 +210,7 @@ export function StudioEditor({ initial, onBeforePdf, onChange, saveState = "idle
       </div>
 
       {level === 3 && (
-        <p role="status" className="mt-4 rounded-2xl border border-peach/40 bg-peach/10 px-4 py-3 text-sm">
+        <p role="status" className="mt-4 rounded-2xl border border-primary/40 bg-primary/[0.06] px-4 py-3 text-sm">
           <strong>Needs review.</strong> This piece is outside what the engine can check fully, so it is a written draft without 3D. Read it through before you start.
         </p>
       )}
@@ -288,7 +288,7 @@ export function StudioEditor({ initial, onBeforePdf, onChange, saveState = "idle
                       gauge: k === "preset" ? { kind: "preset", weight: "worsted" } : { kind: "swatch", stitchesPer10cm: 15, rowsPer10cm: 16 },
                     })
                   }
-                  className={`min-h-10 flex-1 cursor-pointer rounded-full ${doc.gauge.kind === k ? "bg-primary text-primary-fg" : "hover:bg-surface-2"}`}
+                  className={`min-h-10 flex-1 cursor-pointer rounded-sm ${doc.gauge.kind === k ? "bg-primary text-primary-fg" : "hover:bg-surface-2"}`}
                 >
                   {k === "preset" ? "Yarn weight" : "My swatch"}
                 </button>

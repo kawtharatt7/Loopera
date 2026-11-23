@@ -51,10 +51,10 @@ function tapestryResult(id: TapestryId): Result {
   };
 }
 
-export function Creator({ initialTapestry }: { initialTapestry: TapestryId | null }) {
+export function Creator({ initialTapestry, initialType = null }: { initialTapestry: TapestryId | null; initialType?: MakeType | null }) {
   const { t, bi, locale } = useT();
   const ar = locale === "ar";
-  const [type, setType] = useState<MakeType>(initialTapestry ? "wall" : "toy");
+  const [type, setType] = useState<MakeType>(initialTapestry ? "wall" : (initialType ?? "toy"));
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [text, setText] = useState("");
@@ -178,7 +178,7 @@ export function Creator({ initialTapestry }: { initialTapestry: TapestryId | nul
                 role="radio"
                 aria-checked={on}
                 onClick={() => setType(k)}
-                className={`rounded-lg border px-4 py-4 text-start transition-colors ${on ? "border-peach bg-peach/10" : "border-line/15 bg-surface/50 hover:border-line/40"}`}
+                className={`rounded-lg border px-4 py-4 text-start transition-colors ${on ? "border-primary bg-primary/10" : "border-line/15 bg-surface/50 hover:border-line/40"}`}
               >
                 <span className="block text-lg font-medium">{t.creator.types[k].label}</span>
                 <span className="mt-1 block text-sm text-muted-foreground">{t.creator.types[k].hint}</span>
@@ -201,14 +201,14 @@ export function Creator({ initialTapestry }: { initialTapestry: TapestryId | nul
                 e.preventDefault();
                 pick(e.dataTransfer.files[0]);
               }}
-              className="flex min-h-[220px] cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-lg border border-dashed border-line/30 bg-surface/50 p-4 text-center transition-colors hover:border-peach focus-within:border-peach"
+              className="flex min-h-[220px] cursor-pointer flex-col items-center justify-center gap-3 overflow-hidden rounded-lg border border-dashed border-line/30 bg-surface/50 p-4 text-center transition-colors hover:border-primary focus-within:border-primary"
             >
               {preview ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={preview} alt="" className="max-h-56 w-auto rounded-md object-contain" />
               ) : (
                 <>
-                  <svg viewBox="0 0 24 24" className="h-8 w-8 text-peach" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" className="h-8 w-8 text-brand" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <path d="M4 16l4.5-4.5a2 2 0 0 1 2.8 0L16 16m-2-2 1.5-1.5a2 2 0 0 1 2.8 0L20 14M4 6h16v12H4z" />
                   </svg>
                   <span className="font-medium">{t.creator.upload}</span>
@@ -236,7 +236,7 @@ export function Creator({ initialTapestry }: { initialTapestry: TapestryId | nul
                 maxLength={500}
                 rows={4}
                 placeholder={t.creator.describePlaceholder}
-                className="mt-2 w-full resize-y rounded-lg border border-line/20 bg-surface/60 px-4 py-3 text-base placeholder:text-muted-foreground/70 focus:border-peach focus:outline-none"
+                className="mt-2 w-full resize-y rounded-lg border border-line/20 bg-surface/60 px-4 py-3 text-base placeholder:text-muted-foreground/70 focus:border-primary focus:outline-none"
               />
             </div>
 
@@ -246,13 +246,13 @@ export function Creator({ initialTapestry }: { initialTapestry: TapestryId | nul
                   <span className="flex justify-between font-medium">
                     {t.creator.chartWidth} <span className="tabular-nums text-muted-foreground">{width}</span>
                   </span>
-                  <input type="range" min={20} max={60} step={2} value={width} onChange={(e) => setWidth(Number(e.target.value))} className="mt-2 w-full accent-[rgb(var(--peach))]" />
+                  <input type="range" min={20} max={60} step={2} value={width} onChange={(e) => setWidth(Number(e.target.value))} className="mt-2 w-full accent-[rgb(var(--primary))]" />
                 </label>
                 <label className="text-sm">
                   <span className="flex justify-between font-medium">
                     {t.creator.chartColors} <span className="tabular-nums text-muted-foreground">{colors}</span>
                   </span>
-                  <input type="range" min={2} max={6} value={colors} onChange={(e) => setColors(Number(e.target.value))} className="mt-2 w-full accent-[rgb(var(--peach))]" />
+                  <input type="range" min={2} max={6} value={colors} onChange={(e) => setColors(Number(e.target.value))} className="mt-2 w-full accent-[rgb(var(--primary))]" />
                 </label>
               </div>
             ) : (
@@ -265,7 +265,7 @@ export function Creator({ initialTapestry }: { initialTapestry: TapestryId | nul
                       type="button"
                       aria-pressed={size === s}
                       onClick={() => setSize(s)}
-                      className={`min-h-11 flex-1 rounded-lg border px-3 text-sm transition-colors ${size === s ? "border-peach bg-peach/10" : "border-line/20 hover:border-line/40"}`}
+                      className={`min-h-11 flex-1 rounded-lg border px-3 text-sm transition-colors ${size === s ? "border-primary bg-primary/10" : "border-line/20 hover:border-line/40"}`}
                     >
                       {t.creator.sizes[s]}
                     </button>
@@ -281,7 +281,7 @@ export function Creator({ initialTapestry }: { initialTapestry: TapestryId | nul
             type="button"
             onClick={generate}
             disabled={busy || left === 0}
-            className="min-h-12 rounded-full bg-peach px-8 text-base font-medium text-bg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-12 rounded-sm bg-primary px-8 text-base font-medium text-bg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {busy ? t.creator.generating : t.creator.generate}
           </button>
@@ -312,7 +312,7 @@ export function Creator({ initialTapestry }: { initialTapestry: TapestryId | nul
             </div>
             <div className="flex flex-wrap gap-2">
               {progress.done.size > 0 && (
-                <button type="button" onClick={progress.clear} className="min-h-10 rounded-full border border-line/20 px-4 text-sm hover:border-line/50">
+                <button type="button" onClick={progress.clear} className="min-h-10 rounded-sm border border-line/20 px-4 text-sm hover:border-line/50">
                   {t.creator.resetProgress}
                 </button>
               )}
@@ -348,7 +348,7 @@ export function Creator({ initialTapestry }: { initialTapestry: TapestryId | nul
                         setPdfBusy(false);
                       }
                     }}
-                    className="min-h-10 rounded-full border border-line/20 px-4 text-sm hover:border-line/50 disabled:opacity-50"
+                    className="min-h-10 rounded-sm border border-line/20 px-4 text-sm hover:border-line/50 disabled:opacity-50"
                   >
                     {t.creator.exportPdf}
                   </button>
@@ -362,7 +362,7 @@ export function Creator({ initialTapestry }: { initialTapestry: TapestryId | nul
                         // the editor falls back to a blank start
                       }
                     }}
-                    className="flex min-h-10 items-center rounded-full border border-line/20 px-4 text-sm hover:border-line/50"
+                    className="flex min-h-10 items-center rounded-sm border border-line/20 px-4 text-sm hover:border-line/50"
                   >
                     {t.creator.editParts}
                   </Link>
@@ -413,7 +413,7 @@ function TemplateResult({
             {doneCount === total ? t.creator.finished : t.creator.progress(doneCount, total)}
           </p>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-2">
-            <div className="h-full rounded-full bg-peach transition-[width] duration-500" style={{ width: `${total ? (doneCount / total) * 100 : 0}%` }} />
+            <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${total ? (doneCount / total) * 100 : 0}%` }} />
           </div>
         </div>
         <ul className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted-foreground">

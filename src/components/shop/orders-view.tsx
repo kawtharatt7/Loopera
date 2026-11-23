@@ -80,7 +80,7 @@ export function OrderDetail({ id }: { id: string }) {
       <ol className="mt-10 grid grid-cols-4 gap-2" aria-label={t.orders.title}>
         {STEPS.map((s, i) => (
           <li key={s}>
-            <div className={`h-1.5 rounded-full ${i <= step ? "bg-peach" : "bg-surface-2"}`} />
+            <div className={`h-1.5 rounded-full ${i <= step ? "bg-primary" : "bg-surface-2"}`} />
             <p className={`mt-2 text-sm ${i <= step ? "" : "text-muted-foreground"}`} aria-current={i === step ? "step" : undefined}>
               {t.orders.status[s]}
             </p>

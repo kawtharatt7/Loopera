@@ -11,13 +11,13 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: t.creator.title, description: t.creator.intro };
 }
 
-export default async function CreatorPage({ searchParams }: { searchParams: Promise<{ tapestry?: string }> }) {
-  const { tapestry } = await searchParams;
+export default async function CreatorPage({ searchParams }: { searchParams: Promise<{ tapestry?: string; type?: string }> }) {
+  const { tapestry, type } = await searchParams;
   return (
     <>
       <SiteHeader />
       <main id="main" className="min-h-dvh">
-        <Creator initialTapestry={tapestry && isTapestryId(tapestry) ? tapestry : null} />
+        <Creator initialTapestry={tapestry && isTapestryId(tapestry) ? tapestry : null} initialType={type === "wall" ? "wall" : null} />
       </main>
       <SiteFooter />
     </>

@@ -66,7 +66,7 @@ export function PatternList({ parts, activePartId, activeRound, terms, assembly,
                       aria-label={label}
                       title={label}
                       onClick={() => progress.toggle(key)}
-                      className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition-colors ${done ? "border-peach bg-peach text-bg" : "border-line/30 hover:border-peach"}`}
+                      className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition-colors ${done ? "border-primary bg-primary text-primary-fg" : "border-line/30 hover:border-primary"}`}
                     >
                       {done && (
                         <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -81,8 +81,8 @@ export function PatternList({ parts, activePartId, activeRound, terms, assembly,
                     onClick={() => onPick(part.partId, i)}
                     aria-current={active ? "step" : undefined}
                     className={`flex min-h-9 w-full cursor-pointer items-start justify-between gap-3 rounded-lg px-3 py-1.5 text-start transition-colors ${
-                      active ? "bg-surface-2 text-fg ring-1 ring-peach/50" : "text-muted-foreground hover:bg-surface-2/60 hover:text-fg"
-                    } ${done ? "line-through decoration-peach/70 opacity-60" : ""}`}
+                      active ? "bg-surface-2 text-fg ring-1 ring-primary/50" : "text-muted-foreground hover:bg-surface-2/60 hover:text-fg"
+                    } ${done ? "line-through decoration-primary/70 opacity-60" : ""}`}
                   >
                     <span>
                       <span className="font-medium text-brand">

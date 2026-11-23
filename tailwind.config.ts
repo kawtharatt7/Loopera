@@ -14,6 +14,7 @@ const config: Config = {
         ember: token("ember"),
         peach: token("peach"),
         rose: token("rose"),
+        hero: token("hero"),
         "on-wine": token("on-wine"),
         paper: { DEFAULT: token("paper"), fg: token("on-paper") },
         // Semantic tokens
@@ -42,9 +43,18 @@ const config: Config = {
         serif: ["Alexandria", "Tahoma", "sans-serif"],
         sans: ["IBM Plex Sans Arabic", "Tahoma", "system-ui", "sans-serif"],
       },
+      // Near-square corners everywhere: soft enough not to cut, never pill-shaped.
       borderRadius: {
-        "4xl": "2rem",
-        "5xl": "2.5rem",
+        none: "0",
+        sm: "2px",
+        DEFAULT: "2px",
+        md: "3px",
+        lg: "3px",
+        xl: "4px",
+        "2xl": "4px",
+        "3xl": "6px",
+        "4xl": "6px",
+        "5xl": "6px",
       },
       keyframes: {
         shimmer: { "100%": { transform: "translateX(100%)" } },

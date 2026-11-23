@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState, type ReactNode } from "react";
 import { useBag } from "@/components/bag/bag-context";
@@ -41,7 +42,7 @@ function Chip({ selected, disabled, onClick, children, swatch }: { selected: boo
       disabled={disabled}
       aria-pressed={selected}
       className={`inline-flex min-h-10 items-center gap-2 rounded-lg border px-4 text-sm transition-colors disabled:cursor-not-allowed disabled:line-through disabled:opacity-40 ${
-        selected ? "border-fg bg-peach/25" : "border-line/25 hover:border-line/60"
+        selected ? "border-fg bg-primary/25" : "border-line/25 hover:border-line/60"
       }`}
     >
       {swatch && <span className="h-4 w-4 rounded-full ring-1 ring-line/30" style={{ backgroundColor: swatch }} aria-hidden="true" />}
@@ -75,9 +76,9 @@ export function ProductPage({ product }: { product: Product }) {
   const left = stockFor(product, colorId, sizeId);
   const more = useMemo(() => byCategory(product.category).filter((p) => p.slug !== product.slug).slice(0, 4), [product]);
   const category = CATEGORIES.find((c) => c.id === product.category)!;
-  const shown = product.photos[0];
   const kinds = new Set(product.photos.map((p) => p.kind));
-  const photoIndex = Math.max(0, product.photos.findIndex((p) => (view === "hanger" ? p.kind === "hanger" : p.kind !== "hanger")));
+  const [picked, setPicked] = useState<number | null>(null);
+  const photoIndex = picked ?? Math.max(0, product.photos.findIndex((p) => (view === "hanger" ? p.kind === "hanger" : p.kind !== "hanger")));
 
   const details = (
     <div className="space-y-6">
@@ -98,12 +99,14 @@ export function ProductPage({ product }: { product: Product }) {
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
             {product.colors.map((c) => (
-              <Chip key={c.id} selected={c.id === colorId} swatch={c.hex} onClick={() => setColorId(c.id)}>
+              <Chip key={c.id} selected={c.id === colorId} swatch={c.hex} onClick={() => {
+                  setColorId(c.id);
+                  setPicked(null);
+                }}>
                 {bi(c.name)}
               </Chip>
             ))}
           </div>
-          {shown && product.colors.length > 1 && color.id !== product.colors[0].id && <p className="mt-2 text-sm text-muted-foreground">{t.product.shownIn(bi(product.colors[0].name))}</p>}
         </div>
       ) : null}
 
@@ -214,17 +217,35 @@ export function ProductPage({ product }: { product: Product }) {
               )}
               <div className={`relative overflow-hidden rounded-md ${product.tapestry ? "aspect-[3/4] bg-surface/70" : "aspect-[4/5] bg-surface"}`}>
                 <AnimatePresence mode="wait">
-                  <motion.div key={view} className="absolute inset-0" initial={{ opacity: 0, scale: 1.02 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
+                  <motion.div key={`${view}-${photoIndex}-${color.photo ?? ""}`} className="absolute inset-0" initial={{ opacity: 0, scale: 1.02 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
                     {view === "chart" ? (
                       <div className="flex h-full items-center justify-center p-6">
                         <ChartPreview product={product} />
                       </div>
+                    ) : color.photo && picked === null ? (
+                      <Image src={color.photo} alt={`${bi(product.title)}, ${bi(color.name)}`} fill sizes="(min-width: 768px) 50vw, 100vw" priority className="object-cover" />
                     ) : (
                       <PieceImage product={product} photoIndex={photoIndex} sizes="(min-width: 768px) 50vw, 100vw" priority />
                     )}
                   </motion.div>
                 </AnimatePresence>
               </div>
+              {kinds.size === 1 && product.photos.length > 1 && (
+                <div className="mt-3 flex gap-2">
+                  {product.photos.map((ph, i) => (
+                    <button
+                      key={ph.src}
+                      type="button"
+                      aria-label={bi(ph.alt)}
+                      aria-pressed={photoIndex === i}
+                      onClick={() => setPicked(i)}
+                      className={`relative h-20 w-16 overflow-hidden rounded-sm border-2 ${photoIndex === i ? "border-fg" : "border-transparent"}`}
+                    >
+                      <Image src={ph.src} alt="" fill sizes="64px" className="object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
               {product.tapestry && (
                 <a href={`/creator?tapestry=${product.tapestry}`} className="mt-4 inline-block text-sm underline underline-offset-4">
                   {locale === "ar" ? "تبين تشتغلينها بنفسك؟ افتحي المخطط في صانع الكروشيه" : "Want to crochet it yourself? Open the chart in the crochet creator"}

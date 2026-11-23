@@ -3,16 +3,18 @@ import type { TapestryId } from "@/lib/tapestry/designs";
 
 // Demo catalog used until makers list their own pieces (database phase).
 // Photos: Unsplash License and Pexels License (both free for commercial use, no attribution
-// required; credits are kept anyway). Wall hangings are drawn from their own stitch charts.
+// required; credits are kept anyway). Files in /public/photos are the maker's own photos.
+// Only real photos are used: a color is offered only when there is a photo of the piece in it.
 
-export type Category = "clothes" | "bags" | "wall" | "toys" | "flowers" | "home";
+export type Category = "clothes" | "bags" | "dolls" | "graduation" | "flowers" | "wall" | "home";
 
 export const CATEGORIES: { id: Category; label: Bi; blurb: Bi }[] = [
   { id: "clothes", label: { en: "Clothes", ar: "ملابس" }, blurb: { en: "Tops, ponchos and jackets, worn by real people.", ar: "بلايز وبونشو وجاكيتات، على ناس حقيقيين." } },
-  { id: "bags", label: { en: "Bags", ar: "شنط" }, blurb: { en: "Market bags, shoulder bags and backpacks.", ar: "شنط سوق وشنط كتف وشنط ظهر." } },
-  { id: "wall", label: { en: "Wall hangings", ar: "لوحات كروشيه" }, blurb: { en: "Tapestry crochet for your walls. Walk the gallery.", ar: "لوحات تابستري لجدرانك. امشي في المعرض." } },
-  { id: "toys", label: { en: "Toys", ar: "دمى وألعاب" }, blurb: { en: "Amigurumi friends, stuffed firmly.", ar: "دمى أميغورومي محشوة بإتقان." } },
+  { id: "bags", label: { en: "Bags", ar: "شنط" }, blurb: { en: "Hand bags, market bags and backpacks.", ar: "شنط يد وشنط سوق وشنط ظهر." } },
+  { id: "dolls", label: { en: "Dolls", ar: "دمى" }, blurb: { en: "Amigurumi dolls and animals, stuffed firmly.", ar: "دمى وحيوانات أميغورومي محشوة بإتقان." } },
+  { id: "graduation", label: { en: "Graduation", ar: "التخرّج" }, blurb: { en: "Graduation dolls and bouquets, made to look like the graduate.", ar: "دمى وبوكيهات تخرّج، تنشغل على شكل الخرّيجة." } },
   { id: "flowers", label: { en: "Flowers", ar: "ورد" }, blurb: { en: "Bouquets that never wilt.", ar: "باقات ما تذبل أبداً." } },
+  { id: "wall", label: { en: "Wall hangings", ar: "لوحات كروشيه" }, blurb: { en: "Made to order: names, words, logos and characters.", ar: "حسب الطلب: أسماء وكلمات وشعارات وشخصيات." } },
   { id: "home", label: { en: "Home", ar: "للبيت" }, blurb: { en: "Blankets and throws for slow evenings.", ar: "بطانيات وأغطية للأمسيات الهادية." } },
 ];
 
@@ -28,6 +30,8 @@ export interface ColorOption {
   id: string;
   name: Bi;
   hex: string;
+  /** Photo of the piece in this color. Colors without one are not offered (except the first, shown in photos[0]). */
+  photo?: string;
   /** Pieces left per size id. Missing sizes use the size's own stock. */
   stock?: Record<string, number>;
 }
@@ -98,7 +102,7 @@ const C = {
   olive: { id: "olive", name: { en: "Olive", ar: "زيتي" }, hex: "#7C8A4A" },
 } satisfies Record<string, ColorOption>;
 
-export const PRODUCTS: Product[] = [
+const ALL: Product[] = [
   // Clothes
   {
     slug: "cocoa-v-neck-top",
@@ -210,7 +214,6 @@ export const PRODUCTS: Product[] = [
     colors: [C.rainbow],
     photos: [
       { src: px(33853684), alt: { en: "A multicolored crochet handbag hanging on a bar", ar: "شنطة كروشيه ملونة معلّقة على عمود" }, credit: "Pexels", kind: "product" },
-      { src: px(33853676), alt: { en: "A woman in sunglasses holding the rainbow crochet bag", ar: "امرأة بنظارة شمسية تمسك شنطة الكروشيه الملونة" }, credit: "Pexels", kind: "model" },
       { src: px(33853683), alt: { en: "The rainbow bag from the side", ar: "الشنطة الملونة من الجنب" }, credit: "Pexels", kind: "product" },
       { src: px(33853682), alt: { en: "The rainbow bag in sunlight", ar: "الشنطة الملونة في الشمس" }, credit: "Pexels", kind: "product" },
     ],
@@ -231,7 +234,7 @@ export const PRODUCTS: Product[] = [
     reviews: 19,
     sizes: ONE(230, 4),
     colors: [C.sunset],
-    photos: [{ src: px(38560428), alt: { en: "A woman in a headscarf carrying a colorful crochet bag at sunset", ar: "امرأة بحجاب تحمل شنطة كروشيه ملونة وقت الغروب" }, credit: "Pexels", kind: "model" }],
+    photos: [{ src: px(8986210), alt: { en: "A colorful crochet bag hanging on a stone wall", ar: "شنطة كروشيه ملونة معلّقة على جدار حجر" }, credit: "Pexels", kind: "product" }],
   },
   {
     slug: "leather-trim-backpack",
@@ -295,47 +298,10 @@ export const PRODUCTS: Product[] = [
     photos: [{ src: px(25469611), alt: { en: "A beige crochet bag with floral embroidery on grass", ar: "شنطة كروشيه بيج بتطريز ورد على العشب" }, credit: "Pexels", kind: "product" }],
   },
 
-  // Wall hangings (drawn from stitch charts)
-  ...([
-    ["dunes-at-noon", { en: "Dunes at noon", ar: "كثبان الظهيرة" }, MAKERS.reem, 320],
-    ["al-sadu", { en: "Al Sadu", ar: "السدو" }, MAKERS.hala, 360],
-    ["palm-and-moon", { en: "Palm and moon", ar: "نخلة وقمر" }, MAKERS.noor, 300],
-    ["arched-window", { en: "Arched window", ar: "نافذة مقوّسة" }, MAKERS.reem, 340],
-    ["mountain-dawn", { en: "Mountain dawn", ar: "فجر الجبل" }, MAKERS.dana, 300],
-    ["tulip", { en: "Tulip", ar: "توليب" }, MAKERS.noor, 280],
-    ["sea-waves", { en: "Sea waves", ar: "موج البحر" }, MAKERS.hala, 290],
-    ["crescent-night", { en: "Crescent night", ar: "ليلة الهلال" }, MAKERS.dana, 310],
-    ["blush-check", { en: "Blush check", ar: "مربعات وردية" }, MAKERS.reem, 260],
-  ] as const).map(
-    ([slug, title, maker, price]): Product => ({
-      slug,
-      category: "wall",
-      title,
-      maker,
-      description: {
-        en: "Tapestry crochet in single crochet, finished with a wooden dowel and a cotton fringe.",
-        ar: "تابستري كروشيه بالغرزة المفردة، بعصا خشب وشراشيب قطن.",
-      },
-      details: [
-        { en: "Cotton yarn on a beech dowel", ar: "خيط قطن على عصا زان" },
-        { en: "Ready to hang", ar: "جاهزة للتعليق" },
-        { en: "Spot clean only", ar: "تنظيف موضعي فقط" },
-      ],
-      madeToOrder: true,
-      leadTimeDays: 10,
-      rating: 4.8,
-      reviews: 9,
-      sizes: WALL(price),
-      colors: [{ id: "as-shown", name: { en: "As shown", ar: "كما في الصورة" }, hex: "#CE4F2F" }],
-      photos: [],
-      tapestry: slug,
-    }),
-  ),
-
-  // Toys
+  // Dolls
   {
     slug: "penguin-family",
-    category: "toys",
+    category: "dolls",
     title: { en: "Penguin family", ar: "عائلة البطاريق" },
     maker: MAKERS.hala,
     description: { en: "Five little penguins that stack, about 8 cm each.", ar: "خمس بطاريق صغيرة تتراكب، كل وحدة حوالي ٨ سم." },
@@ -353,7 +319,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: "sari-doll",
-    category: "toys",
+    category: "dolls",
     title: { en: "Sari, the yellow doll", ar: "ساري، الدمية الصفراء" },
     maker: MAKERS.hala,
     description: { en: "A soft doll about 25 cm tall with a removable dress.", ar: "دمية ناعمة طولها حوالي ٢٥ سم بفستان ينخلع." },
@@ -371,7 +337,7 @@ export const PRODUCTS: Product[] = [
   },
   {
     slug: "elephant-clip",
-    category: "toys",
+    category: "dolls",
     title: { en: "Little elephant clip", ar: "مشبك الفيل الصغير" },
     maker: MAKERS.noor,
     description: { en: "A tiny elephant on a clip with name beads. Tell us the name.", ar: "فيل صغير على مشبك بخرز الاسم. اكتبي لنا الاسم." },
@@ -386,6 +352,33 @@ export const PRODUCTS: Product[] = [
     sizes: ONE(95, 10),
     colors: [C.sky, C.rose],
     photos: [{ src: u("photo-1784368611050-ebe6372b7af9"), alt: { en: "A crocheted elephant clip with name beads", ar: "مشبك فيل كروشيه بخرز الاسم" }, credit: "Brenda Ortega / Unsplash", kind: "product" }],
+  },
+
+  // Graduation (the maker's own photo)
+  {
+    slug: "graduation-bouquet",
+    category: "graduation",
+    title: { en: "Graduation doll bouquet", ar: "بوكيه دمية التخرّج" },
+    maker: { en: "Loopera", ar: "لوبيرا" },
+    description: {
+      en: "A graduate doll in cap and gown with her own hair, two sunflowers and two daisies, wrapped in paper with a satin ribbon.",
+      ar: "دمية خرّيجة بالقبعة والروب وشعرها على شكل صاحبتها، مع وردتين دوّار شمس ووردتين أقحوان، مغلّفة بورق وشريطة ساتان.",
+    },
+    details: [
+      { en: "Hair, skin tone and gown colors made to match the graduate", ar: "الشعر ولون البشرة والروب على شكل الخرّيجة" },
+      { en: "Cotton yarn, about 45 cm tall wrapped", ar: "خيط قطن، الطول تقريباً ٤٥ سم مع التغليف" },
+      { en: "Send a photo of the graduate when you order", ar: "أرسلي صورة الخرّيجة مع الطلب" },
+    ],
+    madeToOrder: true,
+    leadTimeDays: 10,
+    rating: 5,
+    reviews: 0,
+    sizes: ONE(280, 5),
+    colors: [{ id: "as-shown", name: { en: "As in the photo", ar: "مثل الصورة" }, hex: "#F2C230" }],
+    photos: [
+      { src: "/photos/graduation-bouquet.webp", alt: { en: "A crocheted graduate doll with curly hair in a bouquet of crochet sunflowers and daisies", ar: "دمية خرّيجة كروشيه بشعر كيرلي في بوكيه دوّار شمس وأقحوان كروشيه" }, credit: "Loopera", kind: "product" },
+      { src: "/photos/graduation-bouquet-full.webp", alt: { en: "The whole bouquet held in a hand, with its ribbon", ar: "البوكيه كامل باليد مع الشريطة" }, credit: "Loopera", kind: "product" },
+    ],
   },
 
   // Flowers
@@ -488,6 +481,14 @@ export const PRODUCTS: Product[] = [
     photos: [{ src: u("photo-1782576417438-d8facd37fe2d"), alt: { en: "Colorful crocheted fabric with intricate stitches", ar: "قماش كروشيه ملوّن بغرز دقيقة" }, credit: "Cary Bates / Unsplash", kind: "product" }],
   },
 ];
+
+/** A color is only offered when there is a real photo of the piece in it. */
+export const PRODUCTS: Product[] = ALL.map((p) => ({ ...p, colors: p.colors.filter((c, i) => i === 0 || !!c.photo) }));
+
+/** The photo to show for a color: its own photo, or the first photo for the first color. */
+export function photoFor(p: Product, colorId: string): string {
+  return p.colors.find((c) => c.id === colorId)?.photo ?? p.photos[0]?.src ?? "";
+}
 
 export function getProduct(slug: string): Product | undefined {
   return PRODUCTS.find((p) => p.slug === slug);

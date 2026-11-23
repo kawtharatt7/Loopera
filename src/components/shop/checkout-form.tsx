@@ -38,7 +38,7 @@ function Field({
   );
 }
 
-const input = "mt-1 min-h-12 w-full rounded-xl border border-line/20 bg-bg px-4 text-fg outline-none transition-colors focus:border-peach";
+const input = "mt-1 min-h-12 w-full rounded-xl border border-line/20 bg-bg px-4 text-fg outline-none transition-colors focus:border-primary";
 
 export function CheckoutForm() {
   const lines = useCart();

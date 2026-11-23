@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { LogoMark } from "@/components/LogoMark";
+import { Logo } from "@/components/LogoMark";
 import { useT } from "@/lib/i18n/client";
 
 export function SiteFooter() {
@@ -10,8 +10,7 @@ export function SiteFooter() {
     <footer className="border-t border-line/10 px-5 py-10 sm:px-8">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 sm:flex-row">
         <div className="flex items-center gap-2">
-          <LogoMark className="h-7 w-7" />
-          <span className="font-serif text-lg font-bold">{t.site.name}</span>
+          <Logo className="text-2xl" />
           <span className="text-sm text-muted-foreground">{t.footer.line}</span>
         </div>
         <nav aria-label={t.site.name} className="flex gap-1 text-sm">

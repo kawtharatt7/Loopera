@@ -58,7 +58,8 @@ export function BagsHero({
     <div className="loopera-piece" dir="ltr">
       <SneakerProductHero
         variants={variants}
-        eyebrow={mode === "collection" ? t.shop.bagsHeadline : t.common.by(bi(first.maker))}
+        word="loopera"
+        eyebrow={mode === "collection" ? "loopera" : t.common.by(bi(first.maker))}
         title={mode === "collection" ? collectionTitle : bi(first.title)}
         description={mode === "collection" ? collectionBlurb : bi(first.description)}
         sizes={sizes}
@@ -68,7 +69,7 @@ export function BagsHero({
         currency="SAR "
         lowStock={2}
         toast={t.common.added}
-        likeColor={tokenHex("ember")}
+        likeColor={tokenHex("wine")}
         height="min(100svh, 820px)"
         onAddToCart={({ variant, size }) => {
           if (mode === "collection") {

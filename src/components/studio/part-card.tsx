@@ -120,11 +120,11 @@ export function PartCard({ part, others, scale, onChange, onRemove, onDuplicate,
               )}
 
               <div className="flex gap-2 pt-1">
-                <button type="button" onClick={onDuplicate} className="min-h-10 cursor-pointer rounded-full border border-line/15 px-4 text-sm hover:bg-surface-2">
+                <button type="button" onClick={onDuplicate} className="min-h-10 cursor-pointer rounded-sm border border-line/15 px-4 text-sm hover:bg-surface-2">
                   Duplicate
                 </button>
                 {canRemove && (
-                  <button type="button" onClick={onRemove} className="min-h-10 cursor-pointer rounded-full px-4 text-sm text-brand hover:bg-surface-2">
+                  <button type="button" onClick={onRemove} className="min-h-10 cursor-pointer rounded-sm px-4 text-sm text-brand hover:bg-surface-2">
                     Remove
                   </button>
                 )}

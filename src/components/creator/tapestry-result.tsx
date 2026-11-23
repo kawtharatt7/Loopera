@@ -114,7 +114,7 @@ export function TapestryResult({ grid, palette, names, done, toggle }: Props) {
             </p>
           </div>
           <div className="mt-2 h-2 overflow-hidden rounded-full bg-surface-2">
-            <div className="h-full rounded-full bg-peach transition-[width] duration-500" style={{ width: `${(doneCount / pattern.height) * 100}%` }} />
+            <div className="h-full rounded-full bg-primary transition-[width] duration-500" style={{ width: `${(doneCount / pattern.height) * 100}%` }} />
           </div>
         </div>
 
@@ -133,7 +133,7 @@ export function TapestryResult({ grid, palette, names, done, toggle }: Props) {
                   aria-checked={isDone}
                   aria-label={t.creator.markRowDone(r.number)}
                   onClick={() => toggle(key)}
-                  className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition-colors ${isDone ? "border-peach bg-peach text-bg" : "border-line/30 hover:border-peach"}`}
+                  className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition-colors ${isDone ? "border-primary bg-primary text-primary-fg" : "border-line/30 hover:border-primary"}`}
                 >
                   {isDone && (
                     <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -145,7 +145,7 @@ export function TapestryResult({ grid, palette, names, done, toggle }: Props) {
                   type="button"
                   onClick={() => setCurrent(i)}
                   aria-current={current === i ? "step" : undefined}
-                  className={`w-full rounded-lg px-3 py-1.5 text-start text-[14px] transition-colors ${current === i ? "bg-surface-2 ring-1 ring-peach/50" : "hover:bg-surface-2/60"} ${isDone ? "line-through decoration-peach/70 opacity-60" : ""}`}
+                  className={`w-full rounded-lg px-3 py-1.5 text-start text-[14px] transition-colors ${current === i ? "bg-surface-2 ring-1 ring-primary/50" : "hover:bg-surface-2/60"} ${isDone ? "line-through decoration-primary/70 opacity-60" : ""}`}
                 >
                   <span className="font-medium text-brand">
                     {t.creator.row} {r.number}

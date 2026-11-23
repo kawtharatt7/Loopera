@@ -1,6 +1,7 @@
 # Third-party components
 
-Copied unchanged from 21st.dev. Both are MIT licensed.
+Copied from 21st.dev. Both are MIT licensed. One change: `sneaker-product-hero.tsx` takes an
+optional `word` prop (the brand word shown behind the product instead of the colour name).
 
 | File | Component | Author | Source |
 | --- | --- | --- | --- |

@@ -2,64 +2,75 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { useState } from "react";
+import { useRef } from "react";
+import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { useT } from "@/lib/i18n/client";
+import { byCategory, CATEGORIES, type Category } from "@/lib/shop/catalog";
 
-type Side = "store" | "creator" | null;
+// Real photo: yarn on a white table. With multiply blending the white table takes the hero color,
+// so the yarn sits straight on the one-color background.
+const HERO = "https://images.unsplash.com/photo-1595341595379-cf1cb694ea1f?auto=format&fit=crop&w=1800&q=80";
 
-const PHOTOS = {
-  store: "https://images.unsplash.com/photo-1475179377649-672d1c1c75ec?auto=format&fit=crop&w=1800&q=75",
-  creator: "https://images.unsplash.com/photo-1777537953560-10fda7d9965a?auto=format&fit=crop&w=1800&q=75",
-};
+const SHOWN: Category[] = ["clothes", "bags", "dolls", "graduation", "flowers", "home"];
 
-/**
- * The home page is just the two places. On wide screens the half under the pointer opens up;
- * on phones they stack.
- */
+/** One color, real yarn, the two places. Then a row into each section of the store. */
 export function Landing() {
-  const { t } = useT();
-  const [hover, setHover] = useState<Side>(null);
+  const { t, bi } = useT();
+  const photo = useRef<HTMLDivElement>(null);
 
-  const halves = [
-    { id: "store" as const, href: "/shop", title: t.landing.storeTitle, line: t.landing.storeLine, alt: t.landing.storePhotoAlt },
-    { id: "creator" as const, href: "/creator", title: t.landing.creatorTitle, line: t.landing.creatorLine, alt: t.landing.creatorPhotoAlt },
-  ];
+  // The yarn follows the pointer by a few pixels: the only moving thing on the page.
+  const onMove = (e: React.PointerEvent) => {
+    if (e.pointerType !== "mouse" || !photo.current || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const r = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width - 0.5;
+    const y = (e.clientY - r.top) / r.height - 0.5;
+    photo.current.style.transform = `translate3d(${(x * -14).toFixed(1)}px, ${(y * -10).toFixed(1)}px, 0)`;
+  };
+
+  const sections = SHOWN.map((id) => ({ id, label: bi(CATEGORIES.find((c) => c.id === id)!.label), product: byCategory(id)[0] })).filter((s) => s.product);
 
   return (
     <>
-      <SiteHeader overlay />
-      <main id="main" className="flex h-[100svh] flex-col md:flex-row" onMouseLeave={() => setHover(null)}>
-        {halves.map((h) => {
-          const grow = hover === null ? 1 : hover === h.id ? 1.55 : 0.75;
-          return (
-            <motion.div key={h.id} className="relative min-h-0 flex-1 overflow-hidden" animate={{ flexGrow: grow }} transition={{ type: "spring", stiffness: 120, damping: 22 }} onMouseEnter={() => setHover(h.id)}>
-              <Link href={h.href} className="group absolute inset-0 block" onFocus={() => setHover(h.id)}>
-                <Image
-                  src={PHOTOS[h.id]}
-                  alt={h.alt}
-                  fill
-                  priority
-                  sizes="(min-width: 768px) 60vw, 100vw"
-                  className="object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-[1.04]"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/10" />
-                <div className="absolute inset-x-0 bottom-0 p-6 pb-8 text-white sm:p-10 md:pb-14">
-                  <h2 className="text-5xl font-extrabold sm:text-6xl lg:text-7xl">{h.title}</h2>
-                  <p className="mt-3 max-w-md text-base leading-relaxed text-white/85 sm:text-lg">{h.line}</p>
-                  <span className="mt-6 inline-flex items-center gap-3 border-b border-white/70 pb-1 text-base font-medium">
-                    {t.landing.enter}
-                    <svg viewBox="0 0 20 20" className="h-4 w-4 transition-transform group-hover:translate-x-1 rtl:-scale-x-100 rtl:group-hover:-translate-x-1" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                      <path d="M4 10h12M11 5l5 5-5 5" />
-                    </svg>
-                  </span>
-                </div>
+      <SiteHeader overlay tone="hero" />
+      <main id="main">
+        <section onPointerMove={onMove} className="relative flex min-h-[100svh] items-end overflow-hidden bg-[#EED6D0] text-[#210C0F]">
+          <div ref={photo} className="absolute inset-0 transition-transform duration-700 ease-out" aria-hidden="false">
+            <Image src={HERO} alt={t.landing.heroAlt} fill priority sizes="100vw" className="hero-photo object-cover object-[60%_40%]" />
+          </div>
+          <div className="relative mx-auto w-full max-w-7xl px-5 pb-14 pt-40 sm:px-8 sm:pb-20">
+            <h1 className="max-w-[14ch] text-balance text-5xl leading-[1.08] sm:text-7xl">{t.landing.headline}</h1>
+            <p className="mt-5 max-w-md text-lg leading-relaxed text-[#210C0F]/80">{t.landing.sub}</p>
+            <div className="mt-10 flex flex-wrap gap-3">
+              <Link href="/shop" className="inline-flex min-h-12 items-center rounded-sm bg-[#210C0F] px-8 text-[15px] font-medium text-white hover:bg-[#8E1523]">
+                {t.landing.storeTitle}
               </Link>
-            </motion.div>
-          );
-        })}
+              <Link href="/creator" className="inline-flex min-h-12 items-center rounded-sm border border-[#210C0F] px-8 text-[15px] font-medium hover:bg-[#210C0F] hover:text-white">
+                {t.landing.creatorTitle}
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        <section aria-labelledby="browse" className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-24">
+          <h2 id="browse" className="text-3xl sm:text-4xl">
+            {t.landing.browse}
+          </h2>
+          <ul className="mt-8 grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-3">
+            {sections.map((s) => (
+              <li key={s.id}>
+                <Link href={`/shop#${s.id}`} className="group block">
+                  <div className="relative aspect-[4/5] overflow-hidden bg-surface">
+                    <Image src={s.product.photos[0].src} alt={bi(s.product.photos[0].alt)} fill sizes="(min-width: 768px) 30vw, 46vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" />
+                  </div>
+                  <p className="mt-3 font-serif text-xl underline-offset-4 group-hover:underline">{s.label}</p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
       </main>
+      <SiteFooter />
     </>
   );
 }

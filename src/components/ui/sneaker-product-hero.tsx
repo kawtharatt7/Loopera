@@ -93,6 +93,8 @@ export type SneakerProductHeroProps = {
   likeColor?: string
   onAddToCart?: (info: { variant: SneakerVariant; size: string; price: number }) => void
   onLikeChange?: (liked: boolean) => void
+  /** Loopera: fixed word behind the product (the brand), instead of the colour name. */
+  word?: string
   /** Any CSS length. The section is at least this tall. Default 100svh. */
   height?: number | string
   className?: string
@@ -203,6 +205,7 @@ export default function SneakerProductHero({
   onAddToCart,
   onLikeChange,
   height = "100svh",
+  word,
   className,
   style,
 }: SneakerProductHeroProps) {
@@ -815,7 +818,7 @@ export default function SneakerProductHero({
               style={{ ["--t" as string]: tintOf(vv), visibility: i === active ? "visible" : "hidden" }}
               aria-hidden="true"
             >
-              {vv.name}
+              {word ?? vv.name}
             </span>
           ))}
           <span className="snp-floor" ref={floorRef} aria-hidden="true" />

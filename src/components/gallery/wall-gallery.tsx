@@ -88,7 +88,7 @@ function PiecePanel({ product, onClose, onOpen, imageRef, detailsShown }: { prod
                   type="button"
                   aria-pressed={s.id === sizeId}
                   onClick={() => setSizeId(s.id)}
-                  className={`min-h-10 rounded-lg border px-4 text-sm ${s.id === sizeId ? "border-fg bg-peach/25" : "border-line/25 hover:border-line/60"}`}
+                  className={`min-h-10 rounded-lg border px-4 text-sm ${s.id === sizeId ? "border-fg bg-primary/25" : "border-line/25 hover:border-line/60"}`}
                 >
                   {bi(s.label)}
                 </button>
@@ -513,7 +513,7 @@ export function WallGallery() {
                 type="button"
                 onClick={() => api.current?.step(d)}
                 aria-label={d === 1 ? t.common.next : t.common.prev}
-                className="flex h-12 w-12 items-center justify-center rounded-full border-[1.5px] border-fg text-fg transition-colors hover:bg-fg hover:text-bg"
+                className="flex h-12 w-12 items-center justify-center rounded-sm border-[1.5px] border-fg text-fg transition-colors hover:bg-fg hover:text-bg"
               >
                 <svg viewBox="0 0 20 20" className={`h-5 w-5 ${d === -1 ? "" : "rotate-180"}`} fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
                   <path d="M16 10H4M9 5l-5 5 5 5" />
@@ -549,14 +549,14 @@ export function WallGallery() {
                 }
               }}
               aria-pressed={view === v && !openSlug}
-              className={`min-h-8 rounded-full px-4 ${view === v && !openSlug ? "bg-fg text-bg" : ""}`}
+              className={`min-h-8 rounded-sm px-4 ${view === v && !openSlug ? "bg-fg text-bg" : ""}`}
             >
               {v === "gallery" ? t.gallery.galleryTab : t.gallery.listTab}
             </button>
           ))}
         </div>
 
-        <div ref={pill} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-30 rounded-full bg-ink px-3 py-1.5 text-xs text-white opacity-0 transition-opacity duration-100" style={{ backgroundColor: "#1e1b2b" }}>
+        <div ref={pill} aria-hidden="true" className="pointer-events-none fixed left-0 top-0 z-30 rounded-sm bg-ink px-3 py-1.5 text-xs text-white opacity-0 transition-opacity duration-100" style={{ backgroundColor: "#1e1b2b" }}>
           {t.gallery.pill}
         </div>
 

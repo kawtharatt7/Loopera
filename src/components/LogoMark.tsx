@@ -1,11 +1,29 @@
-export function LogoMark({ className }: { className?: string }) {
+// Loopera's mark: a crochet chain, the first row of every piece, drawn as three linked loops.
+// The wordmark stays "loopera" in both languages so the brand reads the same everywhere.
+
+const LOOP = "M0 0C3.2-4.6 9.6-4.6 12.2 0C9.6 4.6 3.2 4.6 0 0Z";
+
+export function ChainMark({ className = "" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" fill="none" aria-hidden="true" className={className} strokeWidth="2" strokeLinecap="round">
-      <circle cx="16" cy="16" r="14" className="fill-ember stroke-wine" />
-      <path d="M5 13c6-4 16-4 22 1" className="stroke-rose" />
-      <path d="M4 19c7-4 17-4 24 1" className="stroke-rose" />
-      <path d="M10 6c5 5 6 13 3 21" className="stroke-peach" />
-      <path d="M27 21c2 3 3 6 2 9" className="stroke-peach" />
+    <svg viewBox="-1 -6 34 12" className={className} fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true">
+      <path d={LOOP} />
+      <path d={LOOP} transform="translate(9.4 0)" />
+      <path d={LOOP} transform="translate(18.8 0)" />
     </svg>
   );
+}
+
+/** Wordmark. Size it with font-size (text-xl, text-2xl…); the chain scales with the text. */
+export function Logo({ className = "" }: { className?: string }) {
+  return (
+    <span className={`inline-flex items-center gap-[0.35em] font-serif font-semibold leading-none tracking-[-0.03em] ${className}`} dir="ltr">
+      <span>loopera</span>
+      <ChainMark className="h-[0.42em] w-auto translate-y-[0.12em] text-wine" />
+    </span>
+  );
+}
+
+/** Kept for places that only need the mark. */
+export function LogoMark({ className = "" }: { className?: string }) {
+  return <ChainMark className={className} />;
 }

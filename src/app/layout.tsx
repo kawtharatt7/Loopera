@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#1A0B0E",
+  themeColor: "#FAF8F7",
   width: "device-width",
   initialScale: 1,
 };
@@ -25,9 +25,9 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
   return (
-    <html lang={locale} dir={dirOf(locale)} data-theme="dark" suppressHydrationWarning>
+    <html lang={locale} dir={dirOf(locale)} data-theme="light" suppressHydrationWarning>
       <head>
-        {/* Applies the saved theme before first paint, so there is no flash. Dark is the default. */}
+        {/* Applies the saved theme before first paint, so there is no flash. Light is the default. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <link rel="preload" href="/fonts/alexandria-arabic-wght-normal.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />

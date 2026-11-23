@@ -105,7 +105,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
                 setActiveId(p.partId);
                 setPlaying(false);
               }}
-              className={`inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full px-4 text-sm transition-colors ${
+              className={`inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-sm px-4 text-sm transition-colors ${
                 view === "part" && p.partId === active.partId ? "bg-primary text-primary-fg" : "border border-line/15 bg-surface/60 hover:bg-surface-2"
               }`}
             >
@@ -122,7 +122,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
                 setView("assembly");
                 setPlaying(false);
               }}
-              className={`inline-flex min-h-10 cursor-pointer items-center rounded-full px-4 text-sm transition-colors ${
+              className={`inline-flex min-h-10 cursor-pointer items-center rounded-sm px-4 text-sm transition-colors ${
                 view === "assembly" ? "bg-primary text-primary-fg" : "border border-line/15 bg-surface/60 hover:bg-surface-2"
               }`}
             >
@@ -145,7 +145,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
             </div>
           )}
           {view === "part" && (
-            <div className="pointer-events-none absolute left-4 top-4 rounded-full bg-surface/85 px-3 py-1.5 text-sm backdrop-blur">
+            <div className="pointer-events-none absolute left-4 top-4 rounded-sm bg-surface/85 px-3 py-1.5 text-sm backdrop-blur">
               <span className="text-muted-foreground">{active.kind === "rectangle" ? t.creator.row : t.creator.round}</span>{" "}
               <span className="font-medium tabular-nums">
                 {round + 1} / {total}
@@ -155,7 +155,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
             </div>
           )}
           {view === "assembly" && (
-            <label className="absolute bottom-4 left-4 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-full bg-surface/85 px-4 text-sm backdrop-blur">
+            <label className="absolute bottom-4 left-4 inline-flex min-h-10 cursor-pointer items-center gap-2 rounded-sm bg-surface/85 px-4 text-sm backdrop-blur">
               <input type="checkbox" checked={explode} onChange={(e) => setExplode(e.target.checked)} className="h-4 w-4 accent-[rgb(var(--primary))]" />
               {ar ? "عرض مفصول" : "Exploded view"}
             </label>
@@ -169,7 +169,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
               type="button"
               onClick={toggle}
               aria-label={playing ? (ar ? "إيقاف" : "Pause") : ar ? "شغّلي البناء راوند راوند" : "Play the build round by round"}
-              className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-primary text-primary-fg transition-transform active:scale-95"
+              className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-sm bg-primary text-primary-fg transition-transform active:scale-95"
             >
               {playing ? <Icon d="M6 4h3v12H6zM11 4h3v12h-3z" /> : <Icon d="M6 4l10 6-10 6z" />}
             </button>
@@ -193,7 +193,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
               <select
                 value={speed}
                 onChange={(e) => setSpeed(Number(e.target.value) as Speed)}
-                className="min-h-10 cursor-pointer rounded-full border border-line/15 bg-surface px-3 text-fg"
+                className="min-h-10 cursor-pointer rounded-sm border border-line/15 bg-surface px-3 text-fg"
               >
                 {SPEEDS.map((s) => (
                   <option key={s} value={s}>

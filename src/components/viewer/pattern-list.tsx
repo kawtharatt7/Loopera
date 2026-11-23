@@ -51,7 +51,7 @@ export function PatternList({ parts, activePartId, activeRound, terms, assembly,
                     }`}
                   >
                     <span>
-                      <span className="text-brand">{part.kind === "rectangle" ? "Row" : "R"}{r.number}</span> · {toTerms(r.instruction, terms)}
+                      <span className="text-brand">{part.kind === "rectangle" ? "Row" : "R"}{r.number}</span>&ensp;{toTerms(r.instruction, terms)}
                     </span>
                     <span className="shrink-0 tabular-nums">({r.stitches})</span>
                   </button>

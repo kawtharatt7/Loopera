@@ -7,19 +7,21 @@ import { THEME_INIT_SCRIPT } from "@/lib/theme";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE } from "@/lib/site";
 
 // Fonts are self-hosted (files in src/app/fonts) so the build never needs Google.
-const fraunces = localFont({
-  src: [
-    { path: "./fonts/fraunces-latin-wght-normal.woff2", style: "normal", weight: "100 900" },
-    { path: "./fonts/fraunces-latin-wght-italic.woff2", style: "italic", weight: "100 900" },
-  ],
-  variable: "--font-fraunces",
+// Young Serif: a sturdy, slightly soft old-style serif with the weight of thick yarn. Headlines only.
+const display = localFont({
+  src: "./fonts/young-serif-latin-400-normal.woff2",
+  variable: "--font-display",
+  weight: "400",
   display: "swap",
 });
 
-const inter = localFont({
-  src: "./fonts/inter-latin-wght-normal.woff2",
-  variable: "--font-inter",
-  weight: "100 900",
+// Figtree: a friendly, open sans for everything else.
+const body = localFont({
+  src: [
+    { path: "./fonts/figtree-latin-wght-normal.woff2", style: "normal", weight: "300 900" },
+    { path: "./fonts/figtree-latin-wght-italic.woff2", style: "italic", weight: "300 900" },
+  ],
+  variable: "--font-body",
   display: "swap",
 });
 
@@ -46,7 +48,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       lang="en"
       data-theme="dark"
       suppressHydrationWarning
-      className={`${fraunces.variable} ${inter.variable}`}
+      className={`${display.variable} ${body.variable}`}
     >
       <head>
         {/* Applies the saved theme before first paint, so there is no flash. Dark is the default. */}

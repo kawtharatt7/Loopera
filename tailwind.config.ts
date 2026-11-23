@@ -15,6 +15,7 @@ const config: Config = {
         peach: token("peach"),
         rose: token("rose"),
         "on-wine": token("on-wine"),
+        paper: { DEFAULT: token("paper"), fg: token("on-paper") },
         // Semantic tokens
         bg: token("bg"),
         surface: { DEFAULT: token("surface"), 2: token("surface-2") },
@@ -37,8 +38,8 @@ const config: Config = {
         destructive: { DEFAULT: token("ember"), foreground: token("fg") },
       },
       fontFamily: {
-        serif: ["var(--font-fraunces)", "Georgia", "serif"],
-        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif: ["var(--font-display)", "Georgia", "serif"],
+        sans: ["var(--font-body)", "system-ui", "sans-serif"],
       },
       borderRadius: {
         "4xl": "2rem",

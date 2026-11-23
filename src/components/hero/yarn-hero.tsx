@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { ArrowIcon, ButtonLink } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
 import { hasWebGL } from "@/lib/webgl";
 import type { PointerState } from "./yarn-ball-scene";
 import { YarnBallStatic } from "./yarn-ball-static";
@@ -82,85 +82,34 @@ export function YarnHero() {
     <section
       ref={section}
       aria-labelledby="hero-heading"
-      className="relative isolate flex min-h-[100svh] items-end overflow-hidden pb-16 pt-28 lg:items-center lg:pb-0"
+      className="relative isolate flex min-h-[100svh] flex-col items-center justify-end overflow-hidden px-5 pb-14 pt-24 text-center sm:pb-16"
       style={{ touchAction: "pan-y" }}
     >
-      {/* Soft warm glow behind the ball */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute -z-20 h-[70vmin] w-[70vmin] rounded-full bg-ember/20 blur-3xl max-lg:left-1/2 max-lg:top-[12%] max-lg:-translate-x-1/2 lg:right-[8%] lg:top-1/2 lg:-translate-y-1/2"
-      />
-      <div aria-hidden="true" className="bg-grain pointer-events-none absolute inset-0 -z-10" />
-
       <div className="absolute inset-0 -z-10">
         {webgl === true && <YarnBallScene pointer={pointer} animate={!reduce} running={inView} compact={compact} />}
         {webgl === false && (
-          <div className="flex h-full items-start justify-center pt-24 lg:items-center lg:justify-end lg:pr-[10%] lg:pt-0">
-            <YarnBallStatic className="h-[48vmin] w-[48vmin]" />
+          <div className="flex h-full items-start justify-center pt-[12svh]">
+            <YarnBallStatic className="h-[46svh] w-[46svh] max-w-[80vw]" />
           </div>
         )}
       </div>
 
-      {/* Readability veil for the text side */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0 -z-[5] bg-gradient-to-t from-bg via-bg/70 to-transparent lg:bg-gradient-to-r lg:from-bg lg:via-bg/60 lg:to-transparent"
-      />
-
-      <motion.div
-        variants={container}
-        initial="hidden"
-        animate="show"
-        className="relative mx-auto w-full max-w-6xl px-5 sm:px-8"
-      >
-        <div className="max-w-xl">
-          <motion.p
-            variants={rise}
-            className="inline-flex items-center gap-2 rounded-full border border-line/15 bg-surface/60 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.18em] text-brand backdrop-blur"
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-ember" aria-hidden="true" />
-            Crochet, calculated
-          </motion.p>
-          <motion.h1
-            id="hero-heading"
-            variants={rise}
-            className="mt-6 text-balance text-5xl leading-[1.04] tracking-tight sm:text-6xl lg:text-7xl"
-          >
-            Patterns that add up. <span className="italic text-peach">Pieces made by hand.</span>
-          </motion.h1>
-          <motion.p variants={rise} className="mt-6 max-w-md text-pretty text-lg leading-relaxed text-muted-foreground">
-            Turn a photo into an exact, round-by-round crochet pattern, or shop handmade pieces from makers.
-          </motion.p>
-          <motion.div variants={rise} className="mt-9 flex flex-wrap gap-3">
-            <ButtonLink href="/studio" size="lg">
-              I crochet <ArrowIcon />
-            </ButtonLink>
-            <ButtonLink href="/shop" size="lg" variant="secondary">
-              I want to buy
-            </ButtonLink>
-          </motion.div>
-        </div>
+      <motion.div variants={container} initial="hidden" animate="show" className="relative z-10 max-w-3xl">
+        <motion.h1 id="hero-heading" variants={rise} className="text-balance text-5xl leading-[1.02] sm:text-7xl">
+          Patterns that add up.
+        </motion.h1>
+        <motion.p variants={rise} className="mx-auto mt-5 max-w-lg text-pretty text-lg leading-relaxed text-muted-foreground">
+          Turn a photo into a crochet pattern where every round is counted, or buy something a maker crocheted by hand.
+        </motion.p>
+        <motion.div variants={rise} className="mt-8 flex flex-wrap justify-center gap-3">
+          <ButtonLink href="/studio" size="lg">
+            I crochet
+          </ButtonLink>
+          <ButtonLink href="/shop" size="lg" variant="secondary">
+            I want to buy
+          </ButtonLink>
+        </motion.div>
       </motion.div>
-
-      <a
-        href="#places"
-        className="absolute bottom-5 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-1 text-xs uppercase tracking-[0.2em] text-muted-foreground hover:text-fg lg:flex"
-      >
-        Scroll
-        <motion.svg
-          viewBox="0 0 20 20"
-          className="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          aria-hidden="true"
-          animate={reduce ? undefined : { y: [0, 5, 0] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <path d="M5 8l5 5 5-5" />
-        </motion.svg>
-      </a>
     </section>
   );
 }

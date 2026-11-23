@@ -42,7 +42,7 @@ function YarnBall({ pointer, animate, compact }: SceneProps) {
   const group = useRef<Group>(null);
   const lines = useRef<(Line2 | null)[]>([]);
   const rot = useRef({ x: 0.25, y: 0, idle: 0 });
-  const { size, viewport } = useThree();
+  const { viewport } = useThree();
 
   // Strands are merged into one mesh per color: about a hundred strands, only a few draw calls.
   const strands = useMemo(() => {
@@ -80,10 +80,9 @@ function YarnBall({ pointer, animate, compact }: SceneProps) {
   const tmpMatrix = useMemo(() => new Matrix4(), []);
   const tmpVec = useMemo(() => new Vector3(), []);
 
-  // Ball sits right of the text on wide screens and above it on narrow ones.
-  const wide = size.width >= 900;
-  const offset: Vec3 = wide ? [viewport.width * 0.2, 0.05, 0] : [0, viewport.height * 0.16, 0];
-  const scale = wide ? 1 : Math.min(1, viewport.width / 4.2);
+  // The ball sits in the middle of the hero, above the headline.
+  const offset: Vec3 = [0, viewport.height * 0.13, 0];
+  const scale = Math.min((viewport.height * 0.5) / (2 * RADIUS), (viewport.width * 0.72) / (2 * RADIUS));
 
   const worldAnchor = (i: number): Vec3 => {
     const g = group.current;
@@ -135,13 +134,13 @@ function YarnBall({ pointer, animate, compact }: SceneProps) {
       const steps = animate ? 2 : 0;
       for (let s = 0; s < steps; s++) {
         stepThread(thread, worldAnchor(i), dt / 2, {
-          gravity: 2.6,
-          damping: 0.955,
+          gravity: 3.4,
+          damping: 0.94,
           // A gentle breeze that pulls each thread away from the ball and sways it.
           wind: [
-            THREAD_ANCHORS[i].dir[0] * 1.6 + Math.sin(t * 0.7 + i * 1.7) * 1.1,
+            THREAD_ANCHORS[i].dir[0] * 1.1 + Math.sin(t * 0.6 + i * 1.7) * 0.6,
             0,
-            THREAD_ANCHORS[i].dir[2] * 1.2 + Math.cos(t * 0.5 + i) * 0.8,
+            THREAD_ANCHORS[i].dir[2] * 0.8 + Math.cos(t * 0.45 + i) * 0.4,
           ],
           iterations: 6,
           collider: { center, radius: RADIUS * scale * 1.02 },

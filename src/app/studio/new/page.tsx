@@ -11,7 +11,7 @@ export default async function NewDesignPage({ searchParams }: { searchParams: Pr
   return (
     <>
       <SiteHeader />
-      <main id="main" className="bg-grid min-h-dvh">
+      <main id="main" className="min-h-dvh">
         <StudioEditor key={key} initial={starterDoc(key)} />
       </main>
     </>

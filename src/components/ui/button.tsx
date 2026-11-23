@@ -5,13 +5,13 @@ export type ButtonVariant = "primary" | "secondary" | "ghost" | "wine";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex cursor-pointer select-none items-center justify-center gap-2 rounded-full font-medium transition-[transform,background-color,color,opacity] duration-200 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex cursor-pointer select-none items-center justify-center gap-2 rounded-xl font-medium transition-[transform,background-color,color,opacity] duration-200 ease-out active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50";
 
 const variants: Record<ButtonVariant, string> = {
-  primary: "bg-primary text-primary-fg hover:-translate-y-0.5 hover:opacity-95",
-  secondary: "border border-line/20 bg-surface/70 text-fg hover:-translate-y-0.5 hover:bg-surface-2",
+  primary: "bg-primary text-primary-fg hover:opacity-90",
+  secondary: "border border-line/25 text-fg hover:bg-surface-2",
   ghost: "text-fg hover:bg-surface-2/70",
-  wine: "bg-wine text-on-wine hover:-translate-y-0.5 hover:opacity-95",
+  wine: "bg-wine text-on-wine hover:opacity-90",
 };
 
 const sizes: Record<ButtonSize, string> = {

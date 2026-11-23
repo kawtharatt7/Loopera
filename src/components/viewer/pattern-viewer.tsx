@@ -12,7 +12,7 @@ import { SPEEDS, usePlayback, type Speed } from "./use-playback";
 
 const StitchScene = dynamic(() => import("./stitch-scene"), {
   ssr: false,
-  loading: () => <div className="h-full w-full animate-pulse rounded-4xl bg-surface-2/50" />,
+  loading: () => <div className="h-full w-full animate-pulse rounded-2xl bg-surface-2/50" />,
 });
 
 interface PatternViewerProps {
@@ -126,7 +126,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
         </div>
 
         {/* Stage */}
-        <div data-stage className="bg-grid relative mt-4 aspect-square max-h-[68vh] w-full overflow-hidden rounded-4xl border border-line/10 bg-bg/70 sm:aspect-[4/3.2]">
+        <div data-stage className="relative mt-4 aspect-square max-h-[68vh] w-full overflow-hidden rounded-2xl border border-line/10 bg-bg/70 sm:aspect-[4/3.2]">
           {view === "assembly" || use3D ? (
             <StitchScene mode={mode} rowHeightCm={rowHeightCm} playing={playing} reduceMotion={reduce} compact={compact} onCanvas={onCanvas} />
           ) : active.kind === "revolution" ? (
@@ -144,7 +144,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
               <span className="font-medium tabular-nums">
                 {round + 1} / {total}
               </span>
-              <span className="text-muted-foreground"> · </span>
+              <span className="text-muted-foreground">, </span>
               <span className="tabular-nums">{active.rounds[round]?.stitches} st</span>
             </div>
           )}
@@ -200,7 +200,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
         )}
       </div>
 
-      <div className="rounded-4xl border border-line/10 bg-surface/50 p-5 sm:p-6">
+      <div className="rounded-2xl border border-line/10 bg-surface/50 p-5 sm:p-6">
         <PatternList
           parts={pattern.parts}
           activePartId={view === "part" ? active.partId : ""}

@@ -25,7 +25,7 @@ export function ThemeToggle({ className = "" }: { className?: string }) {
       onClick={() => applyTheme(next)}
       aria-label={`Switch to ${next} mode`}
       title={`Switch to ${next} mode`}
-      className={`relative inline-flex h-11 w-11 cursor-pointer items-center justify-center overflow-hidden rounded-full border border-line/15 bg-surface/60 text-fg transition-colors hover:bg-surface-2 ${className}`}
+      className={`relative inline-flex h-11 w-11 cursor-pointer items-center justify-center overflow-hidden rounded-xl text-fg transition-colors hover:bg-surface-2 ${className}`}
     >
       <AnimatePresence mode="wait" initial={false}>
         <motion.svg

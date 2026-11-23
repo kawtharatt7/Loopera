@@ -114,7 +114,7 @@ export function ColorField({ label, value, onChange }: { label: string; value: s
 
 export function Panel({ title, children, action }: { title: string; children: ReactNode; action?: ReactNode }) {
   return (
-    <section className="rounded-4xl border border-line/10 bg-surface/60 p-5">
+    <section className="rounded-2xl bg-surface/70 p-5">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-lg">{title}</h2>
         {action}

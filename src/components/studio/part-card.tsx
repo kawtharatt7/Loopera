@@ -29,7 +29,7 @@ export function PartCard({ part, others, scale, onChange, onRemove, onDuplicate,
     set({ dims: { ...part.dims, [k]: Math.max(0.01, cm / scale) } }, `${part.id}-${k}`);
 
   return (
-    <li className="rounded-3xl border border-line/10 bg-bg/50">
+    <li className="rounded-xl border border-line/10 bg-bg/50">
       <div className="flex items-center gap-2 p-2 pl-3">
         <span className="h-4 w-4 shrink-0 rounded-full ring-1 ring-line/20" style={{ backgroundColor: part.colorHex }} aria-hidden="true" />
         <button

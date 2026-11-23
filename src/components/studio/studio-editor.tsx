@@ -225,7 +225,7 @@ export function StudioEditor({ initial, onBeforePdf, onChange, saveState = "idle
         <aside className="space-y-4" aria-label="Design controls">
           <Panel
             title="Parts"
-            action={<span className="text-xs text-muted-foreground">Edits are free · 0 credits</span>}
+            action={<span className="text-xs text-muted-foreground">Editing is free</span>}
           >
             <ul className="space-y-2">
               {doc.spec.parts.map((p, i) => (
@@ -299,7 +299,7 @@ export function StudioEditor({ initial, onBeforePdf, onChange, saveState = "idle
                 <SelectField<YarnWeight>
                   label="Yarn weight"
                   value={doc.gauge.weight}
-                  options={YARN_PRESETS.map((y) => ({ value: y.weight, label: `${y.label} · ${y.hookMm} mm hook` }))}
+                  options={YARN_PRESETS.map((y) => ({ value: y.weight, label: `${y.label}, ${y.hookMm} mm hook` }))}
                   onChange={(weight) => update({ ...doc, gauge: { kind: "preset", weight } })}
                 />
                 <p className="text-xs text-muted-foreground">Preset gauges are approximate. Measure a swatch for an exact fit.</p>
@@ -378,7 +378,7 @@ export function StudioEditor({ initial, onBeforePdf, onChange, saveState = "idle
               }}
             />
           ) : (
-            <div className="rounded-4xl border border-line/10 bg-surface/50 p-10 text-center text-muted-foreground">Add a part to see your pattern.</div>
+            <div className="rounded-2xl border border-line/10 bg-surface/50 p-10 text-center text-muted-foreground">Add a part to see your pattern.</div>
           )}
         </div>
       </div>

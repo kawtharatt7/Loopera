@@ -27,7 +27,7 @@ export function HowItWorks() {
           {STEPS.map((s, i) => (
             <li key={s.title} className="rounded-4xl border border-line/10 bg-surface/50 p-7">
               <div className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-2 text-peach">
+                <span className="flex h-11 w-11 items-center justify-center rounded-full bg-surface-2 text-ember">
                   <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinejoin="round" strokeLinecap="round" aria-hidden="true">
                     {s.icon}
                   </svg>

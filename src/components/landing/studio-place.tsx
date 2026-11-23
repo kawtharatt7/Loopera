@@ -47,7 +47,7 @@ export function StudioPlace() {
           <ul className="mt-8 space-y-4">
             {FEATURES.map((f) => (
               <li key={f} className="flex gap-3 text-muted-foreground">
-                <svg viewBox="0 0 20 20" className="mt-0.5 h-5 w-5 shrink-0 text-peach" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                <svg viewBox="0 0 20 20" className="mt-0.5 h-5 w-5 shrink-0 text-ember" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                   <path d="M4 10.5l4 4 8-9" />
                 </svg>
                 <span className="leading-relaxed">{f}</span>

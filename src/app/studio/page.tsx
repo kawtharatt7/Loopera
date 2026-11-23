@@ -26,7 +26,7 @@ export default function StudioPage() {
                   href={`/studio/new?start=${k}`}
                   className="group flex h-full flex-col rounded-4xl border border-line/10 bg-surface/70 p-6 transition-[transform,background-color] duration-200 hover:-translate-y-1 hover:bg-surface-2"
                 >
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-bg/70 text-peach" aria-hidden="true">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-bg/70 text-ember" aria-hidden="true">
                     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
                       {k === "blank" ? <path d="M12 5v14M5 12h14" /> : k === "granny" ? <path d="M5 5h14v14H5zM9 9h6v6H9z" /> : k === "bear" ? <path d="M7 6.5a2.5 2.5 0 1 1 3 2M17 6.5a2.5 2.5 0 1 0-3 2M12 20a6 6 0 1 0 0-12 6 6 0 0 0 0 12Z" /> : <circle cx="12" cy="12" r="7" />}
                     </svg>

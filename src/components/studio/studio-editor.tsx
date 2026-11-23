@@ -180,7 +180,7 @@ export function StudioEditor({ initial, onBeforePdf, onChange, saveState = "idle
           maxLength={80}
           onChange={(e) => update({ ...doc, title: e.target.value }, "title")}
           placeholder="Name your design"
-          className="min-h-12 min-w-0 flex-1 rounded-2xl border border-transparent bg-transparent px-2 font-serif text-3xl outline-none transition-colors hover:border-line/15 focus:border-line/25"
+          className="min-h-12 min-w-0 flex-1 basis-full rounded-2xl sm:basis-auto border border-transparent bg-transparent px-2 font-serif text-3xl outline-none transition-colors hover:border-line/15 focus:border-line/25"
         />
         <span className="text-sm text-muted-foreground" aria-live="polite">
           {saveState === "saving" ? "Saving…" : saveState === "saved" ? "Saved" : saveState === "error" ? "Not saved, will retry" : ""}

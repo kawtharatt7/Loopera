@@ -6,6 +6,7 @@ import { useMotionValueEvent, useScroll } from "framer-motion";
 import { useState } from "react";
 import { LogoMark } from "@/components/LogoMark";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useCart } from "@/lib/shop/cart";
 import { SITE_NAME } from "@/lib/site";
 
 const NAV = [
@@ -18,6 +19,7 @@ export function SiteHeader() {
   const pathname = usePathname();
   const { scrollY } = useScroll();
   const [scrolled, setScrolled] = useState(false);
+  const count = useCart().reduce((a, l) => a + l.qty, 0);
   useMotionValueEvent(scrollY, "change", (y) => setScrolled(y > 24));
 
   return (
@@ -45,7 +47,19 @@ export function SiteHeader() {
               </Link>
             );
           })}
-          <ThemeToggle className="ml-1" />
+          <Link
+            href="/cart"
+            aria-label={count > 0 ? `Cart, ${count} ${count === 1 ? "piece" : "pieces"}` : "Cart, empty"}
+            className="relative inline-flex h-11 w-11 items-center justify-center rounded-xl hover:bg-surface-2"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M5 8h14l-1.2 11.2a1 1 0 0 1-1 .8H7.2a1 1 0 0 1-1-.8Z M9 8V6.5a3 3 0 0 1 6 0V8" />
+            </svg>
+            {count > 0 && (
+              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-peach px-1 text-[10px] font-semibold text-bg">{count}</span>
+            )}
+          </Link>
+          <ThemeToggle />
         </nav>
       </div>
     </header>

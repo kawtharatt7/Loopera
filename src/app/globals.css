@@ -48,6 +48,37 @@
   color-scheme: light;
 }
 
+/* Semantic colors in the Tailwind v4 / shadcn naming used by the copied 21st.dev components. */
+:root,
+[data-theme] {
+  --color-foreground: rgb(var(--fg));
+  --color-background: rgb(var(--bg));
+  --color-muted-foreground: rgb(var(--muted-fg));
+}
+
+/*
+  Crochet framing for SneakerProductHero (written for side-profile shoe cut-outs).
+  Our product photos are full portrait shots, so they sit in a rounded portrait frame.
+*/
+.loopera-piece .snp-shoe:not(.snp-sheen):not(.snp-reflect) {
+  aspect-ratio: 4 / 5;
+  width: auto;
+  height: 96%;
+  object-fit: cover;
+  border-radius: 14px;
+}
+.loopera-piece .snp-shoe.snp-reflect,
+.loopera-piece .snp-shoe.snp-sheen {
+  aspect-ratio: 4 / 5;
+  width: auto;
+  height: 96%;
+  object-fit: cover;
+  border-radius: 14px;
+}
+.loopera-piece .snp-floor {
+  display: none;
+}
+
 @layer base {
   html {
     background-color: rgb(var(--bg));

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { StorePage } from "@/components/shop/store-page";
+import { StoreRoom } from "@/components/shop/store-room";
 import { DICT } from "@/lib/i18n/dict";
 import { getLocale } from "@/lib/i18n/server";
 
@@ -8,5 +8,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function ShopPage() {
-  return <StorePage />;
+  return <StoreRoom />;
 }

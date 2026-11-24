@@ -13,12 +13,22 @@ export function ChainMark({ className = "" }: { className?: string }) {
   );
 }
 
-/** Wordmark. Size it with font-size (text-xl, text-2xl…); the chain scales with the text. */
+/** Wordmark. Size it with font-size (text-xl, text-2xl…). Letters rise in on load and ripple on hover. */
 export function Logo({ className = "" }: { className?: string }) {
+  const letters = "loopera".split("");
   return (
-    <span className={`inline-flex items-center gap-[0.35em] font-serif font-semibold leading-none tracking-[-0.03em] ${className}`} dir="ltr">
-      <span>loopera</span>
-      <ChainMark className="h-[0.42em] w-auto translate-y-[0.12em] text-wine" />
+    <span className={`lp-logo relative inline-flex items-end leading-none ${className}`} dir="ltr" aria-label="loopera">
+      <span aria-hidden="true" className="relative inline-flex">
+        {letters.map((ch, i) => (
+          <span key={i} className="lp-ch" style={{ ["--i" as string]: i }}>
+            {ch}
+          </span>
+        ))}
+        {/* a strand of yarn drawn under the word, ending in a small loop */}
+        <svg viewBox="0 0 120 12" preserveAspectRatio="none" className="pointer-events-none absolute -bottom-[0.22em] left-0 h-[0.3em] w-[108%] text-terracotta" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
+          <path className="lp-strand" d="M2 6 C 22 1, 40 11, 60 6 S 96 1, 106 6 C 112 9, 117 6, 114 3 C 111 0, 106 4, 110 7" />
+        </svg>
+      </span>
     </span>
   );
 }

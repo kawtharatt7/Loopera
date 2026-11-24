@@ -2,6 +2,7 @@
 
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useRouter } from "next/navigation";
 import { useLayoutEffect, useRef, useState } from "react";
 import { CustomOrderDrawer } from "@/components/custom/custom-order";
 import { useC } from "@/lib/i18n/collection";
@@ -25,7 +26,8 @@ export function ScrollHero() {
   const [still, setStill] = useState(false);
   const [crochet, setCrochet] = useState(false);
 
-  const openStore = () => document.getElementById("shop")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  const router = useRouter();
+  const openStore = () => router.push("/shop");
 
   useLayoutEffect(() => {
     const el = root.current;
@@ -68,7 +70,7 @@ export function ScrollHero() {
           gsap.set(q("[data-title]"), { autoAlpha: Math.max(0, 1 - p / 0.14), y: -p * 90 });
           gsap.set(q("[data-hint]"), { autoAlpha: p < 0.03 ? 1 : 0 });
           const dark = Math.min(1, Math.max(0, (p - 0.8) / 0.12));
-          gsap.set(q("[data-veil]"), { autoAlpha: dark * 0.94 });
+          gsap.set(q("[data-veil]"), { autoAlpha: dark * 0.96 });
           const c = Math.min(1, Math.max(0, (p - 0.88) / 0.1));
           gsap.set(q("[data-choices]"), { autoAlpha: c, y: (1 - c) * 18 });
         },
@@ -84,7 +86,7 @@ export function ScrollHero() {
 
   return (
     <section ref={root} aria-label={h.label} className="relative">
-      <div data-pin className="relative h-[100svh] w-full overflow-hidden bg-[#1A1613]">
+      <div data-pin className="relative h-[100svh] w-full overflow-hidden bg-bg">
         <video
           ref={video}
           src={VIDEO}
@@ -96,31 +98,31 @@ export function ScrollHero() {
           className="absolute inset-0 h-full w-full object-cover"
           onLoadedData={(e) => still && (e.currentTarget.currentTime = Math.max(0, e.currentTarget.duration - 0.05))}
         />
-        <div aria-hidden="true" className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgb(250 247 242 / 0.75) 0%, rgb(250 247 242 / 0.25) 30%, transparent 52%)" }} />
+        <div aria-hidden="true" className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgb(var(--bg) / 0.8) 0%, rgb(var(--bg) / 0.3) 30%, transparent 52%)" }} />
 
         {!still && (
           <>
-            <div data-title className="absolute inset-x-0 top-[16vh] z-10 px-6 text-center text-[#26211E]">
+            <div data-title className="absolute inset-x-0 top-[16vh] z-10 px-6 text-center text-fg">
               <p className="text-sm tracking-wide opacity-70">{h.kicker}</p>
               <h1 className="mx-auto mt-3 max-w-[16ch] text-balance text-4xl font-semibold leading-[1.06] sm:text-6xl lg:text-7xl">{h.title}</h1>
             </div>
-            <p data-hint className="absolute inset-x-0 bottom-6 z-10 text-center text-xs uppercase tracking-[0.3em] text-white/80">
+            <p data-hint className="absolute inset-x-0 bottom-6 z-10 text-center text-xs uppercase tracking-[0.3em] text-fg/70">
               {h.hint}
-              <span aria-hidden="true" className="mx-auto mt-2 block h-7 w-px animate-pulse bg-white/60" />
+              <span aria-hidden="true" className="mx-auto mt-2 block h-7 w-px animate-pulse bg-fg/50" />
             </p>
           </>
         )}
 
         {/* The end: one deep colour, two quiet choices in the middle */}
-        <div data-veil aria-hidden="true" className="absolute inset-0 z-20 bg-[#1A1613]" style={still ? { opacity: 0.9, visibility: "visible" } : undefined} />
-        <div data-choices className="absolute inset-0 z-30 flex flex-col items-center justify-center px-6 text-center text-[#F4ECE2]" style={still ? { opacity: 1, visibility: "visible" } : undefined}>
+        <div data-veil aria-hidden="true" className="absolute inset-0 z-20 bg-bg" style={still ? { opacity: 0.9, visibility: "visible" } : undefined} />
+        <div data-choices className="absolute inset-0 z-30 flex flex-col items-center justify-center px-6 text-center text-fg" style={still ? { opacity: 1, visibility: "visible" } : undefined}>
           {still && <p className="mb-4 text-sm tracking-wide opacity-70">{h.title}</p>}
           <h2 className="text-balance text-3xl font-normal tracking-tight sm:text-5xl">{h.s4title}</h2>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
-            <button type="button" onClick={openStore} className="min-h-12 min-w-[200px] rounded-full bg-[#F4ECE2] px-8 text-[15px] font-medium text-[#1A1613] transition-transform duration-500 hover:-translate-y-0.5">
+            <button type="button" onClick={openStore} className="min-h-12 min-w-[200px] rounded-full bg-fg px-8 text-[15px] font-medium text-bg transition-transform duration-500 hover:-translate-y-0.5">
               {h.openStore}
             </button>
-            <button type="button" onClick={() => setCrochet(true)} className="min-h-12 min-w-[200px] rounded-full border border-[#F4ECE2]/40 px-8 text-[15px] font-medium transition-colors duration-500 hover:border-[#F4ECE2]">
+            <button type="button" onClick={() => setCrochet(true)} className="min-h-12 min-w-[200px] rounded-full border border-fg/35 px-8 text-[15px] font-medium transition-colors duration-500 hover:border-fg">
               {h.iCrochet}
             </button>
           </div>

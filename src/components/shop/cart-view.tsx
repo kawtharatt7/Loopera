@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useT } from "@/lib/i18n/client";
 import { formatSar, getProduct, stockFor } from "@/lib/shop/catalog";
-import { cartTotal, priceOf, setQty, useCart } from "@/lib/shop/cart";
+import { cartTotal, priceOf, setLineQty, lineKey, useCart } from "@/lib/shop/cart";
+import { BagExtras } from "@/components/bag/bag-extras";
 import { PieceImage } from "./piece-image";
 
 export function CartView() {
@@ -43,17 +44,17 @@ export function CartView() {
                 <p className="text-sm text-muted-foreground">{[color && bi(color.name), size && bi(size.label), bi(p.maker)].filter(Boolean).join(locale === "ar" ? "، " : ", ")}</p>
                 <div className="mt-auto flex items-center gap-3 pt-3">
                   <div className="flex items-center rounded-lg border border-line/20">
-                    <button type="button" aria-label={t.bag.fewer} onClick={() => setQty(i, l.qty - 1)} className="h-10 w-10">
+                    <button type="button" aria-label={t.bag.fewer} onClick={() => setLineQty(lineKey(l), l.qty - 1)} className="h-10 w-10">
                       −
                     </button>
                     <span className="w-8 text-center tabular-nums" aria-live="polite">
                       {l.qty}
                     </span>
-                    <button type="button" aria-label={t.bag.more} disabled={l.qty >= max} onClick={() => setQty(i, l.qty + 1)} className="h-10 w-10 disabled:opacity-40">
+                    <button type="button" aria-label={t.bag.more} disabled={l.qty >= max} onClick={() => setLineQty(lineKey(l), l.qty + 1)} className="h-10 w-10 disabled:opacity-40">
                       +
                     </button>
                   </div>
-                  <button type="button" onClick={() => setQty(i, 0)} className="text-sm underline underline-offset-4">
+                  <button type="button" onClick={() => setLineQty(lineKey(l), 0)} className="text-sm underline underline-offset-4">
                     {t.bag.remove}
                   </button>
                 </div>
@@ -71,6 +72,7 @@ export function CartView() {
         <Link href="/checkout" className="mt-6 flex h-12 w-full items-center justify-center rounded-lg bg-primary font-medium text-primary-fg">
           {t.bag.checkout}
         </Link>
+        <BagExtras />
       </aside>
     </div>
   );

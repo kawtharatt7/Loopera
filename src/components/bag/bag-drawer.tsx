@@ -2,14 +2,11 @@
 
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
-import { WhatsAppIcon } from "@/components/custom/custom-order";
-import { useC } from "@/lib/i18n/collection";
-import { GIFT_WRAP_PRICE, readGift, whatsappLink, writeGift, type Gift } from "@/lib/shop/whatsapp";
+import { useEffect, useRef } from "react";
 import { PieceImage } from "@/components/shop/piece-image";
 import { useLocale, useT } from "@/lib/i18n/client";
 import { formatSar, getProduct, stockFor } from "@/lib/shop/catalog";
-import { cartTotal, priceOf, setQty, useCart } from "@/lib/shop/cart";
+import { cartTotal, priceOf, setLineQty, lineKey, useCart } from "@/lib/shop/cart";
 import { useBag } from "./bag-context";
 
 /** The bag slides in from the end side (right in English, left in Arabic). */
@@ -20,28 +17,7 @@ export function BagDrawer() {
   const locale = useLocale();
   const closeRef = useRef<HTMLButtonElement>(null);
   const rtl = locale === "ar";
-  const c = useC();
-  const [gift, setGiftState] = useState<Gift>({ on: false, note: "" });
-  useEffect(() => setGiftState(readGift()), [open]);
-  const setGift = (g: Gift) => {
-    setGiftState(g);
-    writeGift(g);
-  };
-  const total = cartTotal(lines) + (gift.on && lines.length ? GIFT_WRAP_PRICE : 0);
-  const waText = () => {
-    const rows = lines
-      .map((l) => {
-        const p = getProduct(l.slug);
-        if (!p) return "";
-        const color = p.colors.find((x) => x.id === l.color);
-        const size = p.sizes.find((x) => x.id === l.size);
-        return `• ${l.qty} × ${bi(p.title)} (${[color && bi(color.name), size && bi(size.label)].filter(Boolean).join(", ")}) ${formatSar(priceOf(l) * l.qty, locale)}`;
-      })
-      .filter(Boolean)
-      .join("\n");
-    const g = gift.on ? `${c.gift.line} +${formatSar(GIFT_WRAP_PRICE, locale)}${gift.note.trim() ? `: "${gift.note.trim()}"` : ""}\n` : "";
-    return c.waOrder(rows, formatSar(total, locale), g);
-  };
+  const total = cartTotal(lines);
 
   useEffect(() => {
     if (!open) return;
@@ -115,19 +91,19 @@ export function BagDrawer() {
                           </p>
                           <div className="mt-auto flex items-center justify-between pt-2">
                             <div className="flex items-center rounded-lg border border-line/20">
-                              <button type="button" aria-label={t.bag.fewer} onClick={() => setQty(i, l.qty - 1)} className="h-9 w-9">
+                              <button type="button" aria-label={t.bag.fewer} onClick={() => setLineQty(lineKey(l), l.qty - 1)} className="h-9 w-9">
                                 −
                               </button>
                               <span className="w-6 text-center tabular-nums" aria-live="polite">
                                 {l.qty}
                               </span>
-                              <button type="button" aria-label={t.bag.more} disabled={l.qty >= max} onClick={() => setQty(i, l.qty + 1)} className="h-9 w-9 disabled:opacity-40">
+                              <button type="button" aria-label={t.bag.more} disabled={l.qty >= max} onClick={() => setLineQty(lineKey(l), l.qty + 1)} className="h-9 w-9 disabled:opacity-40">
                                 +
                               </button>
                             </div>
                             <span className="tabular-nums">{formatSar(priceOf(l) * l.qty, locale)}</span>
                           </div>
-                          <button type="button" onClick={() => setQty(i, 0)} className="mt-1 self-start text-sm text-muted-foreground underline underline-offset-4">
+                          <button type="button" onClick={() => setLineQty(lineKey(l), 0)} className="mt-1 self-start text-sm text-muted-foreground underline underline-offset-4">
                             {t.bag.remove}
                           </button>
                         </div>
@@ -139,32 +115,6 @@ export function BagDrawer() {
             </div>
 
             <div className="border-t border-line/15 pt-4">
-              {lines.length > 0 && (
-                <div className="mb-4 rounded-sm border border-dashed border-line/30 p-3">
-                  <label className="flex cursor-pointer items-start gap-3">
-                    <input type="checkbox" checked={gift.on} onChange={(e) => setGift({ ...gift, on: e.target.checked })} className="mt-1 h-4 w-4 accent-[rgb(var(--primary))]" />
-                    <span>
-                      <span className="block font-medium">{c.gift.label}</span>
-                      <span className="block text-sm text-muted-foreground">{c.gift.wrap(`+${formatSar(GIFT_WRAP_PRICE, locale)}`)}</span>
-                    </span>
-                  </label>
-                  {gift.on && (
-                    <textarea
-                      value={gift.note}
-                      onChange={(e) => setGift({ ...gift, note: e.target.value.slice(0, 240) })}
-                      placeholder={c.gift.note}
-                      aria-label={c.gift.note}
-                      className="mt-3 min-h-20 w-full rounded-sm border border-line/25 bg-paper p-2 text-sm text-paper-fg"
-                    />
-                  )}
-                </div>
-              )}
-              {gift.on && lines.length > 0 && (
-                <div className="mb-1 flex justify-between text-sm text-muted-foreground">
-                  <span>{c.gift.line}</span>
-                  <span className="tabular-nums">{formatSar(GIFT_WRAP_PRICE, locale)}</span>
-                </div>
-              )}
               <div className="flex justify-between text-lg">
                 <span>{t.bag.subtotal}</span>
                 <span className="tabular-nums">{formatSar(total, locale)}</span>
@@ -177,16 +127,9 @@ export function BagDrawer() {
               >
                 {t.bag.checkout}
               </Link>
-              <a
-                href={lines.length ? whatsappLink(waText()) : undefined}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-disabled={lines.length === 0}
-                className={`stitch mt-2 flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#1F7A4D] font-medium text-white transition-opacity hover:opacity-90 ${lines.length === 0 ? "pointer-events-none opacity-40" : ""}`}
-              >
-                <WhatsAppIcon />
-                {c.whatsapp}
-              </a>
+              <Link href="/cart" onClick={() => setOpen(false)} className="mt-2 flex h-11 w-full items-center justify-center rounded-lg text-sm text-muted-foreground underline-offset-4 hover:underline">
+                {t.bag.viewBag}
+              </Link>
             </div>
           </motion.aside>
         </>

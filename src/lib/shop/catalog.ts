@@ -8,7 +8,7 @@ import type { TapestryId } from "@/lib/tapestry/designs";
 export type Category = "clothes" | "bags" | "wall" | "dolls" | "flowers";
 
 /** Wall hangings come in four families (the hub's filter tabs). */
-export type WallGroup = "saudi-clubs" | "global-clubs" | "flags" | "anime" | "originals";
+export type WallGroup = "originals" | "saudi-clubs" | "global-clubs" | "anime";
 
 export const CATEGORIES: { id: Category; label: Bi; blurb: Bi }[] = [
   { id: "clothes", label: { en: "Clothes", ar: "ملابس" }, blurb: { en: "Sweaters, vests, tops and dresses, worn in the studio.", ar: "بلايز وصديريات وتوبات وفساتين، ملبوسة في الاستوديو." } },
@@ -74,6 +74,8 @@ export interface Product {
   hanger?: string;
   /** Clothes: the model wearing it, cut out (no backdrop). */
   model?: string;
+  /** Clothes: garment-only masks for the hanger and model cut-outs, so a new yarn colour repaints only the piece. */
+  masks?: { hanger?: string; model?: string };
 }
 
 const LOOPERA: Bi = { en: "Loopera", ar: "لوبيرا" };
@@ -125,24 +127,24 @@ const AS_SHOWN: ColorOption[] = [{ id: "as-shown", name: { en: "As in the photo"
 
 type Garment = [slug: string, en: string, ar: string, enDesc: string, arDesc: string, price: number, from: string];
 const GARMENTS: Garment[] = [
-  ["star-bell-sleeve-sweater", "Crop bell-sleeve sweater", "بلوزة قصيرة بأكمام جرس", "A cropped cream sweater with a star on the chest and striped bell sleeves.", "بلوزة كريمية قصيرة بنجمة على الصدر وأكمام جرس مقلّمة.", 320, "#EDE3D2"],
-  ["green-rose-hem-dress", "Green rose-hem dress", "فستان أخضر بحافة ورود", "A short green pinafore dress with a row of crochet flowers at the hem.", "فستان قصير أخضر بصف ورود كروشيه على الحافة.", 380, "#6E8B4A"],
-  ["open-weave-maxi-overlay", "Open-weave maxi overlay", "عباءة شبك طويلة", "A long open-mesh overlay with side slits, worn over trousers.", "قطعة شبك طويلة بفتحات جانبية، تنلبس فوق البنطلون.", 420, "#EDE8DE"],
-  ["daisy-vest", "Daisy vest", "صديري الأقحوان", "Granny squares with cream daisies on espresso, tied at the front.", "مربعات جراني بأقحوان كريمي على بني غامق، بربطة من الأمام.", 340, "#3A2418"],
-  ["flared-yellow-cardigan", "Flared yellow cardigan", "كارديغان أصفر بأكمام واسعة", "A soft butter-yellow mesh cardigan with flared sleeves and a tie.", "كارديغان شبك أصفر ناعم بأكمام واسعة وربطة.", 360, "#F2E3A6"],
+  ["star-bell-sleeve-sweater", "Crop bell-sleeve sweater", "بلوزة قصيرة بأكمام جرس", "A cropped cream sweater with a star on the chest and striped bell sleeves.", "بلوزة كريمية قصيرة بنجمة على الصدر وأكمام جرس مقلّمة.", 320, "#EDE2CF"],
+  ["green-rose-hem-dress", "Green rose-hem dress", "فستان أخضر بحافة ورود", "A short green pinafore dress with a row of crochet flowers at the hem.", "فستان قصير أخضر بصف ورود كروشيه على الحافة.", 380, "#7D7D4A"],
+  ["open-weave-maxi-overlay", "Open-weave maxi overlay", "عباءة شبك طويلة", "A long open-mesh overlay with side slits, worn over trousers.", "قطعة شبك طويلة بفتحات جانبية، تنلبس فوق البنطلون.", 420, "#F2ECE3"],
+  ["daisy-vest", "Daisy vest", "صديري الأقحوان", "Granny squares with cream daisies on espresso, tied at the front.", "مربعات جراني بأقحوان كريمي على بني غامق، بربطة من الأمام.", 340, "#301C12"],
+  ["flared-yellow-cardigan", "Flared yellow cardigan", "كارديغان أصفر بأكمام واسعة", "A soft butter-yellow mesh cardigan with flared sleeves and a tie.", "كارديغان شبك أصفر ناعم بأكمام واسعة وربطة.", 360, "#F8E0A6"],
   ["spiderweb-mesh-top", "Spiderweb mesh top", "توب شبك العنكبوت", "A burgundy mesh top with a spiderweb worked across the front.", "توب شبك عنابي بشبكة عنكبوت مشغولة على الأمام.", 260, "#7A1E1E"],
-  ["distressed-striped-sweater", "Distressed striped sweater", "بلوزة مقلّمة ممزّعة", "Pink and black stripes with laddered, distressed stitches.", "خطوط وردي وأسود بغرز ممزّعة.", 340, "#E59BB4"],
+  ["distressed-striped-sweater", "Distressed striped sweater", "بلوزة مقلّمة ممزّعة", "Pink and black stripes with laddered, distressed stitches.", "خطوط وردي وأسود بغرز ممزّعة.", 340, "#E1A7B2"],
   ["checkerboard-maxi-dress", "Checkerboard maxi dress", "فستان مربعات طويل", "A long red and cream checkerboard dress with a side slit.", "فستان طويل بمربعات أحمر وكريمي وفتحة جانبية.", 480, "#C2252C"],
   ["granny-square-cardigan", "Granny-square cardigan", "كارديغان مربعات جراني", "A patchwork cardigan of mustard, rust and teal granny squares.", "كارديغان من مربعات جراني بالخردلي والصدئي والتركوازي.", 460, "#C98A2E"],
   ["sage-mesh-polo", "Sage mesh polo", "بولو شبك زيتوني", "A short-sleeved open-mesh polo in sage.", "بولو شبك بأكمام قصيرة بلون زيتوني فاتح.", 300, "#8FA27C"],
-  ["terracotta-halter-top", "Terracotta halter top", "توب هالتر تيراكوتا", "A lace halter top with a scalloped hem.", "توب هالتر دانتيل بحافة متموّجة.", 240, "#B4583A"],
-  ["sand-mesh-tank", "Sand mesh tank", "توب شبك رملي", "A cropped open-mesh tank in sand.", "توب شبك قصير بلون رملي.", 240, "#D2B080"],
-  ["cream-cable-sweater", "Cream cable sweater", "بلوزة كيبل كريمية", "A chunky cable-pattern sweater in raw cream.", "بلوزة سميكة بنقشة كيبل بلون كريمي.", 440, "#E8DCC6"],
-  ["rust-knit-tank", "Rust knit tank", "توب صدئي بدون أكمام", "A close-fitting sleeveless top in rust.", "توب بدون أكمام بلون صدئي.", 250, "#B56839"],
-  ["cocoa-pointelle-vest", "Cocoa pointelle vest", "صديري كاكاو مخرّم", "A V-neck vest with bands of open pointelle stitches.", "صديري برقبة V وأشرطة غرز مخرّمة.", 320, "#523728"],
-  ["caramel-cable-vest", "Caramel cable vest", "صديري كيبل كراميل", "A sleeveless cable sweater vest in caramel.", "صديري كيبل بدون أكمام بلون كراميل.", 340, "#A8673A"],
-  ["striped-maxi-dress", "Striped mesh maxi dress", "فستان شبك مقلّم طويل", "A long mesh dress in rust, mustard, cream and teal stripes.", "فستان شبك طويل بخطوط صدئي وخردلي وكريمي وتركوازي.", 460, "#C2673E"],
-  ["cream-collar-vest", "Cream collar vest", "صديري بياقة كريمي", "A sleeveless mesh top with a polo collar, in cream.", "توب شبك بدون أكمام بياقة بولو، كريمي.", 280, "#E3D3B6"],
+  ["terracotta-halter-top", "Terracotta halter top", "توب هالتر تيراكوتا", "A lace halter top with a scalloped hem.", "توب هالتر دانتيل بحافة متموّجة.", 240, "#94492D"],
+  ["sand-mesh-tank", "Sand mesh tank", "توب شبك رملي", "A cropped open-mesh tank in sand.", "توب شبك قصير بلون رملي.", 240, "#DCB58A"],
+  ["cream-cable-sweater", "Cream cable sweater", "بلوزة كيبل كريمية", "A chunky cable-pattern sweater in raw cream.", "بلوزة سميكة بنقشة كيبل بلون كريمي.", 440, "#ECD9C0"],
+  ["rust-knit-tank", "Rust knit tank", "توب صدئي بدون أكمام", "A close-fitting sleeveless top in rust.", "توب بدون أكمام بلون صدئي.", 250, "#AC6235"],
+  ["cocoa-pointelle-vest", "Cocoa pointelle vest", "صديري كاكاو مخرّم", "A V-neck vest with bands of open pointelle stitches.", "صديري برقبة V وأشرطة غرز مخرّمة.", 320, "#52382A"],
+  ["caramel-cable-vest", "Caramel cable vest", "صديري كيبل كراميل", "A sleeveless cable sweater vest in caramel.", "صديري كيبل بدون أكمام بلون كراميل.", 340, "#8F5933"],
+  ["striped-maxi-dress", "Striped mesh maxi dress", "فستان شبك مقلّم طويل", "A long mesh dress in rust, mustard, cream and teal stripes.", "فستان شبك طويل بخطوط صدئي وخردلي وكريمي وتركوازي.", 460, "#B67640"],
+  ["cream-collar-vest", "Cream collar vest", "صديري بياقة كريمي", "A sleeveless mesh top with a polo collar, in cream.", "توب شبك بدون أكمام بياقة بولو، كريمي.", 280, "#ECD4B7"],
 ];
 
 /** Garments that also have a photo on a wooden hanger. */
@@ -150,18 +152,26 @@ const HANGERS = ["star-bell-sleeve-sweater", "green-rose-hem-dress", "open-weave
 
 /** Loopera's own original tapestries (no club, flag or character): sold normally. */
 const ORIGINALS: [id: string, en: string, ar: string, price: number][] = [
+  ["moon-phases", "Moon phases", "أطوار القمر", 320],
+  ["desert-hills", "Desert hills at sunset", "تلال الصحراء وقت الغروب", 320],
+  ["sunburst", "Sunburst", "شروق الشمس", 260],
+  ["abstract-patchwork", "Abstract patchwork", "باتشورك تجريدي", 260],
+  ["diamonds", "Diamonds", "معيّنات", 240],
+  ["line-face", "Line face", "وجه بخط واحد", 240],
   ["sabr", "Sabr calligraphy", "صبر بالخط العربي", 180],
-  ["love", "Ai (love) character", "حرف الحب", 160],
-  ["geese", "Geese", "الإوز", 190],
-  ["duck", "Duck", "البطة", 140],
-  ["cat", "Climbing cat", "القطة المتعلّقة", 160],
-  ["orca", "Orca", "الأوركا", 170],
-  ["pink-bird", "Pink bird", "الطير الوردي", 170],
-  ["sleep", "I love sleep", "أحب النوم", 150],
-  ["face", "Little face", "الوجه الصغير", 150],
-  ["heart", "Heart", "القلب", 120],
-  ["star", "Star", "النجمة", 120],
-  ["yinyang", "Yin yang", "ين يانغ", 130],
+  ["geese", "Geese", "الإوز", 180],
+  ["orca", "Orca", "الأوركا", 180],
+  ["ducks", "Three ducks", "ثلاث بطات", 160],
+  ["black-cat", "Black cat", "القطة السوداء", 160],
+  ["geometric", "Geometric", "هندسي", 170],
+  ["mandala", "Mandala", "ماندالا", 190],
+];
+
+/** Showcase archive: fan pieces shown in the gallery only, never sold. */
+const SHOWCASE: [id: string, en: string, ar: string, group: WallGroup][] = [
+  ...([["al-hilal", "Al-Hilal", "الهلال"], ["al-nassr", "Al-Nassr", "النصر"], ["al-ittihad", "Al-Ittihad", "الاتحاد"], ["al-ahli", "Al-Ahli", "الأهلي"], ["al-shabab", "Al-Shabab", "الشباب"], ["al-ettifaq", "Al-Ettifaq", "الاتفاق"], ["al-fateh", "Al-Fateh", "الفتح"], ["al-taawoun", "Al-Taawoun", "التعاون"], ["al-qadsiah", "Al-Qadsiah", "القادسية"], ["al-raed", "Al-Raed", "الرائد"]] as const).map(([id, en, ar]) => [id, en, ar, "saudi-clubs"] as [string, string, string, WallGroup]),
+  ...([["real-madrid", "Real Madrid", "ريال مدريد"], ["barcelona", "Barcelona", "برشلونة"], ["man-city", "Man City", "مانشستر سيتي"], ["man-united", "Man United", "مانشستر يونايتد"], ["liverpool", "Liverpool", "ليفربول"], ["arsenal", "Arsenal", "آرسنال"], ["chelsea", "Chelsea", "تشيلسي"], ["bayern", "Bayern Munich", "بايرن ميونخ"], ["psg", "PSG", "باريس سان جيرمان"], ["ac-milan", "AC Milan", "ميلان"]] as const).map(([id, en, ar]) => [id, en, ar, "global-clubs"] as [string, string, string, WallGroup]),
+  ...([["spider-man", "Spider-Man", "سبايدر مان"], ["iron-man", "Iron Man", "آيرون مان"], ["captain-america", "Captain America", "كابتن أمريكا"], ["batman", "Batman", "باتمان"], ["naruto", "Naruto", "ناروتو"], ["luffy", "Luffy", "لوفي"], ["zoro", "Zoro", "زورو"], ["gojo", "Gojo", "غوجو"], ["luffy-hanging", "Luffy (hanging)", "لوفي (معلّقة)"], ["goku", "Goku", "غوكو"], ["no-face", "No-Face", "الوجه الخفي"]] as const).map(([id, en, ar]) => [id, en, ar, "anime"] as [string, string, string, WallGroup]),
 ];
 
 type BagRow = [slug: string, en: string, ar: string, enDesc: string, arDesc: string, midi: number, from: string];
@@ -200,6 +210,10 @@ const ALL: Product[] = [
     recolor: { from, mask: `/images/clothes/mask/${slug}.png` },
     hanger: HANGERS.includes(slug) ? `/images/clothes/hanger/${slug}.webp` : undefined,
     model: `/images/clothes/model/${slug}.webp`,
+    masks: {
+      hanger: HANGERS.includes(slug) ? `/images/clothes/hanger-mask/${slug}.png` : undefined,
+      model: `/images/clothes/model-mask/${slug}.png`,
+    },
   })),
   ...BAGS.map(([slug, en, ar, enDesc, arDesc, midi, from]): Product => ({
     slug,
@@ -232,7 +246,24 @@ const ALL: Product[] = [
     reviews: 0,
     sizes: WALL(price),
     colors: AS_SHOWN,
-    photos: PRODUCT_SHOT(`/images/wall/orig-${id}.webp`, { en: `${en}, a crocheted wall hanging`, ar: `${ar}، لوحة كروشيه` }),
+    photos: PRODUCT_SHOT(`/images/wall/${id}.webp`, { en: `${en}, a crocheted wall hanging`, ar: `${ar}، لوحة كروشيه` }),
+  })),
+  ...SHOWCASE.map(([id, en, ar, group]): Product => ({
+    slug: `wall-${id}`,
+    category: "wall",
+    group,
+    showcase: true,
+    title: { en, ar },
+    maker: LOOPERA,
+    description: { en: "A fan piece from our showcase archive. Shown only, not for sale.", ar: "قطعة من أرشيف أعمالنا. للعرض فقط، غير معروضة للبيع." },
+    details: [{ en: "Tapestry crochet", ar: "كروشيه تابستري" }],
+    madeToOrder: true,
+    leadTimeDays: 7,
+    rating: 0,
+    reviews: 0,
+    sizes: WALL(0),
+    colors: AS_SHOWN,
+    photos: PRODUCT_SHOT(`/images/wall/${id}.webp`, { en: `${en}, a crocheted wall hanging`, ar: `${ar}، لوحة كروشيه` }),
   })),
   {
     slug: "graduate-doll-her",

@@ -92,7 +92,11 @@ export function ProductPage({ product }: { product: Product }) {
         <p className="mt-2 text-lg text-muted-foreground">{t.common.by(bi(product.maker))}</p>
       </div>
       <p className="max-w-prose leading-relaxed">{bi(product.description)}</p>
-      <p className="text-2xl tabular-nums">{formatSar(size.price, locale)}</p>
+      {product.showcase ? (
+        <p className="inline-flex w-fit rounded-full bg-surface px-4 py-1.5 text-sm text-muted-foreground">{locale === "ar" ? "للعرض فقط — نماذج أعمال" : "Showcase archive · not for sale"}</p>
+      ) : (
+        <p className="text-2xl tabular-nums">{formatSar(size.price, locale)}</p>
+      )}
 
       {product.colors.length > 1 || product.colors[0].id !== "as-shown" ? (
         <div>
@@ -146,7 +150,7 @@ export function ProductPage({ product }: { product: Product }) {
         </div>
         <button
           type="button"
-          disabled={left === 0}
+          disabled={left === 0 || !!product.showcase}
           onClick={() => {
             const ok = add({ slug: product.slug, color: colorId, size: sizeId }, qty);
             setNote(ok ? null : t.bag.allWeHave);

@@ -80,7 +80,7 @@ const cache = new Map<string, Promise<string>>();
 
 /** A data URL of the photo in the new color (cached). Same-origin photos only. */
 export function recolorUrl(src: string, mask: string | undefined, from: string, to: string): Promise<string> {
-  const key = `${src}|${to}`;
+  const key = `${src}|${mask ?? ""}|${to}`;
   const hit = cache.get(key);
   if (hit) return hit;
   const job = (async () => {
@@ -97,6 +97,7 @@ export function recolorUrl(src: string, mask: string | undefined, from: string, 
       const md = ctx.getImageData(0, 0, w, h).data;
       maskData = new Uint8ClampedArray(w * h);
       for (let i = 0, p = 0; i < md.length; i += 4, p++) maskData[p] = md[i];
+      ctx.clearRect(0, 0, w, h);
     }
     ctx.drawImage(img, 0, 0);
     const d = ctx.getImageData(0, 0, w, h);

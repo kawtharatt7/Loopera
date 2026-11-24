@@ -11,7 +11,7 @@ import { useSetLocale, useT } from "@/lib/i18n/client";
 import { cartCount, useCart } from "@/lib/shop/cart";
 
 /** Header: the two places, language, theme and the bag. Clear over the page top, solid once scrolled. */
-export function SiteHeader({ overlay = false, tone }: { overlay?: boolean; tone?: "hero" }) {
+export function SiteHeader({ overlay = false, tone, compact = false }: { overlay?: boolean; tone?: "hero"; compact?: boolean }) {
   const pathname = usePathname();
   const { t, locale } = useT();
   const setLocale = useSetLocale();
@@ -60,6 +60,7 @@ export function SiteHeader({ overlay = false, tone }: { overlay?: boolean; tone?
           <button
             type="button"
             onClick={() => setOpen(true)}
+            data-bag-icon
             aria-label={t.bag.openBag(count)}
             className="relative inline-flex h-11 w-11 items-center justify-center rounded-lg hover:bg-surface-2"
           >
@@ -73,7 +74,7 @@ export function SiteHeader({ overlay = false, tone }: { overlay?: boolean; tone?
         </nav>
       </div>
       {/* Mobile: the two places as a second row */}
-      <nav aria-label={t.nav.home} className="flex border-t border-line/10 sm:hidden">
+      <nav aria-label={t.nav.home} className={`border-t border-line/10 sm:hidden ${compact ? "hidden" : "flex"}`}>
         {NAV.map((item) => {
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (

@@ -76,9 +76,34 @@ function subscribe(l: () => void) {
   };
 }
 
+/** Drops lines whose piece, colour or size no longer exists (old catalog), so the bag never shows ghosts. */
+function valid(l: CartLine): boolean {
+  const p = getProduct(l.slug);
+  return !!p && !p.showcase && p.colors.some((c) => c.id === l.color) && p.sizes.some((s) => s.id === l.size);
+}
+
 function getCart(): CartLine[] {
-  if (cache === null) cache = read(KEY, z.array(LineSchema), EMPTY);
+  if (cache === null) {
+    const all = read(KEY, z.array(LineSchema), EMPTY);
+    const kept = all.filter(valid);
+    cache = kept.length === all.length ? all : kept;
+    if (kept.length !== all.length) {
+      try {
+        localStorage.setItem(KEY, JSON.stringify(kept));
+      } catch {
+        // ignore
+      }
+    }
+  }
   return cache;
+}
+
+export const lineKey = (l: Pick<CartLine, "slug" | "color" | "size">) => `${l.slug}|${l.color}|${l.size}`;
+
+/** Sets the quantity of one line, found by its piece, colour and size (0 removes it). */
+export function setLineQty(key: string, qty: number) {
+  const i = getCart().findIndex((l) => lineKey(l) === key);
+  if (i >= 0) setQty(i, qty);
 }
 function getOrders(): Order[] {
   if (ordersCache === null) ordersCache = read(ORDERS_KEY, z.array(OrderSchema), NO_ORDERS);
@@ -108,7 +133,7 @@ export function cartCount(lines: CartLine[]): number {
 /** Adds pieces. Returns false when that color and size has no stock left. */
 export function addToCart(line: Omit<CartLine, "qty">, qty = 1): boolean {
   const p = getProduct(line.slug);
-  if (!p) return false;
+  if (!p || p.showcase) return false;
   const left = stockFor(p, line.color, line.size);
   const lines = [...getCart()];
   const i = lines.findIndex((l) => l.slug === line.slug && l.color === line.color && l.size === line.size);

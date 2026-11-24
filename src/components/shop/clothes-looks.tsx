@@ -28,7 +28,7 @@ function LookPhoto({ product, colorId, className = "", onSrc }: { product: Produ
 function HangerPhoto({ product, colorId, className = "" }: { product: Product; colorId: string; className?: string }) {
   const { bi } = useT();
   const color = product.colors.find((c) => c.id === colorId) ?? product.colors[0];
-  const recipe = useMemo(() => (product.recolor ? { from: product.recolor.from } : undefined), [product.recolor]);
+  const recipe = useMemo(() => (product.recolor ? { from: product.recolor.from, mask: product.masks?.hanger } : undefined), [product.recolor, product.masks]);
   const src = useRecolored(product.hanger ?? product.photos[0].src, recipe, color.hex === "transparent" ? null : color.hex);
   // eslint-disable-next-line @next/next/no-img-element -- local cut-out or its repainted copy
   return <img src={src} alt={`${bi(product.title)}, ${bi(color.name)}`} className={className} draggable={false} />;

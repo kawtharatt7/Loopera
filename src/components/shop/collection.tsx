@@ -7,6 +7,7 @@ import { byCategory, CATEGORIES, type Category } from "@/lib/shop/catalog";
 import { BagsGrid } from "./bags-grid";
 import { ClothesLooks } from "./clothes-looks";
 import { Gifts } from "./gifts";
+import { RunwayRail } from "./runway-rail";
 import { WallHub } from "./wall-hub";
 
 function Section({ id, title, sub, children }: { id: string; title: string; sub?: string; children: ReactNode }) {
@@ -29,7 +30,10 @@ export function CollectionSections() {
   return (
     <>
       <Section id="clothes" title={c.clothes.title} sub={c.clothes.sub}>
-        <ClothesLooks products={byCategory("clothes")} />
+        <RunwayRail />
+        <div className="mt-14">
+          <ClothesLooks products={byCategory("clothes")} />
+        </div>
       </Section>
       <Section id="bags" title={c.bags.title} sub={c.bags.sub}>
         <BagsGrid bags={byCategory("bags")} />

@@ -15,7 +15,7 @@ export type MakeKind = "toy" | "bag" | "clothes" | "flat" | "other";
 
 const KIND_HINT: Record<MakeKind, string> = {
   toy: "an amigurumi toy or doll, worked in the round (category amigurumi)",
-  bag: "a bag. Bags worked in the round use a cylinder or ellipsoid body (category amigurumi) with a capsule or rectangle strap; flat bags use rectangle or granny_square panels (category flat)",
+  bag: "a bag. A bag worked in the round has a basket body (open top; dims.depth smaller than width for a flat bag, equal for a round bucket bag) and its handle or strap as a rectangle named \"Handle\" or \"Strap\" attached to the body at y = 1, with position.x = where the handle ends sit (0.3 to 0.9 of the half width) and quantity 2 when there is a handle on the front and on the back. Its height is the handle's length along its curve; a crossbody strap is long (about 3 to 4 times the bag width). Use category amigurumi. A bag made of flat panels or granny squares uses rectangle or granny_square parts (category flat) plus the same strap parts",
   clothes: "a garment, made of flat rectangle panels or granny_square motifs (category flat): front, back, sleeves, straps, bands",
   flat: "a flat piece: blanket, scarf, coaster, cushion cover (category flat)",
   other: "any crochet piece; pick the category that fits",
@@ -26,7 +26,8 @@ export function systemPrompt(): string {
     "You are a crochet designer. You look at a photo of a crocheted piece (or read a description) and describe how to build it from simple crochet parts.",
     "Describe only what you can see. Do not invent parts that are not there.",
     `Allowed part shapes: ${PART_SHAPES.join(", ")}.`,
-    "sphere, ellipsoid, cylinder, cone, capsule and ear are worked in the round from a magic ring. rectangle is worked flat in rows. granny_square is a classic square motif.",
+    "sphere, ellipsoid, cylinder, cone, capsule and ear are worked in the round from a magic ring (closed, stuffed shapes). basket is worked in the round with a flat base and straight walls and stays open at the top: use it for bag bodies, baskets and pots. rectangle is worked flat in rows. granny_square is a classic square motif.",
+    "Match the photo's proportions closely: measure width, height and depth against each other in the photo, so the 3D model built from your answer looks like the photographed piece.",
     "dims are relative proportions (width, height, depth); the largest dimension of the whole piece is about 1. overallHeightRatio is the total height of the assembled piece in the same units.",
     "position (x, y, z from -1 to 1) is where a part sits on its parent (attachTo): y = 1 top, -1 bottom; x = 1 right; z = 1 front. The main part has attachTo null and position 0,0,0.",
     "Use quantity for mirrored pairs (two ears, two arms, two straps) and describe one of them with x > 0.",

@@ -44,6 +44,7 @@ export function profileRadius(shape: EnginePart["shape"], t: number): number {
       // Widens from the tip, peaks around 70 percent, eases slightly toward the open edge.
       return Math.max(0.1, Math.sin(Math.min(Math.PI * 0.5, (c / 0.7) * Math.PI * 0.5)) * (c > 0.7 ? 1 - (c - 0.7) * 0.4 : 1));
     case "cylinder":
+    case "basket":
     case "capsule":
       return 1;
     default:
@@ -70,7 +71,7 @@ export function revolutionCounts(part: EnginePart, gauge: Gauge): number[] {
   const circumference = (2 * Math.PI * radiusCm) / gauge.stitchWidthCm;
   const snap =
     part.snapToSix ??
-    (part.shape === "sphere" || part.shape === "capsule" || part.shape === "cylinder" || part.shape === "ellipsoid");
+    (part.shape === "sphere" || part.shape === "capsule" || part.shape === "cylinder" || part.shape === "basket" || part.shape === "ellipsoid");
 
   if (part.shape === "sphere" || part.shape === "capsule") {
     let max = snap ? snap6(circumference) : Math.max(START, Math.round(circumference / 6) * 6);
@@ -89,14 +90,15 @@ export function revolutionCounts(part: EnginePart, gauge: Gauge): number[] {
     return counts;
   }
 
-  if (part.shape === "cylinder") {
+  if (part.shape === "cylinder" || part.shape === "basket") {
     const max = snap6(circumference);
     const k = max / 6;
     const counts: number[] = [];
     for (let i = 1; i <= k; i++) counts.push(i * 6);
     const wall = Math.max(1, totalRounds);
     for (let i = 0; i < wall; i++) counts.push(max);
-    for (let i = k - 1; i >= 1; i--) counts.push(i * 6);
+    // A basket (bag body) stays open at the top; a cylinder closes with a flat top.
+    if (part.shape === "cylinder") for (let i = k - 1; i >= 1; i--) counts.push(i * 6);
     return counts;
   }
 
@@ -159,6 +161,9 @@ function rawHeights(part: EnginePart, counts: number[], gauge: Gauge): number[] 
   }
   const first = counts.indexOf(Math.max(...counts));
   const last = counts.lastIndexOf(Math.max(...counts));
+  if (part.shape === "basket") {
+    return counts.map((_, i) => (i <= first ? 0 : (i - first) * gauge.rowHeightCm));
+  }
   if (part.shape === "cylinder") {
     const wall = (last - first) * gauge.rowHeightCm;
     return counts.map((_, i) => (i <= first ? 0 : i >= last ? wall : (i - first) * gauge.rowHeightCm));
@@ -215,6 +220,8 @@ export function buildRevolutionPart(part: EnginePart, gauge: Gauge): PartPattern
     ? "Fasten off, stuff, and close."
     : part.shape === "ear"
       ? "Fasten off, leaving a long tail. Flatten; do not stuff."
+      : part.shape === "basket"
+        ? "Fasten off and weave in the ends: this round is the open top edge."
       : "Fasten off, leaving a long tail for sewing.";
 
   return {

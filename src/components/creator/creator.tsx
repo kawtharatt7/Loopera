@@ -4,7 +4,13 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PatternViewer } from "@/components/viewer/pattern-viewer";
 import { roundKey } from "@/components/viewer/pattern-list";
+import dynamic from "next/dynamic";
 import type { AiDesign } from "@/lib/ai/design";
+import type { EnginePart, Pattern } from "@/lib/engine/types";
+import { hasWebGL } from "@/lib/webgl";
+import { guessMake, type Make } from "@/lib/viewer/piece";
+
+const PieceScene = dynamic(() => import("@/components/viewer/piece-scene"), { ssr: false });
 import { colorFromText, heightFor, matchTapestry, matchTemplate, recolor, TEMPLATES, type MakeType, type SizeChoice } from "@/lib/creator/templates";
 import { estimate, generatePattern, presetFor, scaleSpec } from "@/lib/engine";
 import type { EditorDoc } from "@/lib/editor/state";
@@ -24,7 +30,7 @@ const LAST_KEY = "loopera-creator-last-v1";
 export const HANDOFF_KEY = "loopera-editor-handoff";
 
 type Result =
-  | { kind: "template"; id: string; templateKey: string; title: Bi; spec: DesignSpec; height: number; fromPhoto: boolean; ai?: "ok" | "fallback" | "off" }
+  | { kind: "template"; id: string; templateKey: string; title: Bi; spec: DesignSpec; height: number; fromPhoto: boolean; ai?: "ok" | "fallback" | "off"; make?: Make }
   | { kind: "wall"; id: string; title: Bi; grid: number[][]; palette: string[]; names: Bi[]; fromPhoto: boolean };
 
 function loadLast(): Result | null {
@@ -161,6 +167,7 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
             height: Math.round(ai.heightCm),
             fromPhoto: !!img,
             ai: aiState,
+            make: type,
           };
         } else {
           const fromText = colorFromText(words);
@@ -177,6 +184,7 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
             height,
             fromPhoto: !!img,
             ai: aiState,
+            make: type,
           };
         }
       }
@@ -437,8 +445,10 @@ function TemplateResult({
   const hours = est.minutes >= 60 ? `${Math.round((est.minutes / 60) * 2) / 2} ${ar ? "ساعة" : "h"}` : `${est.minutes} ${ar ? "دقيقة" : "min"}`;
   const tplName = TEMPLATES.find((x) => x.key === result.templateKey);
 
+  const make: Make = result.make ?? (tplName ? tplName.type : guessMake(parts));
   return (
     <div className="space-y-8">
+      <FormingPiece pattern={pattern} parts={parts} make={make} rowHeightCm={preset.gauge.rowHeightCm} stitchWidthCm={preset.gauge.stitchWidthCm} />
       <div className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
         <div>
           <p className="font-medium" aria-live="polite">
@@ -461,6 +471,37 @@ function TemplateResult({
         </ul>
       </div>
       <PatternViewer pattern={pattern} parts={parts} rowHeightCm={preset.gauge.rowHeightCm} terms="us" onCanvas={onCanvas} progress={progress} />
+    </div>
+  );
+}
+
+/** The finished piece in 3D, forming stitch by stitch in the order it is worked. */
+function FormingPiece(props: { pattern: Pattern; parts: EnginePart[]; make: Make; rowHeightCm: number; stitchWidthCm: number }) {
+  const { t } = useT();
+  const [gl, setGl] = useState<boolean | null>(null);
+  const [run, setRun] = useState(0);
+  const [done, setDone] = useState(false);
+  const [reduce, setReduce] = useState(false);
+  useEffect(() => {
+    setGl(hasWebGL());
+    setReduce(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
+  useEffect(() => setDone(false), [props.pattern, run]);
+  if (gl === false) return null;
+  return (
+    <div className="overflow-hidden rounded-2xl bg-surface/60 ring-1 ring-line/10">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4">
+        <div>
+          <h3 className="font-serif text-xl">{t.creator.pieceTitle}</h3>
+          <p className="text-sm text-muted-foreground" aria-live="polite">
+            {done ? t.creator.pieceDone : t.creator.pieceForming}
+          </p>
+        </div>
+        <button type="button" onClick={() => setRun((r) => r + 1)} className="min-h-10 rounded-full border border-line/20 px-4 text-sm hover:border-line/50">
+          {t.creator.replay}
+        </button>
+      </div>
+      <div className="h-[380px] sm:h-[460px]">{gl && <PieceScene {...props} run={run} reduceMotion={reduce} onDone={() => setDone(true)} />}</div>
     </div>
   );
 }

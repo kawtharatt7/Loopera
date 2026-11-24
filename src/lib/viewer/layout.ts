@@ -131,7 +131,7 @@ export function assemblyLayout(pattern: Pattern, parts: EnginePart[], explode: n
       let up: V3;
       if (b.closed) {
         // Closed part: its center sits just outside the attach point, its axis along the direction.
-        const c = ce.radius * 0.75 + ce.height * 0.15 + push;
+        const c = ce.radius * 0.58 + push;
         up = dir;
         origin = [
           attach[0] + dir[0] * c - up[0] * (ce.height / 2),

@@ -61,6 +61,7 @@ export const SHAPE_DEFAULTS: Record<PartShape, { width: number; height: number; 
   sphere: { width: 0.6, height: 0.6, depth: 0.6, label: "Ball" },
   ellipsoid: { width: 0.6, height: 0.8, depth: 0.55, label: "Egg / body" },
   cylinder: { width: 0.4, height: 0.6, depth: 0.4, label: "Tube" },
+  basket: { width: 1, height: 0.8, depth: 1, label: "Bag body (open top)" },
   cone: { width: 0.4, height: 0.5, depth: 0.4, label: "Cone" },
   capsule: { width: 0.25, height: 0.6, depth: 0.25, label: "Limb" },
   ear: { width: 0.3, height: 0.25, depth: 0.1, label: "Ear" },

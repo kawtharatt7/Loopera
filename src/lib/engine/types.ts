@@ -6,7 +6,7 @@ export interface Gauge {
   rowHeightCm: number;
 }
 
-export type RevolutionShape = "sphere" | "ellipsoid" | "cylinder" | "cone" | "capsule" | "ear";
+export type RevolutionShape = "sphere" | "ellipsoid" | "cylinder" | "basket" | "cone" | "capsule" | "ear";
 export type FlatShape = "rectangle" | "granny_square";
 export type PartShape = RevolutionShape | FlatShape;
 

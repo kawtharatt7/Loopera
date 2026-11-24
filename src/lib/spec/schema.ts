@@ -6,6 +6,7 @@ export const PART_SHAPES = [
   "sphere",
   "ellipsoid",
   "cylinder",
+  "basket",
   "cone",
   "capsule",
   "ear",

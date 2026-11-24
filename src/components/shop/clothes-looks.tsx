@@ -79,7 +79,7 @@ export function ClothesLooks({ products }: { products: Product[] }) {
           <li key={p.slug}>
             <button type="button" onClick={() => setOpen(i)} aria-haspopup="dialog" className="group block w-full text-start">
               {p.hanger ? (
-                <span className="relative flex aspect-[8/9] items-center justify-center overflow-hidden rounded-sm bg-[#FAF7F2] ring-1 ring-line/5">
+                <span className="relative flex aspect-[8/9] items-center justify-center overflow-hidden rounded-sm bg-surface ring-1 ring-line/5">
                   <span aria-hidden="true" className="absolute inset-0" style={{ background: "radial-gradient(80% 60% at 70% 10%, rgb(255 236 210 / 0.8), transparent 70%)" }} />
                   <HangerPhoto product={p} colorId={colorOf(p)} className="relative max-h-[88%] max-w-[84%] object-contain drop-shadow-[0_22px_18px_rgba(60,30,10,0.22)] transition-transform duration-700 ease-out group-hover:-translate-y-1.5 group-hover:rotate-[-1.5deg]" />
                   <span className="stitch absolute end-3 top-3 rounded-sm bg-[#26211E] px-2.5 py-1 text-xs font-medium text-[#FAF7F2]" style={{ outlineColor: "rgb(250 247 242 / 0.5)", outlineOffset: "-3px" }}>
@@ -176,7 +176,7 @@ function LookDialog({ product, colorId, onColor, onClose }: { product: Product; 
             <LookPhoto product={product} colorId={colorId} onSrc={onSrc} className="absolute inset-0 h-full w-full object-cover" />
           </motion.div>
           {product.hanger && (
-            <motion.div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#FAF7F2]" initial={false} animate={{ opacity: onModel ? 0 : 1, scale: onModel ? 0.92 : 1, y: onModel ? -20 : 0 }} transition={{ duration: reduce ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}>
+            <motion.div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-surface" initial={false} animate={{ opacity: onModel ? 0 : 1, scale: onModel ? 0.92 : 1, y: onModel ? -20 : 0 }} transition={{ duration: reduce ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}>
               <HangerPhoto product={product} colorId={colorId} className="max-h-[86%] max-w-[80%] object-contain drop-shadow-[0_26px_22px_rgba(60,30,10,0.25)]" />
             </motion.div>
           )}

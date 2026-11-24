@@ -1,74 +1,131 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useLayoutEffect, useRef, useState } from "react";
 import { CustomOrderDrawer } from "@/components/custom/custom-order";
 import { useC } from "@/lib/i18n/collection";
 
 /*
-  The opening: a full-bleed film (yarn spool, the sweater forming stitch by stitch, the finished
-  sweater) that plays muted on a loop. The poster stands in until it can play, and stays if the
-  visitor prefers reduced motion. One small control pauses or plays it.
+  The opening moves with the scroll: the section pins and the film's currentTime follows the
+  scroll (GSAP ScrollTrigger, scrub), from the hook working the yarn to the model in the finished
+  cardigan. As the film ends the screen sinks into one deep colour, and two quiet choices appear
+  in the middle. Reduced motion shows that final screen directly.
 */
 
-const VIDEO = "/videos/hero-loop.mp4";
-const POSTER = "/videos/hero-loop-poster.jpg";
+gsap.registerPlugin(ScrollTrigger);
+
+const VIDEO = "/videos/hero-craft.mp4";
+const POSTER = "/videos/hero-craft-poster.jpg";
 
 export function ScrollHero() {
-  const c = useC();
-  const h = c.hero;
+  const h = useC().hero;
+  const root = useRef<HTMLElement | null>(null);
   const video = useRef<HTMLVideoElement | null>(null);
-  const [playing, setPlaying] = useState(false);
+  const [still, setStill] = useState(false);
   const [crochet, setCrochet] = useState(false);
 
-  useEffect(() => {
-    const v = video.current;
-    if (!v) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    v.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
-  }, []);
-
-  const toggle = () => {
-    const v = video.current;
-    if (!v) return;
-    if (v.paused) v.play().then(() => setPlaying(true)).catch(() => undefined);
-    else {
-      v.pause();
-      setPlaying(false);
-    }
-  };
   const openStore = () => document.getElementById("shop")?.scrollIntoView({ behavior: "smooth", block: "start" });
 
-  return (
-    <section aria-label={h.label} className="relative h-[min(92svh,900px)] min-h-[520px] w-full overflow-hidden bg-[#EFE6D6] text-[#26211E]">
-      <video ref={video} src={VIDEO} poster={POSTER} muted loop playsInline preload="auto" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover" onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} />
-      <div aria-hidden="true" className="absolute inset-0" style={{ background: "linear-gradient(to right, rgb(250 247 242 / 0.9) 0%, rgb(250 247 242 / 0.6) 34%, transparent 62%)" }} />
-      <div aria-hidden="true" className="absolute inset-0 rtl:-scale-x-100" style={{ background: "linear-gradient(to top, rgb(250 247 242 / 0.7), transparent 30%)" }} />
+  useLayoutEffect(() => {
+    const el = root.current;
+    const v = video.current;
+    if (!el || !v) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setStill(true);
+      return;
+    }
+    const q = gsap.utils.selector(el);
+    let target = 0;
+    let shown = 0;
+    let raf = 0;
+    // Ease the film toward the scroll position, so fast scrolls still look smooth.
+    const tick = () => {
+      raf = 0;
+      if (!v.duration || Number.isNaN(v.duration)) return;
+      shown += (target - shown) * 0.18;
+      if (Math.abs(target - shown) < 0.0005) shown = target;
+      const t = Math.min(v.duration - 0.05, Math.max(0, shown * v.duration));
+      if (Math.abs(v.currentTime - t) > 0.008) v.currentTime = t;
+      if (shown !== target) raf = requestAnimationFrame(tick);
+    };
+    const prime = () => v.play().then(() => v.pause()).catch(() => undefined);
+    v.addEventListener("loadedmetadata", tick);
+    prime();
 
-      <div className="relative flex h-full max-w-7xl flex-col justify-end px-6 pb-16 sm:px-10 md:justify-center md:pb-0">
-        <p className="text-sm tracking-wide opacity-75">{h.kicker}</p>
-        <h1 className="mt-3 max-w-[14ch] text-balance text-4xl leading-[1.05] sm:text-6xl lg:text-7xl">{h.title}</h1>
-        <p className="mt-4 max-w-md leading-relaxed opacity-80">{h.s3text}</p>
-        <div className="mt-7 flex flex-wrap gap-3">
-          <button type="button" onClick={openStore} className="stitch inline-flex min-h-12 items-center rounded-sm bg-[#A44F36] px-7 font-medium text-white shadow-[0_14px_30px_-14px_rgba(120,50,30,0.8)] hover:bg-[#8F4430]">
-            {h.openStore}
-          </button>
-          <button type="button" onClick={() => setCrochet(true)} className="inline-flex min-h-12 items-center rounded-sm border border-[#26211E]/40 bg-[#FAF7F2]/85 px-7 font-medium backdrop-blur hover:border-[#26211E]">
-            {h.iCrochet}
-          </button>
+    const ctx = gsap.context(() => {
+      gsap.set(q("[data-veil], [data-choices]"), { autoAlpha: 0 });
+      ScrollTrigger.create({
+        trigger: el,
+        start: "top top",
+        end: "+=300%",
+        pin: q("[data-pin]")[0],
+        scrub: 0.6,
+        onUpdate: (st) => {
+          const p = st.progress;
+          target = Math.min(1, p / 0.85);
+          if (!raf) raf = requestAnimationFrame(tick);
+          gsap.set(q("[data-title]"), { autoAlpha: Math.max(0, 1 - p / 0.14), y: -p * 90 });
+          gsap.set(q("[data-hint]"), { autoAlpha: p < 0.03 ? 1 : 0 });
+          const dark = Math.min(1, Math.max(0, (p - 0.8) / 0.12));
+          gsap.set(q("[data-veil]"), { autoAlpha: dark * 0.94 });
+          const c = Math.min(1, Math.max(0, (p - 0.88) / 0.1));
+          gsap.set(q("[data-choices]"), { autoAlpha: c, y: (1 - c) * 18 });
+        },
+      });
+    }, el);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      v.removeEventListener("loadedmetadata", tick);
+      ctx.revert();
+    };
+  }, []);
+
+  return (
+    <section ref={root} aria-label={h.label} className="relative">
+      <div data-pin className="relative h-[100svh] w-full overflow-hidden bg-[#1A1613]">
+        <video
+          ref={video}
+          src={VIDEO}
+          poster={POSTER}
+          muted
+          playsInline
+          preload="auto"
+          aria-hidden="true"
+          className="absolute inset-0 h-full w-full object-cover"
+          onLoadedData={(e) => still && (e.currentTarget.currentTime = Math.max(0, e.currentTarget.duration - 0.05))}
+        />
+        <div aria-hidden="true" className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgb(250 247 242 / 0.75) 0%, rgb(250 247 242 / 0.25) 30%, transparent 52%)" }} />
+
+        {!still && (
+          <>
+            <div data-title className="absolute inset-x-0 top-[16vh] z-10 px-6 text-center text-[#26211E]">
+              <p className="text-sm tracking-wide opacity-70">{h.kicker}</p>
+              <h1 className="mx-auto mt-3 max-w-[16ch] text-balance text-4xl font-semibold leading-[1.06] sm:text-6xl lg:text-7xl">{h.title}</h1>
+            </div>
+            <p data-hint className="absolute inset-x-0 bottom-6 z-10 text-center text-xs uppercase tracking-[0.3em] text-white/80">
+              {h.hint}
+              <span aria-hidden="true" className="mx-auto mt-2 block h-7 w-px animate-pulse bg-white/60" />
+            </p>
+          </>
+        )}
+
+        {/* The end: one deep colour, two quiet choices in the middle */}
+        <div data-veil aria-hidden="true" className="absolute inset-0 z-20 bg-[#1A1613]" style={still ? { opacity: 0.9, visibility: "visible" } : undefined} />
+        <div data-choices className="absolute inset-0 z-30 flex flex-col items-center justify-center px-6 text-center text-[#F4ECE2]" style={still ? { opacity: 1, visibility: "visible" } : undefined}>
+          {still && <p className="mb-4 text-sm tracking-wide opacity-70">{h.title}</p>}
+          <h2 className="text-balance text-3xl font-normal tracking-tight sm:text-5xl">{h.s4title}</h2>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:gap-4">
+            <button type="button" onClick={openStore} className="min-h-12 min-w-[200px] rounded-full bg-[#F4ECE2] px-8 text-[15px] font-medium text-[#1A1613] transition-transform duration-500 hover:-translate-y-0.5">
+              {h.openStore}
+            </button>
+            <button type="button" onClick={() => setCrochet(true)} className="min-h-12 min-w-[200px] rounded-full border border-[#F4ECE2]/40 px-8 text-[15px] font-medium transition-colors duration-500 hover:border-[#F4ECE2]">
+              {h.iCrochet}
+            </button>
+          </div>
         </div>
       </div>
-
-      <button
-        type="button"
-        onClick={toggle}
-        aria-pressed={playing}
-        aria-label={playing ? c.pauseVideo : c.playVideo}
-        className="absolute bottom-5 end-5 grid h-11 w-11 place-items-center rounded-full border border-[#26211E]/20 bg-[#FAF7F2]/80 backdrop-blur hover:border-[#26211E]"
-      >
-        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
-          <path d={playing ? "M6.5 4.5h3.5v15H6.5zM14 4.5h3.5v15H14z" : "M7 4.5v15l12.5-7.5z"} />
-        </svg>
-      </button>
       <CustomOrderDrawer open={crochet} onClose={() => setCrochet(false)} kind="general" />
     </section>
   );

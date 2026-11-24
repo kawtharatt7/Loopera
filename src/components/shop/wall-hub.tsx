@@ -45,18 +45,24 @@ export function WallHub({ products }: { products: Product[] }) {
             type="button"
             aria-selected={tab === t}
             onClick={() => setTab(t)}
-            className={`inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-sm border px-4 text-sm transition-colors ${tab === t ? "border-fg bg-fg text-bg" : "border-line/20 hover:border-fg"}`}
+            className={`inline-flex min-h-11 shrink-0 items-center gap-2 whitespace-nowrap rounded-full border px-4 text-sm transition-colors duration-500 ${tab === t ? "border-fg bg-fg text-bg" : "border-line/20 hover:border-fg"}`}
           >
             {c.hub.tabs[t]}
             <span className={`text-xs tabular-nums ${tab === t ? "text-bg/70" : "text-muted-foreground"}`}>{count(t).toLocaleString(locale === "ar" ? "ar-SA" : "en")}</span>
           </button>
         ))}
-        <button type="button" onClick={() => setCustom("")} className="ms-auto inline-flex min-h-11 shrink-0 items-center rounded-sm bg-primary px-5 text-sm font-medium text-primary-fg hover:opacity-90">
+        <button type="button" onClick={() => setCustom("")} className="ms-auto inline-flex min-h-11 shrink-0 items-center rounded-full bg-fg px-5 text-sm font-medium text-bg hover:opacity-90">
           {c.hub.customize}
         </button>
       </div>
 
-      <ul className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4">
+      <div className="mb-10 flex flex-wrap items-center justify-between gap-4 rounded-sm bg-surface px-6 py-5">
+        <p className="max-w-md text-sm leading-relaxed text-muted-foreground">{c.hub.walkText}</p>
+        <a href="/shop/wall" className="inline-flex min-h-11 items-center rounded-full border border-fg/30 px-6 text-sm hover:border-fg">
+          {c.hub.walk}
+        </a>
+      </div>
+      <ul className="columns-2 gap-x-6 md:columns-3 lg:columns-4 [&>li]:mb-10 [&>li]:break-inside-avoid">
         {shown.map((k) => {
           const id = k.kind === "product" ? k.product.slug : `${k.group}-${k.en}`;
           const name = k.kind === "product" ? bi(k.product.title) : locale === "ar" ? k.ar : k.en;
@@ -64,13 +70,16 @@ export function WallHub({ products }: { products: Product[] }) {
           return (
             <li key={id} className="flex flex-col">
               {k.kind === "product" ? (
-                <div className="relative aspect-[4/3] overflow-hidden rounded-sm bg-surface">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- local photo */}
-                  <img src={k.product.photos[0].src} alt={bi(k.product.photos[0].alt)} loading="lazy" className="h-full w-full object-cover drop-shadow-[0_14px_14px_rgba(60,30,10,0.18)]" />
+                <div className="relative">
+                  {/* gallery light above the frame */}
+                  <span aria-hidden="true" className="pointer-events-none absolute -inset-x-4 -top-6 h-24" style={{ background: "radial-gradient(50% 60% at 50% 0%, rgb(255 236 210 / 0.35), transparent 70%)" }} />
+                  <div className="relative border border-line/10 bg-bg p-3 shadow-[0_24px_40px_-26px_rgba(30,20,10,0.55)] transition-transform duration-700 ease-out hover:-translate-y-1 sm:p-4">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- local photo */}
+                    <img src={k.product.photos[0].src} alt={bi(k.product.photos[0].alt)} loading="lazy" className="block w-full" />
+                  </div>
                 </div>
               ) : (
-                <div className="relative flex aspect-[4/3] flex-col items-center justify-center overflow-hidden rounded-sm border border-line/10 bg-surface px-4 text-center">
-                  <span aria-hidden="true" className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='8'><path d='M0 4h4M4 0v4' stroke='%2326211E' stroke-width='1.4'/></svg>\")" }} />
+                <div className="relative flex aspect-[4/5] flex-col items-center justify-center border border-line/10 bg-bg px-4 text-center shadow-[0_24px_40px_-26px_rgba(30,20,10,0.55)]">
                   <span className="relative text-xs uppercase tracking-[0.2em] text-muted-foreground">{c.hub.tabs[k.group]}</span>
                   <span className="relative mt-2 font-serif text-2xl leading-tight sm:text-3xl">{name}</span>
                   <span className="relative mt-2 text-xs text-muted-foreground">{c.hub.byRequest}</span>
@@ -95,7 +104,7 @@ export function WallHub({ products }: { products: Product[] }) {
                         <button
                           type="button"
                           onClick={() => add({ slug: k.product.slug, color: k.product.colors[0].id, size: k.product.sizes[0].id }) && setAdded(k.product.slug)}
-                          className={`min-h-11 rounded-sm px-3 text-sm font-medium transition-colors ${added === k.product.slug ? "bg-sage text-white" : "bg-primary text-primary-fg hover:opacity-90"}`}
+                          className={`min-h-10 rounded-full px-3 text-xs font-medium transition-colors duration-500 ${added === k.product.slug ? "bg-sage text-white" : "bg-fg text-bg hover:opacity-90"}`}
                         >
                           {added === k.product.slug ? c.added : c.hub.orderShown}
                         </button>
@@ -103,7 +112,7 @@ export function WallHub({ products }: { products: Product[] }) {
                       <button
                         type="button"
                         onClick={() => setCustom(`${prefix}:${k.kind === "product" ? name : locale === "ar" ? k.ar : k.en}`)}
-                        className={forSale ? "min-h-11 rounded-sm border border-fg/25 px-3 text-sm hover:border-fg" : "min-h-11 rounded-sm bg-primary px-3 text-sm font-medium text-primary-fg hover:opacity-90"}
+                        className="min-h-10 rounded-full border border-fg/20 px-3 text-xs transition-colors duration-500 hover:border-fg"
                       >
                         {forSale ? c.hub.customize : c.hub.request}
                       </button>

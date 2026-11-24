@@ -81,6 +81,8 @@ const en = {
     byRequest: "Made from your reference",
     designOf: (n: string) => `${n} tapestry`,
     showcase: "Showcase Archive",
+    walk: "Walk through the gallery",
+    walkText: "Every piece hangs in a quiet 3D room. Walk along the walls and stop at the ones you love.",
     request: "Request Custom Piece",
   },
   gifts: {
@@ -212,6 +214,8 @@ const ar: CollectionDict = {
     byRequest: "تنشغل من الصورة اللي ترسلينها",
     designOf: (n: string) => `لوحة ${n}`,
     showcase: "للعرض فقط — نماذج أعمال",
+    walk: "ادخلي المعرض",
+    walkText: "كل اللوحات معلّقة في غرفة ثلاثية الأبعاد هادية. تمشّي على الجدران ووقفي عند اللي تحبينها.",
     request: "اطلب تصميماً خاصاً",
   },
   gifts: {

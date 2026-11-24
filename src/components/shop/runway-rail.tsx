@@ -6,6 +6,7 @@ import { useBag } from "@/components/bag/bag-context";
 import { useC } from "@/lib/i18n/collection";
 import { useT } from "@/lib/i18n/client";
 import { formatSar, getProduct, type Product } from "@/lib/shop/catalog";
+import { useRecolored } from "@/lib/shop/recolor";
 
 /*
   "Try the Look", on a rail: each look's garment hangs from a wooden display rail across the top
@@ -18,29 +19,20 @@ import { formatSar, getProduct, type Product } from "@/lib/shop/catalog";
   the layout and pins stay where they are.
 */
 
-type Look = { garment: string; bag: string; pin: [number, number] };
+type Look = { garment: string; pin: [number, number] };
 const LOOKS: Look[] = [
-  { garment: "star-bell-sleeve-sweater", bag: "cocoa-bucket-bag", pin: [55, 38] },
-  { garment: "green-rose-hem-dress", bag: "cream-braided-tote", pin: [50, 50] },
-  { garment: "open-weave-maxi-overlay", bag: "terracotta-crescent-bag", pin: [50, 42] },
-  { garment: "daisy-vest", bag: "sage-daisy-crossbody", pin: [56, 50] },
-  { garment: "flared-yellow-cardigan", bag: "cream-mesh-tote", pin: [50, 48] },
-  { garment: "spiderweb-mesh-top", bag: "burgundy-pearl-clutch", pin: [50, 40] },
-  { garment: "distressed-striped-sweater", bag: "navy-bow-clutch", pin: [50, 45] },
-  { garment: "checkerboard-maxi-dress", bag: "wine-mini-bag", pin: [52, 58] },
+  { garment: "star-bell-sleeve-sweater", pin: [55, 38] },
+  { garment: "green-rose-hem-dress", pin: [50, 50] },
+  { garment: "open-weave-maxi-overlay", pin: [50, 42] },
+  { garment: "daisy-vest", pin: [56, 50] },
+  { garment: "flared-yellow-cardigan", pin: [50, 48] },
+  { garment: "spiderweb-mesh-top", pin: [50, 40] },
+  { garment: "distressed-striped-sweater", pin: [50, 45] },
+  { garment: "checkerboard-maxi-dress", pin: [52, 58] },
 ];
 const SPEED = 5000;
 const K = 95;
 const C = 2 * Math.sqrt(K);
-
-/** Popup colourways: only the surface and accent change. */
-const TINTS = [
-  { id: "linen", surface: "#F3ECE1", accent: "#A44F36" },
-  { id: "sage", surface: "#E6EBE1", accent: "#55664F" },
-  { id: "rose", surface: "#F4E4E2", accent: "#8E3B46" },
-  { id: "sand", surface: "#EFE2CC", accent: "#7A5A2E" },
-  { id: "espresso", surface: "#2E2621", accent: "#E2B48A" },
-];
 
 const wrap = (d: number, n: number) => ((((d + n / 2) % n) + n) % n) - n / 2;
 
@@ -50,7 +42,7 @@ export function RunwayRail() {
   const r = c.runway;
   const reduce = useReducedMotion() ?? false;
   const looks = useMemo(
-    () => LOOKS.map((l) => ({ ...l, g: getProduct(l.garment), b: getProduct(l.bag) })).filter((l): l is Look & { g: Product; b: Product } => !!l.g?.hanger && !!l.b),
+    () => LOOKS.map((l) => ({ ...l, g: getProduct(l.garment) })).filter((l): l is Look & { g: Product } => !!l.g?.hanger),
     [],
   );
   const n = looks.length;
@@ -62,7 +54,8 @@ export function RunwayRail() {
   const [playing, setPlaying] = useState(!reduce);
   const [hold, setHold] = useState(false);
   const [open, setOpen] = useState(false);
-  const [tint, setTint] = useState(0);
+  const [colorId, setColorId] = useState("as-shown");
+  const [dir, setDir] = useState(1);
   const [hot, setHot] = useState<number | null>(null);
   const drag = useRef<{ x: number; y: number; t: number; on: boolean; id: number; samples: { x: number; time: number }[] } | null>(null);
   const suppress = useRef(0);
@@ -131,6 +124,7 @@ export function RunwayRail() {
       setIndex(((t % n) + n) % n);
       setOpen(false);
       setHot(null);
+      setColorId("as-shown");
       kick();
     },
     [kick, n],
@@ -215,16 +209,14 @@ export function RunwayRail() {
     moveTo(Math.max(from - 2, Math.min(from + 2, i)));
   };
 
-  const t = TINTS[tint];
-  const pieces = look ? [look.g, look.b] : [];
 
   return (
-    <div className="grid overflow-hidden rounded-sm border border-line/10 bg-[#FAF7F2] text-[#26211E] lg:grid-cols-[minmax(0,1fr)_360px]">
+    <div className="grid overflow-hidden rounded-sm border border-line/10 bg-bg text-fg lg:grid-cols-[minmax(0,1fr)_360px]">
       <div className="relative flex min-h-[min(78svh,720px)] flex-col">
         <div className="flex items-end justify-between gap-4 px-6 pt-6 sm:px-8">
           <div>
             <h3 className="text-3xl sm:text-4xl">{r.title}</h3>
-            <p className="mt-1 text-sm text-[#6B5F57]">{r.sub}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{r.sub}</p>
           </div>
           <span className="sr-only" aria-live="polite">
             {look ? `${r.look} ${index + 1}: ${bi(look.g.title)}` : ""}
@@ -238,7 +230,7 @@ export function RunwayRail() {
           role="region"
           aria-roledescription="carousel"
           aria-label={r.stageLabel}
-          className="relative flex-1 cursor-grab touch-pan-y select-none overflow-hidden outline-none focus-visible:shadow-[inset_0_0_0_2px_#26211E] active:cursor-grabbing"
+          className="relative flex-1 cursor-grab touch-pan-y select-none overflow-hidden outline-none focus-visible:shadow-[inset_0_0_0_2px_rgb(var(--fg))] active:cursor-grabbing"
           onPointerDown={onDown}
           onPointerMove={onMove}
           onPointerUp={onUp}
@@ -262,7 +254,7 @@ export function RunwayRail() {
           {[0, 1].map((k) => (
             <div key={k} aria-hidden="true" className={`absolute top-[18px] z-[201] h-[34px] w-[16px] rounded-sm ${k ? "end-[3%]" : "start-[3%]"}`} style={{ background: "linear-gradient(to right, #A8A39A, #E6E2DA 45%, #8C877E)", boxShadow: "0 3px 6px rgba(0,0,0,0.25)" }} />
           ))}
-          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1/3" style={{ background: "linear-gradient(to top, rgb(239 230 214 / 0.8), transparent)" }} />
+          <div aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1/3" style={{ background: "linear-gradient(to top, rgb(var(--surface) / 0.8), transparent)" }} />
 
           {looks.map((l, i) => (
             <button
@@ -286,12 +278,11 @@ export function RunwayRail() {
             </button>
           ))}
 
-          {/* View look: the same box every time; only its colours change with the swatches */}
+          {/* View look: the model in the middle; swatches repaint the garment and slide it in sideways */}
           <AnimatePresence>
             {open && look && (
               <motion.div
-                className="absolute inset-0 z-[300] flex items-end justify-center gap-6 px-6 pb-6 pt-16"
-                style={{ backgroundColor: t.surface, transition: "background-color .6s cubic-bezier(.16,1,.3,1)" }}
+                className="absolute inset-0 z-[300] flex flex-col items-center bg-surface px-6 pb-5 pt-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -300,39 +291,40 @@ export function RunwayRail() {
                 role="dialog"
                 aria-label={r.viewLook}
               >
-                <div className="absolute inset-x-6 top-4 flex items-center justify-between gap-4">
-                  <p className={`text-sm ${tint === 4 ? "text-[#FAF7F2]" : ""}`}>
-                    <span className="me-2 text-xs uppercase tracking-[0.2em] opacity-70 tabular-nums">
+                <div className="flex w-full items-center justify-between gap-4">
+                  <p className="text-sm">
+                    <span className="me-2 text-xs uppercase tracking-[0.2em] text-muted-foreground tabular-nums">
                       {r.look} {String(index + 1).padStart(2, "0")}
                     </span>
                     {bi(look.g.title)}
                   </p>
-                  <div className="flex items-center gap-3">
-                    <div role="group" aria-label={r.tint} className="flex gap-1.5">
-                      {TINTS.map((x, k) => (
-                        <button key={x.id} type="button" aria-pressed={k === tint} aria-label={r.tints[k]} onClick={() => setTint(k)} className={`h-7 w-7 rounded-full border-2 p-0.5 ${k === tint ? "border-current" : "border-transparent"} ${tint === 4 ? "text-[#FAF7F2]" : ""}`}>
-                          <span className="block h-full w-full rounded-full ring-1 ring-black/10" style={{ background: `linear-gradient(135deg, ${x.surface} 50%, ${x.accent} 50%)` }} />
-                        </button>
-                      ))}
-                    </div>
-                    <button type="button" autoFocus onClick={() => setOpen(false)} aria-label={c.close} className="grid h-11 w-11 place-items-center rounded-full border border-black/15 bg-white/60 backdrop-blur transition-transform hover:rotate-90">
-                      <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-                        <path d="M5 5l14 14M19 5L5 19" />
-                      </svg>
+                  <button type="button" autoFocus onClick={() => setOpen(false)} aria-label={c.close} className="grid h-11 w-11 place-items-center rounded-full border border-line/15 bg-bg/60 backdrop-blur transition-transform duration-500 hover:rotate-90">
+                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
+                      <path d="M5 5l14 14M19 5L5 19" />
+                    </svg>
+                  </button>
+                </div>
+                <div className="relative mt-3 min-h-0 w-full flex-1 overflow-hidden">
+                  <ModelSlide product={look.g} colorId={colorId} dir={dir} reduce={reduce} pin={look.pin} hot={hot === 0} onPin={() => setHot(0)} />
+                </div>
+                <div role="group" aria-label={c.color} className="mt-4 flex flex-wrap justify-center gap-2.5">
+                  {look.g.colors.map((col, k) => (
+                    <button
+                      key={col.id}
+                      type="button"
+                      aria-pressed={col.id === colorId}
+                      aria-label={bi(col.name)}
+                      title={bi(col.name)}
+                      onClick={() => {
+                        const from = look.g.colors.findIndex((x) => x.id === colorId);
+                        setDir(k >= from ? 1 : -1);
+                        setColorId(col.id);
+                      }}
+                      className={`h-9 w-9 rounded-full border-2 p-0.5 transition-colors ${col.id === colorId ? "border-fg" : "border-transparent hover:border-line/40"}`}
+                    >
+                      <span className="block h-full w-full rounded-full ring-1 ring-line/20" style={{ background: col.hex === "transparent" ? (look.g.recolor?.from ?? "#ccc") : col.hex }} />
                     </button>
-                  </div>
-                </div>
-                {/* Model wearing the garment, pin 1 */}
-                <div className="relative h-full max-h-[560px] overflow-hidden rounded-sm shadow-[0_30px_60px_-30px_rgba(0,0,0,0.5)]" style={{ aspectRatio: "680/762" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element -- local photo */}
-                  <img src={look.g.photos[0].src} alt={bi(look.g.photos[0].alt)} className="h-full w-full object-cover" />
-                  <Pin n={1} x={look.pin[0]} y={look.pin[1]} label={bi(look.g.title)} accent={t.accent} hot={hot === 0} onClick={() => setHot(0)} />
-                </div>
-                {/* The bag of the look, pin 2 */}
-                <div className="relative hidden h-[38%] sm:block">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- local cut-out */}
-                  <img src={look.b.cutout} alt={bi(look.b.title)} className="h-full w-auto object-contain drop-shadow-[0_20px_16px_rgba(60,30,10,0.3)]" />
-                  <Pin n={2} x={50} y={55} label={bi(look.b.title)} accent={t.accent} hot={hot === 1} onClick={() => setHot(1)} />
+                  ))}
                 </div>
               </motion.div>
             )}
@@ -350,12 +342,12 @@ export function RunwayRail() {
                 aria-current={i === index}
                 aria-label={`${r.look} ${i + 1}: ${bi(l.g.title)}`}
                 onClick={() => (setPlaying(false), go(i))}
-                className={`group flex h-11 min-w-[14px] flex-col justify-center gap-2 text-start text-[10px] tabular-nums text-[#6B5F57] transition-[flex-basis] duration-700 ${i === index ? "flex-[0_0_120px] text-[#26211E] sm:flex-[0_0_170px]" : "flex-[0_1_44px]"}`}
+                className={`group flex h-11 min-w-[14px] flex-col justify-center gap-2 text-start text-[10px] tabular-nums text-muted-foreground transition-[flex-basis] duration-700 ${i === index ? "flex-[0_0_120px] text-fg sm:flex-[0_0_170px]" : "flex-[0_1_44px]"}`}
               >
-                <span className="relative block h-[2px] w-full overflow-hidden bg-[#26211E]/15">
+                <span className="relative block h-[2px] w-full overflow-hidden bg-fg/15">
                   <span
                     key={i === index ? `${index}-${playing && !hold && !open}` : "x"}
-                    className={`absolute inset-0 origin-left bg-[#A44F36] rtl:origin-right ${i < index ? "scale-x-100 opacity-40" : i === index ? (playing && !hold && !open && !reduce ? "hero-fill" : "scale-x-100") : "scale-x-0"}`}
+                    className={`absolute inset-0 origin-left bg-primary rtl:origin-right ${i < index ? "scale-x-100 opacity-40" : i === index ? (playing && !hold && !open && !reduce ? "hero-fill" : "scale-x-100") : "scale-x-0"}`}
                     style={{ animationDuration: `${SPEED}ms` }}
                   />
                 </span>
@@ -366,7 +358,7 @@ export function RunwayRail() {
               </button>
             ))}
           </div>
-          <button type="button" onClick={() => setPlaying((p) => !p)} aria-pressed={playing} aria-label={playing ? r.pause : r.play} className="grid h-11 w-11 shrink-0 place-items-center rounded-full hover:bg-[#26211E]/5">
+          <button type="button" onClick={() => setPlaying((p) => !p)} aria-pressed={playing} aria-label={playing ? r.pause : r.play} className="grid h-11 w-11 shrink-0 place-items-center rounded-full hover:bg-fg/5">
             <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
               <path d={playing ? "M6.5 4.5h3.5v15H6.5zM14 4.5h3.5v15H14z" : "M7 4.5v15l12.5-7.5z"} />
             </svg>
@@ -376,8 +368,8 @@ export function RunwayRail() {
       </div>
 
       {/* In this look */}
-      <aside className="flex flex-col border-t border-line/10 bg-[#FAF7F2] lg:border-s lg:border-t-0" onPointerEnter={(e) => e.pointerType === "mouse" && setHold(true)} onPointerLeave={() => setHold(false)}>
-        {look && <LookPanel key={look.garment} pieces={pieces} hot={hot} setHot={setHot} />}
+      <aside className="flex flex-col border-t border-line/10 bg-bg lg:border-s lg:border-t-0" onPointerEnter={(e) => e.pointerType === "mouse" && setHold(true)} onPointerLeave={() => setHold(false)}>
+        {look && <LookPanel key={look.garment} product={look.g} colorId={colorId} hot={hot} setHot={setHot} />}
       </aside>
     </div>
   );
@@ -385,7 +377,7 @@ export function RunwayRail() {
 
 function IconBtn({ label, onClick, path }: { label: string; onClick: () => void; path: string }) {
   return (
-    <button type="button" onClick={onClick} aria-label={label} className="grid h-11 w-11 shrink-0 place-items-center rounded-full hover:bg-[#26211E]/5">
+    <button type="button" onClick={onClick} aria-label={label} className="grid h-11 w-11 shrink-0 place-items-center rounded-full hover:bg-fg/5">
       <svg viewBox="0 0 26 14" className="h-3.5 w-6 rtl:-scale-x-100" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d={path} />
       </svg>
@@ -393,111 +385,100 @@ function IconBtn({ label, onClick, path }: { label: string; onClick: () => void;
   );
 }
 
-function Pin({ n, x, y, label, accent, hot, onClick }: { n: number; x: number; y: number; label: string; accent: string; hot: boolean; onClick: () => void }) {
+function Pin({ n, x, y, label, hot, onClick }: { n: number; x: number; y: number; label: string; hot: boolean; onClick: () => void }) {
   return (
     <button type="button" onClick={onClick} aria-label={`${n}: ${label}`} className="group absolute -ms-[22px] -mt-[22px] grid h-11 w-11 place-items-center" style={{ left: `${x}%`, top: `${y}%` }}>
       <span
         className="grid h-6 w-6 place-items-center rounded-full text-[11px] font-semibold shadow-[0_4px_14px_-4px_rgba(0,0,0,0.35)] backdrop-blur transition-[transform,background-color,color] duration-300 group-hover:scale-125"
-        style={hot ? { background: accent, color: "#fff", transform: "scale(1.3)" } : { background: "rgb(255 255 255 / 0.86)", color: "#26211E" }}
+        style={hot ? { background: "#A44F36", color: "#fff", transform: "scale(1.3)" } : { background: "rgb(255 255 255 / 0.86)", color: "#26211E" }}
       >
         {n}
       </span>
-      <span className={`pointer-events-none absolute start-[calc(100%-6px)] top-1/2 max-w-[180px] -translate-y-1/2 truncate whitespace-nowrap rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-medium text-[#26211E] shadow-lg transition-opacity ${hot ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>{label}</span>
+      <span className={`pointer-events-none absolute start-[calc(100%-6px)] top-1/2 max-w-[180px] -translate-y-1/2 truncate whitespace-nowrap rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-medium text-fg shadow-lg transition-opacity ${hot ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>{label}</span>
     </button>
   );
 }
 
-function LookPanel({ pieces, hot, setHot }: { pieces: Product[]; hot: number | null; setHot: (n: number | null) => void }) {
+function ModelSlide({ product, colorId, dir, reduce, pin, hot, onPin }: { product: Product; colorId: string; dir: number; reduce: boolean; pin: [number, number]; hot: boolean; onPin: () => void }) {
+  const { bi } = useT();
+  const color = product.colors.find((x) => x.id === colorId) ?? product.colors[0];
+  const src = useRecolored(product.photos[0].src, product.recolor, color.hex === "transparent" ? null : color.hex);
+  return (
+    <AnimatePresence initial={false} custom={dir}>
+      <motion.div
+        key={src}
+        custom={dir}
+        className="absolute inset-0 flex justify-center"
+        initial={reduce ? { opacity: 0 } : { x: `${dir * 18}%`, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        exit={reduce ? { opacity: 0 } : { x: `${-dir * 18}%`, opacity: 0 }}
+        transition={{ duration: reduce ? 0.2 : 0.7, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="relative h-full overflow-hidden rounded-sm shadow-[0_30px_60px_-30px_rgba(0,0,0,0.5)]" style={{ aspectRatio: "680/762" }}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- local photo or its repainted copy */}
+          <img src={src} alt={`${bi(product.photos[0].alt)}, ${bi(color.name)}`} className="h-full w-full object-cover" draggable={false} />
+          <Pin n={1} x={pin[0]} y={pin[1]} label={bi(product.title)} hot={hot} onClick={onPin} />
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+function LookPanel({ product: p, colorId, hot, setHot }: { product: Product; colorId: string; hot: number | null; setHot: (n: number | null) => void }) {
   const { bi, locale } = useT();
   const c = useC();
   const r = c.runway;
   const { add } = useBag();
-  const [open, setOpen] = useState<Record<string, boolean>>({});
-  const [size, setSize] = useState<Record<string, string>>({});
-  const [added, setAdded] = useState<Record<string, boolean>>({});
+  const [size, setSize] = useState<string | null>(null);
+  const [added, setAdded] = useState(false);
   const [msg, setMsg] = useState("");
-  const total = pieces.reduce((s, p) => s + (p.sizes.find((x) => x.id === size[p.slug])?.price ?? p.sizes[0].price), 0);
-  const addOne = (p: Product) => {
-    const sz = size[p.slug];
-    if (!sz) return setOpen((o) => ({ ...o, [p.slug]: true }));
-    if (add({ slug: p.slug, color: p.colors[0].id, size: sz })) {
-      setAdded((a) => ({ ...a, [p.slug]: true }));
-      setOpen((o) => ({ ...o, [p.slug]: false }));
-    }
-  };
-  const addAll = () => {
+  useEffect(() => setAdded(false), [colorId, size]);
+  const color = p.colors.find((x) => x.id === colorId) ?? p.colors[0];
+  const price = p.sizes.find((x) => x.id === size)?.price ?? p.sizes[0].price;
+  const addIt = () => {
+    if (!size) return setMsg(r.pick(bi(p.title)));
     setMsg("");
-    const pending = pieces.filter((p) => !added[p.slug] && !size[p.slug]);
-    pieces.filter((p) => !added[p.slug] && size[p.slug]).forEach(addOne);
-    if (pending.length) {
-      setOpen((o) => Object.fromEntries([...Object.entries(o), ...pending.map((p) => [p.slug, true])]));
-      setMsg(r.pick(pending.map((p) => bi(p.title)).join(locale === "ar" ? "، " : ", ")));
-    }
+    if (add({ slug: p.slug, color: colorId, size })) setAdded(true);
   };
-  const complete = pieces.every((p) => added[p.slug]);
 
   return (
     <motion.div className="flex h-full flex-col" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-      <div className="flex items-baseline justify-between px-6 pb-3 pt-6 sm:px-8 lg:pt-8">
+      <div className="flex flex-col gap-1 px-6 pb-3 pt-6 sm:px-8 lg:pt-8">
         <h4 className="text-lg">{r.inLook}</h4>
-        <span className="text-[10px] uppercase tracking-[0.16em] text-[#6B5F57]">{r.pieces(pieces.length)}</span>
+        <span className="text-xs text-muted-foreground">{c.readyIn(p.leadTimeDays)}</span>
       </div>
-      <ul className="flex-1 px-6 sm:px-8">
-        {pieces.map((p, i) => (
-          <li key={p.slug} onPointerEnter={(e) => e.pointerType === "mouse" && setHot(i)} onPointerLeave={() => setHot(null)} className={`relative grid grid-cols-[72px_minmax(0,1fr)_44px] items-center gap-4 border-t border-line/15 py-4 last:border-b ${hot === i ? "after:scale-x-100" : "after:scale-x-0"} after:absolute after:inset-x-0 after:-bottom-px after:h-px after:origin-left after:bg-[#A44F36] after:transition-transform after:duration-700`}>
-            <span className="relative grid aspect-[4/5] place-items-center overflow-hidden bg-[#EFE6D6]">
-              {/* eslint-disable-next-line @next/next/no-img-element -- local cut-out */}
-              <img src={p.hanger ?? p.cutout ?? p.photos[0].src} alt="" className="max-h-[90%] max-w-[90%] object-contain" />
-              <span className={`absolute end-1 top-1 grid h-5 w-5 place-items-center rounded-full text-[10px] font-semibold ${hot === i ? "bg-[#A44F36] text-white" : "bg-white/90"}`}>{i + 1}</span>
-            </span>
-            <span className="flex min-w-0 flex-col gap-1">
-              <span className="truncate text-[10px] uppercase tracking-[0.14em] text-[#6B5F57]">{bi(p.maker)}</span>
-              <a href={`/shop/${p.slug}`} className="text-sm font-medium leading-snug hover:underline">
-                {bi(p.title)}
-              </a>
-              <span className="text-xs tabular-nums">{formatSar(p.sizes.find((x) => x.id === size[p.slug])?.price ?? p.sizes[0].price, locale)}</span>
-            </span>
-            <button
-              type="button"
-              aria-expanded={!!open[p.slug]}
-              aria-label={added[p.slug] ? r.addedLabel(bi(p.title)) : r.addLabel(bi(p.title))}
-              disabled={added[p.slug]}
-              onClick={() => setOpen((o) => ({ ...o, [p.slug]: !o[p.slug] }))}
-              className="grid h-11 w-11 place-items-center rounded-full hover:bg-[#26211E]/5"
-            >
-              <svg viewBox="0 0 24 24" className={`h-5 w-5 transition-transform duration-500 ${open[p.slug] ? "rotate-45" : ""}`} fill="none" stroke={added[p.slug] ? "#A44F36" : "currentColor"} strokeWidth="1.4" strokeLinecap="round" aria-hidden="true">
-                <path d={added[p.slug] ? "M4.5 12.5l5 5L19.5 7" : "M12 4v16M4 12h16"} />
-              </svg>
+      <div className="flex-1 px-6 sm:px-8" onPointerEnter={(e) => e.pointerType === "mouse" && setHot(0)} onPointerLeave={() => setHot(null)}>
+        <div className="grid grid-cols-[84px_minmax(0,1fr)] items-center gap-4 border-y border-line/15 py-4">
+          <span className="relative grid aspect-[4/5] place-items-center overflow-hidden rounded-sm bg-surface">
+            {/* eslint-disable-next-line @next/next/no-img-element -- local cut-out */}
+            <img src={p.hanger ?? p.photos[0].src} alt="" className="max-h-[90%] max-w-[90%] object-contain" />
+            <span className={`absolute end-1 top-1 grid h-5 w-5 place-items-center rounded-full text-[10px] font-semibold ${hot === 0 ? "bg-primary text-primary-fg" : "bg-bg/90"}`}>1</span>
+          </span>
+          <span className="flex min-w-0 flex-col gap-1">
+            <span className="truncate text-[10px] uppercase tracking-[0.14em] text-muted-foreground">{bi(color.name)}</span>
+            <a href={`/shop/${p.slug}`} className="text-base font-medium leading-snug hover:underline">
+              {bi(p.title)}
+            </a>
+            <span className="text-sm tabular-nums">{formatSar(price, locale)}</span>
+          </span>
+        </div>
+        <div role="radiogroup" aria-label={c.size} className="mt-5 flex flex-wrap gap-2">
+          {p.sizes.map((s) => (
+            <button key={s.id} type="button" role="radio" aria-checked={size === s.id} onClick={() => setSize(s.id)} className={`min-h-10 min-w-12 rounded-full border px-4 text-xs transition-colors duration-300 ${size === s.id ? "border-fg bg-fg text-bg" : "border-line/25 hover:border-fg"}`}>
+              {bi(s.label)}
             </button>
-            {open[p.slug] && !added[p.slug] && (
-              <div className="col-span-3 flex flex-col gap-3 pt-2">
-                <div role="radiogroup" aria-label={c.size} className="flex flex-wrap gap-2">
-                  {p.sizes.map((s) => (
-                    <button key={s.id} type="button" role="radio" aria-checked={size[p.slug] === s.id} onClick={() => setSize((m) => ({ ...m, [p.slug]: s.id }))} className={`min-h-10 min-w-11 rounded-full border px-3.5 text-xs transition-colors ${size[p.slug] === s.id ? "border-[#26211E] bg-[#26211E] text-white" : "border-line/30 hover:border-[#26211E]"}`}>
-                      {bi(s.label)}
-                    </button>
-                  ))}
-                </div>
-                <button type="button" disabled={!size[p.slug]} onClick={() => addOne(p)} className="min-h-11 bg-[#26211E] text-xs font-medium text-white disabled:opacity-40">
-                  {c.addToBag}
-                </button>
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-      <div className="flex flex-col gap-3 border-t border-line/15 px-6 pb-6 pt-4 sm:px-8">
+          ))}
+        </div>
+        <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{bi(p.description)}</p>
+      </div>
+      <div className="flex flex-col gap-3 px-6 pb-6 pt-4 sm:px-8">
         {msg && (
-          <p role="status" className="text-xs text-[#A44F36]">
+          <p role="status" className="text-xs text-terracotta">
             {msg}
           </p>
         )}
-        <div className="flex items-baseline justify-between">
-          <span className="text-sm font-medium">{r.complete}</span>
-          <strong className="font-normal tabular-nums">{formatSar(total, locale)}</strong>
-        </div>
-        <button type="button" onClick={addAll} disabled={complete} className={`min-h-14 w-full text-sm font-medium text-white transition-colors ${complete ? "bg-[#55664F]" : "bg-primary hover:opacity-90"}`}>
-          {complete ? r.inBag : r.addAll}
+        <button type="button" onClick={addIt} className={`min-h-14 w-full rounded-full text-sm font-medium transition-colors duration-500 ${added ? "bg-sage text-white" : "bg-fg text-bg hover:opacity-90"}`}>
+          {added ? c.added : c.addToBag}
         </button>
       </div>
     </motion.div>

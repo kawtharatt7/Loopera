@@ -8,9 +8,7 @@ import { useT } from "@/lib/i18n/client";
 import { formatSar, fromPrice, type Product } from "@/lib/shop/catalog";
 import { recolorUrl } from "@/lib/shop/recolor";
 
-/** Cut-outs for bags whose catalog entry has none yet. */
-const CUTOUTS: Record<string, string> = { "tulip-granny-bag": "/photos/cutout/tulip-granny-bag-u2.webp" };
-const cutoutOf = (p: Product) => p.cutout ?? CUTOUTS[p.slug];
+const cutoutOf = (p: Product) => p.cutout;
 
 const swatchOf = (p: Product, hex: string) => (hex === "transparent" ? (p.recolor?.from ?? "#C9785C") : hex);
 

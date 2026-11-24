@@ -8,6 +8,7 @@ import { useBag } from "@/components/bag/bag-context";
 import { useRecolored } from "@/lib/shop/recolor";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
+import { ScrollHero } from "./scroll-hero";
 import { useT } from "@/lib/i18n/client";
 import { byCategory, CATEGORIES, formatSar, fromPrice, getProduct, PRODUCTS, type Category, type Product } from "@/lib/shop/catalog";
 
@@ -30,6 +31,7 @@ export function Landing() {
     <>
       <SiteHeader overlay />
       <main id="main">
+        <ScrollHero />
         <HeroStage />
 
         {/* A moving strip of real pieces, two rows in opposite directions */}
@@ -107,11 +109,11 @@ function HeroStage() {
   };
 
   return (
-    <section aria-roledescription="carousel" aria-label={t.landing.kicker} className="relative isolate overflow-hidden pt-16">
+    <section aria-roledescription="carousel" aria-label={t.landing.kicker} className="relative isolate overflow-hidden border-t border-line/10">
       <div className="mx-auto grid max-w-[1500px] grid-cols-1 lg:grid-cols-[minmax(0,1fr)_400px]">
         <div className="relative flex min-w-0 flex-col">
           <div className="px-5 pt-8 sm:px-10 sm:pt-12">
-            <h1 className="max-w-[20ch] text-balance text-4xl leading-[1.08] sm:text-6xl">{t.landing.headline}</h1>
+            <h2 className="max-w-[20ch] text-balance text-3xl leading-[1.08] sm:text-5xl">{t.landing.headline}</h2>
             <p className="mt-3 max-w-md text-muted-foreground">{t.landing.sub}</p>
           </div>
 

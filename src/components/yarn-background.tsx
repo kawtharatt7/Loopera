@@ -26,6 +26,14 @@ const STRANDS: Strand[] = [
   { y: 0.985, amp: 0.015, freq: 2.1, speed: -0.1, phase: 1, width: 8, color: [206, 79, 47], tilt: 0.01 },
 ];
 
+/** In the light (cream) theme the same strands are spun in terracotta, sage, oat and cocoa. */
+const LIGHT_COLORS: [number, number, number][] = [
+  [200, 109, 81],
+  [118, 134, 112],
+  [217, 195, 165],
+  [122, 78, 54],
+];
+
 function drawStrand(ctx: CanvasRenderingContext2D, s: Strand, w: number, h: number, t: number, alpha: number) {
   const pts: [number, number][] = [];
   const step = 6;
@@ -97,7 +105,7 @@ export function YarnBackground() {
       const light = document.documentElement.getAttribute("data-theme") === "light";
       ctx.clearRect(0, 0, w, h);
       const t = now / 1000;
-      STRANDS.forEach((s) => drawStrand(ctx, s, w, h, t, light ? 0.5 : 0.55));
+      STRANDS.forEach((s, i) => drawStrand(ctx, light ? { ...s, color: LIGHT_COLORS[i % LIGHT_COLORS.length] } : s, w, h, t, light ? 0.55 : 0.55));
     };
     const frame = (now: number) => {
       raf = requestAnimationFrame(frame);

@@ -14,6 +14,8 @@ const config: Config = {
         ember: token("ember"),
         peach: token("peach"),
         rose: token("rose"),
+        terracotta: token("terracotta"),
+        sage: token("sage"),
         hero: token("hero"),
         "on-wine": token("on-wine"),
         paper: { DEFAULT: token("paper"), fg: token("on-paper") },

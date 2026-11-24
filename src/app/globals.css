@@ -81,22 +81,25 @@
   --ember: 206 79 47; /* #CE4F2F */
   --peach: 226 155 106; /* #E29B6A */
   --rose: 243 182 182; /* #F3B6B6 */
+  --terracotta: 200 109 81; /* #C86D51 */
+  --sage: 118 134 112; /* #768670 */
   --on-wine: 255 255 255;
-  --hero: 238 214 208; /* #EED6D0, the one-color opening */
+  --hero: 239 232 221; /* #EFE8DD oatmeal linen */
 
-  --bg: 250 248 247; /* #FAF8F7 */
-  --surface: 241 236 234; /* #F1ECEA */
-  --surface-2: 230 222 219; /* #E6DEDB */
-  --fg: 33 12 15; /* #210C0F */
-  --muted-fg: 102 76 79; /* #664C4F, 7.6:1 on bg */
-  --border: 33 12 15;
-  --primary: 142 21 35; /* wine buttons */
-  --on-primary: 255 255 255; /* 9:1 */
-  --accent-text: 142 21 35;
-  --ring: 142 21 35;
+  /* Light (default): warm raw cotton studio */
+  --bg: 250 247 242; /* #FAF7F2 raw cotton cream */
+  --surface: 239 232 221; /* #EFE8DD oatmeal linen */
+  --surface-2: 228 219 205; /* #E4DBCD */
+  --fg: 38 33 30; /* #26211E espresso */
+  --muted-fg: 107 95 87; /* #6B5F57, 5.8:1 on bg */
+  --border: 38 33 30;
+  --primary: 164 79 54; /* #A44F36 deep terracotta buttons, 5.6:1 with white */
+  --on-primary: 255 255 255;
+  --accent-text: 164 79 54;
+  --ring: 200 109 81;
   --paper: 255 255 255;
-  --on-paper: 33 12 15;
-  --grain: 0.35;
+  --on-paper: 38 33 30;
+  --grain: 0.3;
   color-scheme: light;
 }
 
@@ -176,7 +179,12 @@
     background-size: 18px 20px;
   }
   [data-theme="light"] body::before {
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='18' height='20'><g fill='none' stroke='%23210C0F' stroke-opacity='.05' stroke-width='1.6'><ellipse cx='5' cy='10' rx='3' ry='7.5' transform='rotate(-28 5 10)'/><ellipse cx='13' cy='10' rx='3' ry='7.5' transform='rotate(28 13 10)'/></g><g fill='%23000000' fill-opacity='.035'><ellipse cx='5' cy='12' rx='1.6' ry='4' transform='rotate(-28 5 12)'/><ellipse cx='13' cy='12' rx='1.6' ry='4' transform='rotate(28 13 12)'/></g></svg>");
+    /* Woven cotton linen: fine warp and weft threads, very faint, under warm window light. */
+    background-image:
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='6'><g stroke='%2326211E' stroke-opacity='.05' stroke-width='1'><path d='M0 1.5h3M3 4.5h3'/><path d='M4.5 0v3M1.5 3v3' stroke-opacity='.035'/></g></svg>"),
+      radial-gradient(120% 80% at 85% -10%, rgb(255 214 160 / 0.28), transparent 60%),
+      radial-gradient(90% 70% at 0% 110%, rgb(118 134 112 / 0.08), transparent 60%);
+    background-size: 6px 6px, 100% 100%, 100% 100%;
   }
   body::after {
     content: "";

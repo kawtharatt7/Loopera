@@ -25,7 +25,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const locale = await getLocale();
   return (
-    <html lang={locale} dir={dirOf(locale)} data-theme="dark" suppressHydrationWarning>
+    <html lang={locale} dir={dirOf(locale)} data-theme="light" suppressHydrationWarning>
       <head>
         {/* Applies the saved theme before first paint, so there is no flash. Dark is the default. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />

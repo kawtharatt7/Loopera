@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useBag } from "@/components/bag/bag-context";
 import SneakerProductHero, { type SneakerVariant, type SneakerView } from "@/components/ui/sneaker-product-hero";
+import { useC } from "@/lib/i18n/collection";
 import { useT } from "@/lib/i18n/client";
 import { formatSar, fromPrice, type Product } from "@/lib/shop/catalog";
 import { recolorUrl } from "@/lib/shop/recolor";
@@ -70,16 +71,18 @@ export function BagsGrid({ bags }: { bags: Product[] }) {
           </li>
         ))}
       </ul>
-      {open !== null && bags[open] && <BagDialog key={bags[open].slug} bag={bags[open]} onClose={close} />}
+      {open !== null && bags[open] && <ProductDialog key={bags[open].slug} product={bags[open]} onClose={close} />}
     </>
   );
 }
 
-function BagDialog({ bag, onClose }: { bag: Product; onClose: () => void }) {
+/** A piece up close (bags, and clothes on the model): sizes, yarn colours, stitch zoom, add to bag. */
+export function ProductDialog({ product: bag, onClose }: { product: Product; onClose: () => void }) {
   const { t, bi, locale } = useT();
+  const c2 = useC();
   const { add } = useBag();
   const box = useRef<HTMLDivElement | null>(null);
-  const cut = cutoutOf(bag);
+  const cut = bag.model ?? cutoutOf(bag);
   const base = cut ?? bag.photos[0].src;
   const [painted, setPainted] = useState<Record<string, string>>({});
 
@@ -124,16 +127,17 @@ function BagDialog({ bag, onClose }: { bag: Product; onClose: () => void }) {
           { src, label: viewLabels.stitch, focus: [0.5, 0.6], zoom: 2.2 },
           { src, label: viewLabels.handle, focus: [0.5, 0.15], zoom: 1.9 },
           { src, label: viewLabels.base, focus: [0.5, 0.85], zoom: 1.9 },
+          ...(bag.hanger ? [{ src: bag.hanger, label: c2.hangerView }] : []),
           ...bag.photos.map((ph) => ({ src: ph.src, label: bi(ph.alt) })),
         ];
         return { name: bi(c.name), swatch: swatchOf(bag, c.hex), tint: swatchOf(bag, c.hex), src, gallery };
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- labels follow the locale
-    [bag, base, painted, locale],
+    [bag, base, painted, locale, c2],
   );
 
   return createPortal(
-    <div ref={box} role="dialog" aria-modal="true" aria-label={bi(bag.title)} className="fixed inset-0 z-[70] flex items-stretch justify-center sm:items-center sm:p-6">
+    <div ref={box} role="dialog" aria-modal="true" aria-label={bi(bag.title)} className="fixed inset-0 z-[400] flex items-stretch justify-center sm:items-center sm:p-6">
       <button type="button" aria-label={t.common.close} tabIndex={-1} onClick={onClose} className="absolute inset-0 bg-[rgb(38_33_30/0.45)] backdrop-blur-sm" />
       <div className="relative max-h-full w-full max-w-6xl overflow-y-auto bg-bg shadow-[0_40px_120px_-30px_rgba(0,0,0,0.5)] sm:rounded">
         <button
@@ -147,13 +151,14 @@ function BagDialog({ bag, onClose }: { bag: Product; onClose: () => void }) {
             <path d="M3 3l10 10M13 3L3 13" />
           </svg>
         </button>
-        <div className="loopera-cutout">
+        <div className={bag.category === "clothes" ? "loopera-cutout loopera-model" : "loopera-cutout"}>
           <SneakerProductHero
             variants={variants}
             eyebrow={bi(bag.maker)}
             title={bi(bag.title)}
             description={bi(bag.description)}
             word="loopera"
+            swap={bag.category === "clothes" ? "horizontal" : "vertical"}
             sizes={bag.sizes.map((s) => ({ label: bi(s.label), price: s.price, stock: s.stock }))}
             price={fromPrice(bag)}
             formatPrice={(n) => formatSar(n, locale)}

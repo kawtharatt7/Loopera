@@ -6,7 +6,7 @@ import { useBag } from "@/components/bag/bag-context";
 import { useC } from "@/lib/i18n/collection";
 import { useT } from "@/lib/i18n/client";
 import { formatSar, getProduct, type Product } from "@/lib/shop/catalog";
-import { useRecolored } from "@/lib/shop/recolor";
+import { ProductDialog } from "./bags-grid";
 
 /*
   "Try the Look", on a rail: each look's garment hangs from a wooden display rail across the top
@@ -54,8 +54,7 @@ export function RunwayRail() {
   const [playing, setPlaying] = useState(!reduce);
   const [hold, setHold] = useState(false);
   const [open, setOpen] = useState(false);
-  const [colorId, setColorId] = useState("as-shown");
-  const [dir, setDir] = useState(1);
+  const colorId = "as-shown";
   const [hot, setHot] = useState<number | null>(null);
   const drag = useRef<{ x: number; y: number; t: number; on: boolean; id: number; samples: { x: number; time: number }[] } | null>(null);
   const suppress = useRef(0);
@@ -124,7 +123,6 @@ export function RunwayRail() {
       setIndex(((t % n) + n) % n);
       setOpen(false);
       setHot(null);
-      setColorId("as-shown");
       kick();
     },
     [kick, n],
@@ -161,13 +159,6 @@ export function RunwayRail() {
     const id = window.setTimeout(next, SPEED);
     return () => clearTimeout(id);
   }, [index, playing, hold, open, reduce, next]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
 
   const onDown = (e: React.PointerEvent) => {
     if (open || (e.pointerType === "mouse" && e.button !== 0)) return;
@@ -211,7 +202,7 @@ export function RunwayRail() {
 
 
   return (
-    <div className="grid overflow-hidden rounded-sm border border-line/10 bg-bg text-fg lg:grid-cols-[minmax(0,1fr)_360px]">
+    <div className="isolate grid overflow-hidden rounded-sm border border-line/10 bg-bg text-fg lg:grid-cols-[minmax(0,1fr)_360px]">
       <div className="relative flex min-h-[min(78svh,720px)] flex-col">
         <div className="flex items-end justify-between gap-4 px-6 pt-6 sm:px-8">
           <div>
@@ -278,57 +269,6 @@ export function RunwayRail() {
             </button>
           ))}
 
-          {/* View look: the model in the middle; swatches repaint the garment and slide it in sideways */}
-          <AnimatePresence>
-            {open && look && (
-              <motion.div
-                className="absolute inset-0 z-[300] flex flex-col items-center bg-surface px-6 pb-5 pt-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: reduce ? 0 : 0.45 }}
-                onClick={(e) => e.target === e.currentTarget && setOpen(false)}
-                role="dialog"
-                aria-label={r.viewLook}
-              >
-                <div className="flex w-full items-center justify-between gap-4">
-                  <p className="text-sm">
-                    <span className="me-2 text-xs uppercase tracking-[0.2em] text-muted-foreground tabular-nums">
-                      {r.look} {String(index + 1).padStart(2, "0")}
-                    </span>
-                    {bi(look.g.title)}
-                  </p>
-                  <button type="button" autoFocus onClick={() => setOpen(false)} aria-label={c.close} className="grid h-11 w-11 place-items-center rounded-full border border-line/15 bg-bg/60 backdrop-blur transition-transform duration-500 hover:rotate-90">
-                    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-                      <path d="M5 5l14 14M19 5L5 19" />
-                    </svg>
-                  </button>
-                </div>
-                <div className="relative mt-3 min-h-0 w-full flex-1 overflow-hidden">
-                  <ModelSlide product={look.g} colorId={colorId} dir={dir} reduce={reduce} pin={look.pin} hot={hot === 0} onPin={() => setHot(0)} />
-                </div>
-                <div role="group" aria-label={c.color} className="mt-4 flex flex-wrap justify-center gap-2.5">
-                  {look.g.colors.map((col, k) => (
-                    <button
-                      key={col.id}
-                      type="button"
-                      aria-pressed={col.id === colorId}
-                      aria-label={bi(col.name)}
-                      title={bi(col.name)}
-                      onClick={() => {
-                        const from = look.g.colors.findIndex((x) => x.id === colorId);
-                        setDir(k >= from ? 1 : -1);
-                        setColorId(col.id);
-                      }}
-                      className={`h-9 w-9 rounded-full border-2 p-0.5 transition-colors ${col.id === colorId ? "border-fg" : "border-transparent hover:border-line/40"}`}
-                    >
-                      <span className="block h-full w-full rounded-full ring-1 ring-line/20" style={{ background: col.hex === "transparent" ? (look.g.recolor?.from ?? "#ccc") : col.hex }} />
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
         </div>
 
         {/* Controls */}
@@ -367,6 +307,8 @@ export function RunwayRail() {
         </div>
       </div>
 
+      {open && look && <ProductDialog key={look.garment} product={look.g} onClose={() => setOpen(false)} />}
+
       {/* In this look */}
       <aside className="flex flex-col border-t border-line/10 bg-bg lg:border-s lg:border-t-0" onPointerEnter={(e) => e.pointerType === "mouse" && setHold(true)} onPointerLeave={() => setHold(false)}>
         {look && <LookPanel key={look.garment} product={look.g} colorId={colorId} hot={hot} setHot={setHot} />}
@@ -396,31 +338,6 @@ function Pin({ n, x, y, label, hot, onClick }: { n: number; x: number; y: number
       </span>
       <span className={`pointer-events-none absolute start-[calc(100%-6px)] top-1/2 max-w-[180px] -translate-y-1/2 truncate whitespace-nowrap rounded-full bg-white/90 px-3 py-1.5 text-[11px] font-medium text-fg shadow-lg transition-opacity ${hot ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>{label}</span>
     </button>
-  );
-}
-
-function ModelSlide({ product, colorId, dir, reduce, pin, hot, onPin }: { product: Product; colorId: string; dir: number; reduce: boolean; pin: [number, number]; hot: boolean; onPin: () => void }) {
-  const { bi } = useT();
-  const color = product.colors.find((x) => x.id === colorId) ?? product.colors[0];
-  const src = useRecolored(product.photos[0].src, product.recolor, color.hex === "transparent" ? null : color.hex);
-  return (
-    <AnimatePresence initial={false} custom={dir}>
-      <motion.div
-        key={src}
-        custom={dir}
-        className="absolute inset-0 flex justify-center"
-        initial={reduce ? { opacity: 0 } : { x: `${dir * 18}%`, opacity: 0 }}
-        animate={{ x: 0, opacity: 1 }}
-        exit={reduce ? { opacity: 0 } : { x: `${-dir * 18}%`, opacity: 0 }}
-        transition={{ duration: reduce ? 0.2 : 0.7, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="relative h-full overflow-hidden rounded-sm shadow-[0_30px_60px_-30px_rgba(0,0,0,0.5)]" style={{ aspectRatio: "680/762" }}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- local photo or its repainted copy */}
-          <img src={src} alt={`${bi(product.photos[0].alt)}, ${bi(color.name)}`} className="h-full w-full object-cover" draggable={false} />
-          <Pin n={1} x={pin[0]} y={pin[1]} label={bi(product.title)} hot={hot} onClick={onPin} />
-        </div>
-      </motion.div>
-    </AnimatePresence>
   );
 }
 

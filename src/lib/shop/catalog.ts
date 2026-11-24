@@ -72,6 +72,8 @@ export interface Product {
   showcase?: boolean;
   /** Clothes: the garment on its own, on a wooden hanger (cut out). */
   hanger?: string;
+  /** Clothes: the model wearing it, cut out (no backdrop). */
+  model?: string;
 }
 
 const LOOPERA: Bi = { en: "Loopera", ar: "لوبيرا" };
@@ -180,21 +182,6 @@ const BAGS: BagRow[] = [
   ["burgundy-pearl-clutch", "Burgundy pearl clutch", "كلتش عنابي باللؤلؤ", "A pleated clutch on a pearl strap.", "كلتش مكسّر بحزام لؤلؤ.", 240, "#6E1626"],
 ];
 
-const FLAGS: [id: string, en: string, ar: string, price: number][] = [
-  ["yemen", "Yemen", "اليمن", 120],
-  ["saudi-arabia", "Saudi Arabia", "السعودية", 160],
-  ["uae", "UAE", "الإمارات", 130],
-  ["kuwait", "Kuwait", "الكويت", 130],
-  ["qatar", "Qatar", "قطر", 130],
-  ["bahrain", "Bahrain", "البحرين", 130],
-  ["oman", "Oman", "عُمان", 150],
-  ["egypt", "Egypt", "مصر", 150],
-  ["jordan", "Jordan", "الأردن", 140],
-  ["palestine", "Palestine", "فلسطين", 130],
-  ["iraq", "Iraq", "العراق", 160],
-  ["morocco", "Morocco", "المغرب", 140],
-];
-
 const ALL: Product[] = [
   ...GARMENTS.map(([slug, en, ar, enDesc, arDesc, price, from]): Product => ({
     slug,
@@ -212,6 +199,7 @@ const ALL: Product[] = [
     photos: SHOT(`/images/clothes/${slug}.webp`, { en: `A model wearing the ${en.toLowerCase()}`, ar: `عارضة لابسة ${ar}` }),
     recolor: { from, mask: `/images/clothes/mask/${slug}.png` },
     hanger: HANGERS.includes(slug) ? `/images/clothes/hanger/${slug}.webp` : undefined,
+    model: `/images/clothes/model/${slug}.webp`,
   })),
   ...BAGS.map(([slug, en, ar, enDesc, arDesc, midi, from]): Product => ({
     slug,
@@ -229,23 +217,6 @@ const ALL: Product[] = [
     photos: PRODUCT_SHOT(`/images/bags/${slug}.webp`, { en: en, ar }),
     cutout: `/images/bags/${slug}.webp`,
     recolor: { from },
-  })),
-  ...FLAGS.map(([id, en, ar, price]): Product => ({
-    slug: `flag-${id}`,
-    category: "wall",
-    group: "flags",
-    showcase: true,
-    title: { en: `${en} flag`, ar: `علم ${ar}` },
-    maker: LOOPERA,
-    description: { en: `The flag of ${en} as a pixel tapestry with hanging loops. Showcase piece, not for sale.`, ar: `علم ${ar} كلوحة بكسل بعروات للتعليق. للعرض فقط، غير معروضة للبيع.` },
-    details: [{ en: "Tapestry crochet, acrylic yarn", ar: "كروشيه تابستري، خيط أكريليك" }],
-    madeToOrder: true,
-    leadTimeDays: 7,
-    rating: 0,
-    reviews: 0,
-    sizes: WALL(price),
-    colors: AS_SHOWN,
-    photos: PRODUCT_SHOT(`/images/wall/flag-${id}.webp`, { en: `${en} flag, crocheted`, ar: `علم ${ar} كروشيه` }),
   })),
   ...ORIGINALS.map(([id, en, ar, price]): Product => ({
     slug: `wall-${id}`,
@@ -343,13 +314,6 @@ const ALL: Product[] = [
     photos: PRODUCT_SHOT("/images/bouquets/red-tulip-bouquet.webp", { en: "Crochet red tulip bouquet", ar: "بوكيه توليب أحمر كروشيه" }),
     cutout: "/images/bouquets/red-tulip-bouquet.webp",
   },
-];
-
-/** Designs offered only as custom orders (no photo of a finished piece yet): the hub lists them by name. */
-export const WALL_DESIGNS: { group: WallGroup; en: string; ar: string }[] = [
-  ...[["Al-Hilal", "الهلال"], ["Al-Nassr", "النصر"], ["Al-Ittihad", "الاتحاد"], ["Al-Ahli", "الأهلي"], ["Al-Shabab", "الشباب"], ["Al-Ettifaq", "الاتفاق"], ["Al-Fateh", "الفتح"], ["Al-Taawoun", "التعاون"], ["Al-Qadsiah", "القادسية"], ["Al-Raed", "الرائد"]].map(([en, ar]) => ({ group: "saudi-clubs" as const, en, ar })),
-  ...[["Real Madrid", "ريال مدريد"], ["Barcelona", "برشلونة"], ["Man City", "مانشستر سيتي"], ["Man United", "مانشستر يونايتد"], ["Liverpool", "ليفربول"], ["Arsenal", "آرسنال"], ["Chelsea", "تشيلسي"], ["Bayern Munich", "بايرن ميونخ"], ["PSG", "باريس سان جيرمان"], ["AC Milan", "ميلان"]].map(([en, ar]) => ({ group: "global-clubs" as const, en, ar })),
-  ...[["Spider-Man", "سبايدر مان"], ["Iron Man", "آيرون مان"], ["Captain America", "كابتن أمريكا"], ["Batman", "باتمان"], ["Luffy", "لوفي"], ["Goku", "غوكو"], ["Naruto", "ناروتو"], ["Zoro", "زورو"], ["Gojo", "غوجو"]].map(([en, ar]) => ({ group: "anime" as const, en, ar })),
 ];
 
 /** Pieces with a recolor recipe can be shown in any yarn color; others only in the colors photographed. */

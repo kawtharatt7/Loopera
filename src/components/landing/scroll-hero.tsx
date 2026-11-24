@@ -8,15 +8,15 @@ import { useC } from "@/lib/i18n/collection";
 
 /*
   The opening moves with the scroll: the section pins and the film's currentTime follows the
-  scroll (GSAP ScrollTrigger, scrub), from the hook working the yarn to the model in the finished
-  cardigan. As the film ends the screen sinks into one deep colour, and two quiet choices appear
+  scroll (GSAP ScrollTrigger, scrub), from the spool of yarn, through the sweater forming stitch by
+  stitch, to the finished sweater. As the film ends the screen sinks into one deep colour, and two quiet choices appear
   in the middle. Reduced motion shows that final screen directly.
 */
 
 gsap.registerPlugin(ScrollTrigger);
 
-const VIDEO = "/videos/hero-craft.mp4";
-const POSTER = "/videos/hero-craft-poster.jpg";
+const VIDEO = "/videos/hero-sweater.mp4";
+const POSTER = "/videos/hero-sweater-poster.jpg";
 
 export function ScrollHero() {
   const h = useC().hero;

@@ -144,6 +144,8 @@ export type SneakerProductHeroProps = {
   onLikeChange?: (liked: boolean) => void
   /** Loopera: fixed word behind the product (the brand), instead of the colour name. */
   word?: string
+  /** Loopera: "horizontal" slides the piece sideways on a colour change instead of up and down. */
+  swap?: "vertical" | "horizontal"
   /** Loopera: formats a price (e.g. Saudi riyals in Arabic digits) instead of currency + number. */
   formatPrice?: (amount: number) => string
   /** Loopera: interface words. */
@@ -265,6 +267,7 @@ export default function SneakerProductHero({
   word,
   labels,
   showReviews = true,
+  swap = "vertical",
   formatPrice,
   stockNote,
   className,
@@ -455,7 +458,7 @@ export default function SneakerProductHero({
       list.forEach((el, i) => {
         if (!el) return
         gsap.killTweensOf(el)
-        if (i !== prev && i !== next) gsap.set(el, { autoAlpha: 0, yPercent: 0, rotation: 0 })
+        if (i !== prev && i !== next) gsap.set(el, { autoAlpha: 0, xPercent: 0, yPercent: 0, rotation: 0 })
       }),
     )
     if (reduce) {
@@ -468,13 +471,20 @@ export default function SneakerProductHero({
     }
     // From the reference: a ~0.4 s swap, the old shoe lifting out the top as
     // the new one rises from below, about 1.3 shoe-heights of travel.
-    if (shoes[prev]) gsap.to(shoes[prev], { yPercent: -130, rotation: -7, autoAlpha: 0, duration: 0.45, ease: "power2.in" })
-    if (shoes[next])
-      gsap.fromTo(
-        shoes[next],
-        { yPercent: 130, rotation: 9, autoAlpha: 0 },
-        { yPercent: 0, rotation: 0, autoAlpha: 1, duration: 0.7, ease: "back.out(1.3)", delay: 0.06 },
-      )
+    if (swap === "horizontal") {
+      const d = next > prev ? 1 : -1
+      if (shoes[prev]) gsap.to(shoes[prev], { xPercent: -60 * d, autoAlpha: 0, duration: 0.55, ease: "power2.inOut" })
+      if (shoes[next])
+        gsap.fromTo(shoes[next], { xPercent: 60 * d, autoAlpha: 0 }, { xPercent: 0, autoAlpha: 1, duration: 0.8, ease: "power3.out", delay: 0.08 })
+    } else {
+      if (shoes[prev]) gsap.to(shoes[prev], { yPercent: -130, rotation: -7, autoAlpha: 0, duration: 0.45, ease: "power2.in" })
+      if (shoes[next])
+        gsap.fromTo(
+          shoes[next],
+          { yPercent: 130, rotation: 9, autoAlpha: 0 },
+          { yPercent: 0, rotation: 0, autoAlpha: 1, duration: 0.7, ease: "back.out(1.3)", delay: 0.06 },
+        )
+    }
     sweep(0.55)
     if (words[prev]) gsap.to(words[prev], { yPercent: -70, autoAlpha: 0, duration: 0.55, ease: "power2.in" })
     if (words[next]) gsap.fromTo(words[next], { yPercent: 70, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: 0.9, ease: "power3.out", delay: 0.1 })

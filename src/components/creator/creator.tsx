@@ -8,6 +8,10 @@ import dynamic from "next/dynamic";
 import type { AiDesign } from "@/lib/ai/design";
 import type { EnginePart, Pattern } from "@/lib/engine/types";
 import { hasWebGL } from "@/lib/webgl";
+import { UpgradeDialog } from "@/components/pricing/pricing-plans";
+import { planOf, spendDesign, useDesignsLeft, useSubscription } from "@/lib/credits/plans";
+import { useP } from "@/lib/i18n/pricing";
+import { AnimatePresence } from "framer-motion";
 import { guessMake, type Make } from "@/lib/viewer/piece";
 
 const PieceScene = dynamic(() => import("@/components/viewer/piece-scene"), { ssr: false });
@@ -77,6 +81,10 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
   const [width, setWidth] = useState(36);
   const [colors, setColors] = useState(4);
   const [aiReady, setAiReady] = useState<boolean | null>(null);
+  const [upgrade, setUpgrade] = useState(false);
+  const p = useP();
+  const sub = useSubscription();
+  const left = useDesignsLeft();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
@@ -116,6 +124,11 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
     const words = text.trim().slice(0, 500);
     if (!file && words.length < 2) {
       setError(t.creator.needInput);
+      return;
+    }
+    // Each new design uses one of the month's designs; when they run out, show the plans.
+    if (!spendDesign()) {
+      setUpgrade(true);
       return;
     }
     setBusy(true);
@@ -331,6 +344,14 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
           >
             {busy ? (file && aiReady && type !== "wall" ? t.creator.aiReading : t.creator.generating) : t.creator.generate}
           </button>
+          {left !== null && (
+            <p className="text-sm text-muted-foreground" aria-live="polite">
+              <span className="font-medium text-fg">{p.planLine(p.names[sub.plan])}</span> · {p.left(left, planOf(sub.plan).designs)}
+              <Link href="/pricing" className="ms-2 underline underline-offset-4 hover:text-fg">
+                {sub.plan === "max" ? p.seePlans : p.upgrade}
+              </Link>
+            </p>
+          )}
         </div>
         {error && (
           <p role="alert" className="mt-4 text-sm text-ember">
@@ -338,6 +359,8 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
           </p>
         )}
       </section>
+
+      <AnimatePresence>{upgrade && <UpgradeDialog onClose={() => setUpgrade(false)} />}</AnimatePresence>
 
       {result && (
         <section ref={resultRef} aria-labelledby="step-result" className="mt-20 scroll-mt-24 border-t border-line/10 pt-12">

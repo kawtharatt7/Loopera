@@ -25,6 +25,7 @@ export function SiteHeader({ overlay = false, tone, compact = false }: { overlay
   const NAV = [
     { href: "/shop", label: t.nav.store },
     { href: "/creator", label: t.nav.creator },
+    { href: "/pricing", label: locale === "ar" ? "الأسعار" : "Pricing" },
   ];
 
   return (

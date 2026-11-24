@@ -218,7 +218,7 @@ export function ScrollHero() {
 
         {/* 4 — the linen table in window light */}
         <div data-table className="absolute inset-x-0 bottom-0 h-[58%] will-change-transform">
-          <div className="absolute inset-x-0 bottom-0 h-[46%]" style={{ background: "linear-gradient(to bottom, #E7DCCB, #DCCDB6)", boxShadow: "0 -1px 0 rgb(38 33 30 / 0.08), 0 -30px 60px -30px rgb(60 30 10 / 0.25) inset" }}>
+          <div className="absolute inset-x-0 bottom-0 h-[46%]" style={{ background: "linear-gradient(to bottom, rgb(var(--surface-2)), rgb(var(--surface)))", boxShadow: "0 -1px 0 rgb(38 33 30 / 0.08), 0 -30px 60px -30px rgb(60 30 10 / 0.25) inset" }}>
             <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='6'><g stroke='%2326211E' stroke-width='1'><path d='M0 1.5h3M3 4.5h3'/><path d='M4.5 0v3M1.5 3v3' stroke-opacity='.7'/></g></svg>\")", backgroundSize: "6px 6px" }} />
             <div className="absolute inset-0" style={{ background: "linear-gradient(105deg, transparent 20%, rgb(255 226 180 / 0.35) 32%, transparent 44%, transparent 56%, rgb(255 226 180 / 0.25) 66%, transparent 78%)" }} />
           </div>
@@ -273,7 +273,7 @@ export function ScrollHero() {
 function Backdrop() {
   return (
     <div aria-hidden="true" className="absolute inset-0 -z-0">
-      <div className="absolute inset-0" style={{ background: "radial-gradient(90% 70% at 78% 8%, #FFF1DC 0%, #FAF7F2 45%, #EFE8DD 100%)" }} />
+      <div className="absolute inset-0" style={{ background: "radial-gradient(90% 70% at 78% 8%, rgb(255 226 185 / 0.45) 0%, rgb(var(--bg)) 45%, rgb(var(--surface)) 100%)" }} />
       <div className="absolute inset-0 opacity-60" style={{ background: "linear-gradient(118deg, transparent 0 18%, rgb(255 220 170 / 0.22) 26%, transparent 34%, transparent 46%, rgb(255 220 170 / 0.16) 54%, transparent 62%)" }} />
       <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='6' height='6'><g stroke='%2326211E' stroke-width='1'><path d='M0 1.5h3M3 4.5h3'/><path d='M4.5 0v3M1.5 3v3'/></g></svg>\")", backgroundSize: "6px 6px" }} />
     </div>

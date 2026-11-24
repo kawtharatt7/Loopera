@@ -7,6 +7,7 @@ import { useC, YARN_HEX, type CollectionDict } from "@/lib/i18n/collection";
 import { useLocale } from "@/lib/i18n/client";
 import { formatSar } from "@/lib/shop/catalog";
 import { bouquetPrice, saveRequest, type CustomRequest } from "@/lib/shop/requests";
+import { whatsappLink } from "@/lib/shop/whatsapp";
 
 export type CustomKind = CustomRequest["kind"];
 type Yarn = keyof CollectionDict["yarns"];
@@ -203,8 +204,17 @@ export function CustomOrderForm({ kind, preset = "", onDone }: { kind: CustomKin
         </p>
         <h3 className="mt-5 text-2xl">{f.sentTitle}</h3>
         <p className="mx-auto mt-3 max-w-sm leading-relaxed text-muted-foreground">{f.sentText(sent.ref)}</p>
+        <a
+          href={whatsappLink(c.waRequest(sent.ref, [sent.subject, ...Object.entries(sent.choices).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`), sent.colors.length ? `yarn: ${sent.colors.join(", ")}` : "", sent.note, `${sent.name} · ${sent.phone}`].filter(Boolean).join("\n")))}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="stitch mt-6 inline-flex min-h-12 items-center gap-2 rounded-sm bg-[#1F7A4D] px-7 font-medium text-white hover:opacity-90"
+        >
+          <WhatsAppIcon />
+          {c.whatsapp}
+        </a>
         {onDone && (
-          <button type="button" onClick={onDone} className="mt-8 inline-flex min-h-12 items-center rounded-sm border border-fg/30 px-7 hover:border-fg">
+          <button type="button" onClick={onDone} className="mt-4 ms-3 inline-flex min-h-12 items-center rounded-sm border border-fg/30 px-7 hover:border-fg">
             {c.close}
           </button>
         )}
@@ -326,7 +336,8 @@ function presetType(preset: string): "crest" | "flag" | "city" | "character" | "
   if (preset.startsWith("club:")) return "crest";
   if (preset.startsWith("char:")) return "character";
   if (preset.startsWith("flag:")) return "flag";
-  return "crest";
+  if (preset.startsWith("orig:")) return "calligraphy";
+  return preset ? "crest" : "calligraphy";
 }
 
 /** Opens the right form in a drawer. `preset` like "club:Al-Hilal" pre-fills the design. */
@@ -338,5 +349,13 @@ export function CustomOrderDrawer({ open, onClose, kind, preset = "" }: { open: 
       {/* key: a fresh form each time it opens */}
       {open && <CustomOrderForm key={`${kind}-${preset}`} kind={kind} preset={preset} onDone={onClose} />}
     </Drawer>
+  );
+}
+
+export function WhatsAppIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+      <path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.4.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.2-.2-.5-.3Z" />
+    </svg>
   );
 }

@@ -5,7 +5,7 @@ import { createContext, useCallback, useContext, type ReactNode } from "react";
 import { LOCALE_COOKIE, type Bi, type Locale } from "./config";
 import { DICT, type Dict } from "./dict";
 
-const LocaleContext = createContext<Locale>("ar");
+const LocaleContext = createContext<Locale>("en");
 
 export function LocaleProvider({ locale, children }: { locale: Locale; children: ReactNode }) {
   return <LocaleContext.Provider value={locale}>{children}</LocaleContext.Provider>;

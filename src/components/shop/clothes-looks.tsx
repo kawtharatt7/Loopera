@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useBag } from "@/components/bag/bag-context";
 import { useC } from "@/lib/i18n/collection";
@@ -23,6 +23,16 @@ function LookPhoto({ product, colorId, className = "", onSrc }: { product: Produ
       <motion.img key={src} src={src} alt={`${bi(product.photos[0].alt)}, ${bi(color.name)}`} className={className} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} draggable={false} />
     </AnimatePresence>
   );
+}
+
+/** The garment alone on its wooden hanger, repainted in the chosen yarn (the hanger stays wood). */
+function HangerPhoto({ product, colorId, className = "" }: { product: Product; colorId: string; className?: string }) {
+  const { bi } = useT();
+  const color = product.colors.find((c) => c.id === colorId) ?? product.colors[0];
+  const recipe = useMemo(() => (product.recolor ? { from: product.recolor.from } : undefined), [product.recolor]);
+  const src = useRecolored(product.hanger ?? product.photos[0].src, recipe, color.hex === "transparent" ? null : color.hex);
+  // eslint-disable-next-line @next/next/no-img-element -- local cut-out or its repainted copy
+  return <img src={src} alt={`${bi(product.title)}, ${bi(color.name)}`} className={className} draggable={false} />;
 }
 
 function Swatches({ product, value, onChange, size = "sm" }: { product: Product; value: string; onChange: (id: string) => void; size?: "sm" | "lg" }) {
@@ -68,10 +78,20 @@ export function ClothesLooks({ products }: { products: Product[] }) {
         {products.map((p, i) => (
           <li key={p.slug}>
             <button type="button" onClick={() => setOpen(i)} aria-haspopup="dialog" className="group block w-full text-start">
-              <span className="relative block aspect-[8/9] overflow-hidden rounded-sm bg-surface shadow-[0_24px_40px_-28px_rgba(60,30,10,0.45)]">
-                <LookPhoto product={p} colorId={colorOf(p)} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]" />
-                <span className="absolute bottom-3 start-3 rounded-sm bg-bg/85 px-2.5 py-1 text-xs opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">{c.open}</span>
-              </span>
+              {p.hanger ? (
+                <span className="relative flex aspect-[8/9] items-center justify-center overflow-hidden rounded-sm bg-[#FAF7F2] ring-1 ring-line/5">
+                  <span aria-hidden="true" className="absolute inset-0" style={{ background: "radial-gradient(80% 60% at 70% 10%, rgb(255 236 210 / 0.8), transparent 70%)" }} />
+                  <HangerPhoto product={p} colorId={colorOf(p)} className="relative max-h-[88%] max-w-[84%] object-contain drop-shadow-[0_22px_18px_rgba(60,30,10,0.22)] transition-transform duration-700 ease-out group-hover:-translate-y-1.5 group-hover:rotate-[-1.5deg]" />
+                  <span className="stitch absolute end-3 top-3 rounded-sm bg-[#26211E] px-2.5 py-1 text-xs font-medium text-[#FAF7F2]" style={{ outlineColor: "rgb(250 247 242 / 0.5)", outlineOffset: "-3px" }}>
+                    {c.tryOn}
+                  </span>
+                </span>
+              ) : (
+                <span className="relative block aspect-[8/9] overflow-hidden rounded-sm bg-surface shadow-[0_24px_40px_-28px_rgba(60,30,10,0.45)]">
+                  <LookPhoto product={p} colorId={colorOf(p)} className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.035]" />
+                  <span className="absolute bottom-3 start-3 rounded-sm bg-bg/85 px-2.5 py-1 text-xs opacity-0 backdrop-blur transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">{c.open}</span>
+                </span>
+              )}
             </button>
             <div className="mt-3 flex items-baseline justify-between gap-3">
               <h3 className="font-serif text-lg leading-snug">{bi(p.title)}</h3>
@@ -97,13 +117,21 @@ function LookDialog({ product, colorId, onColor, onClose }: { product: Product; 
   const [added, setAdded] = useState(false);
   const [src, setSrc] = useState(product.photos[0].src);
   const [lens, setLens] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const [onModel, setOnModel] = useState(!product.hanger);
+  const [guide, setGuide] = useState(false);
+  // The fitting room: the garment on its hanger first, then the model wearing it.
+  useEffect(() => {
+    if (!product.hanger) return;
+    const id = window.setTimeout(() => setOnModel(true), reduce ? 0 : 900);
+    return () => clearTimeout(id);
+  }, [product.hanger, reduce]);
   const frame = useRef<HTMLDivElement | null>(null);
   const size = product.sizes.find((s) => s.id === sizeId) ?? product.sizes[0];
   const onSrc = useCallback((s: string) => setSrc(s), []);
 
   useEffect(() => {
     const opener = document.activeElement as HTMLElement | null;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && !document.querySelector("[data-size-guide]") && onClose();
     window.addEventListener("keydown", onKey);
     const overflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -144,8 +172,25 @@ function LookDialog({ product, colorId, onColor, onClose }: { product: Product; 
           onPointerUp={(e) => e.pointerType === "touch" && setLens(null)}
           onPointerLeave={() => setLens(null)}
         >
-          <LookPhoto product={product} colorId={colorId} onSrc={onSrc} className="absolute inset-0 h-full w-full object-cover" />
-          {lens && (
+          <motion.div className="absolute inset-0" initial={false} animate={{ opacity: onModel ? 1 : 0, scale: onModel ? 1 : 1.06 }} transition={{ duration: reduce ? 0 : 0.9, ease: [0.16, 1, 0.3, 1] }}>
+            <LookPhoto product={product} colorId={colorId} onSrc={onSrc} className="absolute inset-0 h-full w-full object-cover" />
+          </motion.div>
+          {product.hanger && (
+            <motion.div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[#FAF7F2]" initial={false} animate={{ opacity: onModel ? 0 : 1, scale: onModel ? 0.92 : 1, y: onModel ? -20 : 0 }} transition={{ duration: reduce ? 0 : 0.8, ease: [0.16, 1, 0.3, 1] }}>
+              <HangerPhoto product={product} colorId={colorId} className="max-h-[86%] max-w-[80%] object-contain drop-shadow-[0_26px_22px_rgba(60,30,10,0.25)]" />
+            </motion.div>
+          )}
+          {product.hanger && (
+            <div className="absolute end-3 top-3 z-10 flex overflow-hidden rounded-sm bg-bg/85 text-xs backdrop-blur" role="group">
+              <button type="button" aria-pressed={!onModel} onClick={(e) => { e.stopPropagation(); setOnModel(false); }} onPointerDown={(e) => e.stopPropagation()} className={`px-3 py-2 ${!onModel ? "bg-fg text-bg" : ""}`}>
+                {c.hangerView}
+              </button>
+              <button type="button" aria-pressed={onModel} onClick={(e) => { e.stopPropagation(); setOnModel(true); }} onPointerDown={(e) => e.stopPropagation()} className={`px-3 py-2 ${onModel ? "bg-fg text-bg" : ""}`}>
+                {c.tryOn}
+              </button>
+            </div>
+          )}
+          {lens && onModel && (
             <span
               aria-hidden="true"
               className="pointer-events-none absolute rounded-full shadow-[0_0_0_3px_rgb(var(--bg)),0_18px_40px_-10px_rgba(0,0,0,0.5)]"
@@ -186,7 +231,12 @@ function LookDialog({ product, colorId, onColor, onClose }: { product: Product; 
             {c.readyIn(product.leadTimeDays)}
           </p>
           <fieldset>
-            <legend className="mb-2 text-sm text-muted-foreground">{c.size}</legend>
+            <legend className="mb-2 flex w-full items-center justify-between text-sm text-muted-foreground">
+              {c.size}
+              <button type="button" onClick={() => setGuide(true)} className="underline underline-offset-4 hover:text-fg">
+                {c.sizeGuide}
+              </button>
+            </legend>
             <div className="flex flex-wrap gap-2">
               {product.sizes.map((s) => (
                 <button key={s.id} type="button" aria-pressed={s.id === sizeId} onClick={() => setSizeId(s.id)} className={`h-11 min-w-12 rounded-sm border px-3 text-sm ${s.id === sizeId ? "border-fg bg-fg text-bg" : "border-line/25 hover:border-fg"}`}>
@@ -214,7 +264,85 @@ function LookDialog({ product, colorId, onColor, onClose }: { product: Product; 
           </div>
         </div>
       </motion.div>
+      {guide && <SizeGuide onClose={() => setGuide(false)} />}
     </div>,
     document.body,
+  );
+}
+
+const SIZE_TABLE: [string, number, number, number][] = [
+  ["S", 88, 52, 58],
+  ["M", 96, 54, 60],
+  ["L", 104, 56, 61],
+  ["XL", 112, 58, 62],
+];
+
+/** Size guide: a plain silhouette with the three lengths marked, and the garment measurements. */
+function SizeGuide({ onClose }: { onClose: () => void }) {
+  const c = useC();
+  const { locale } = useT();
+  const n = (v: number) => v.toLocaleString(locale === "ar" ? "ar-SA" : "en");
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [onClose]);
+  const marks: [keyof typeof c.lengths, number][] = [["mini", 150], ["midi", 205], ["maxi", 262]];
+  return (
+    <div data-size-guide role="dialog" aria-modal="true" aria-label={c.sizeGuideTitle} className="absolute inset-0 z-10 flex items-center justify-center p-4">
+      <button type="button" tabIndex={-1} aria-label={c.close} onClick={onClose} className="absolute inset-0 bg-[rgb(38_33_30/0.35)]" />
+      <div className="relative grid w-full max-w-2xl gap-6 bg-bg p-6 shadow-2xl sm:grid-cols-[180px_1fr] sm:rounded">
+        <svg viewBox="0 0 160 290" className="mx-auto h-64 w-auto text-fg" aria-hidden="true">
+          <g fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" opacity="0.55">
+            <circle cx="70" cy="22" r="14" />
+            <path d="M70 36v10M46 52c8-6 40-6 48 0l8 70M46 52l-8 70M52 60l-4 60h44l-4-60M50 120l-6 70h52l-6-70M58 190l-2 90M82 190l2 90" />
+          </g>
+          {marks.map(([k, y]) => (
+            <g key={k}>
+              <line x1="30" x2="112" y1={y} y2={y} stroke="rgb(var(--terracotta))" strokeWidth="1.5" strokeDasharray="4 3" />
+              <text x="116" y={y + 4} fontSize="11" fill="currentColor">
+                {c.lengths[k]}
+              </text>
+            </g>
+          ))}
+        </svg>
+        <div>
+          <div className="flex items-start justify-between gap-4">
+            <h3 className="text-2xl">{c.sizeGuideTitle}</h3>
+            <button type="button" autoFocus onClick={onClose} className="h-10 rounded-sm px-3 text-sm hover:bg-surface">
+              {c.close}
+            </button>
+          </div>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{c.sizeGuideText}</p>
+          <table className="mt-4 w-full text-sm tabular-nums">
+            <thead>
+              <tr className="border-b border-line/15 text-start text-muted-foreground">
+                {[c.table.size, c.table.chest, c.table.length, c.table.sleeve].map((h) => (
+                  <th key={h} className="py-2 text-start font-normal">
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {SIZE_TABLE.map(([s, a, b, d]) => (
+                <tr key={s} className="border-b border-line/10">
+                  <td className="py-2 font-medium">{s}</td>
+                  <td>{n(a)}</td>
+                  <td>{n(b)}</td>
+                  <td>{n(d)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-3 text-xs text-muted-foreground">{c.lengthNote}</p>
+        </div>
+      </div>
+    </div>
   );
 }

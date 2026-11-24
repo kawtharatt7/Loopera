@@ -8,7 +8,7 @@ import type { TapestryId } from "@/lib/tapestry/designs";
 export type Category = "clothes" | "bags" | "wall" | "dolls" | "flowers";
 
 /** Wall hangings come in four families (the hub's filter tabs). */
-export type WallGroup = "saudi-clubs" | "global-clubs" | "flags" | "anime";
+export type WallGroup = "saudi-clubs" | "global-clubs" | "flags" | "anime" | "originals";
 
 export const CATEGORIES: { id: Category; label: Bi; blurb: Bi }[] = [
   { id: "clothes", label: { en: "Clothes", ar: "ملابس" }, blurb: { en: "Sweaters, vests, tops and dresses, worn in the studio.", ar: "بلايز وصديريات وتوبات وفساتين، ملبوسة في الاستوديو." } },
@@ -68,6 +68,10 @@ export interface Product {
   tapestry?: TapestryId;
   /** Wall hangings: which family the piece belongs to. */
   group?: WallGroup;
+  /** Showcase archive only: shown in the gallery, not sold (no price, no cart). */
+  showcase?: boolean;
+  /** Clothes: the garment on its own, on a wooden hanger (cut out). */
+  hanger?: string;
 }
 
 const LOOPERA: Bi = { en: "Loopera", ar: "لوبيرا" };
@@ -139,6 +143,25 @@ const GARMENTS: Garment[] = [
   ["cream-collar-vest", "Cream collar vest", "صديري بياقة كريمي", "A sleeveless mesh top with a polo collar, in cream.", "توب شبك بدون أكمام بياقة بولو، كريمي.", 280, "#E3D3B6"],
 ];
 
+/** Garments that also have a photo on a wooden hanger. */
+const HANGERS = ["star-bell-sleeve-sweater", "green-rose-hem-dress", "open-weave-maxi-overlay", "daisy-vest", "flared-yellow-cardigan", "spiderweb-mesh-top", "distressed-striped-sweater", "checkerboard-maxi-dress"];
+
+/** Loopera's own original tapestries (no club, flag or character): sold normally. */
+const ORIGINALS: [id: string, en: string, ar: string, price: number][] = [
+  ["sabr", "Sabr calligraphy", "صبر بالخط العربي", 180],
+  ["love", "Ai (love) character", "حرف الحب", 160],
+  ["geese", "Geese", "الإوز", 190],
+  ["duck", "Duck", "البطة", 140],
+  ["cat", "Climbing cat", "القطة المتعلّقة", 160],
+  ["orca", "Orca", "الأوركا", 170],
+  ["pink-bird", "Pink bird", "الطير الوردي", 170],
+  ["sleep", "I love sleep", "أحب النوم", 150],
+  ["face", "Little face", "الوجه الصغير", 150],
+  ["heart", "Heart", "القلب", 120],
+  ["star", "Star", "النجمة", 120],
+  ["yinyang", "Yin yang", "ين يانغ", 130],
+];
+
 type BagRow = [slug: string, en: string, ar: string, enDesc: string, arDesc: string, midi: number, from: string];
 const BAGS: BagRow[] = [
   ["snug-shell-bag", "Embellished burgundy bag", "شنطة عنابية مزيّنة", "Chunky burgundy stitches studded with shells and pearls.", "غرز عنابية سميكة مزيّنة بأصداف ولؤلؤ.", 260, "#6E1424"],
@@ -188,6 +211,7 @@ const ALL: Product[] = [
     colors: CLOTHES_COLORS,
     photos: SHOT(`/images/clothes/${slug}.webp`, { en: `A model wearing the ${en.toLowerCase()}`, ar: `عارضة لابسة ${ar}` }),
     recolor: { from, mask: `/images/clothes/mask/${slug}.png` },
+    hanger: HANGERS.includes(slug) ? `/images/clothes/hanger/${slug}.webp` : undefined,
   })),
   ...BAGS.map(([slug, en, ar, enDesc, arDesc, midi, from]): Product => ({
     slug,
@@ -210,10 +234,11 @@ const ALL: Product[] = [
     slug: `flag-${id}`,
     category: "wall",
     group: "flags",
+    showcase: true,
     title: { en: `${en} flag`, ar: `علم ${ar}` },
     maker: LOOPERA,
-    description: { en: `The flag of ${en} as a pixel tapestry with hanging loops.`, ar: `علم ${ar} كلوحة بكسل بعروات للتعليق.` },
-    details: [{ en: "Tapestry crochet, acrylic yarn", ar: "كروشيه تابستري، خيط أكريليك" }, { en: "Hanging loops on top", ar: "عروات تعليق فوق" }],
+    description: { en: `The flag of ${en} as a pixel tapestry with hanging loops. Showcase piece, not for sale.`, ar: `علم ${ar} كلوحة بكسل بعروات للتعليق. للعرض فقط، غير معروضة للبيع.` },
+    details: [{ en: "Tapestry crochet, acrylic yarn", ar: "كروشيه تابستري، خيط أكريليك" }],
     madeToOrder: true,
     leadTimeDays: 7,
     rating: 0,
@@ -221,6 +246,22 @@ const ALL: Product[] = [
     sizes: WALL(price),
     colors: AS_SHOWN,
     photos: PRODUCT_SHOT(`/images/wall/flag-${id}.webp`, { en: `${en} flag, crocheted`, ar: `علم ${ar} كروشيه` }),
+  })),
+  ...ORIGINALS.map(([id, en, ar, price]): Product => ({
+    slug: `wall-${id}`,
+    category: "wall",
+    group: "originals",
+    title: { en, ar },
+    maker: LOOPERA,
+    description: { en: "One of our own tapestry designs, crocheted to order.", ar: "من تصاميمنا الخاصة، تنشغل حسب الطلب." },
+    details: [{ en: "Tapestry crochet, acrylic yarn", ar: "كروشيه تابستري، خيط أكريليك" }, { en: "Ready to hang", ar: "جاهزة للتعليق" }],
+    madeToOrder: true,
+    leadTimeDays: 7,
+    rating: 0,
+    reviews: 0,
+    sizes: WALL(price),
+    colors: AS_SHOWN,
+    photos: PRODUCT_SHOT(`/images/wall/orig-${id}.webp`, { en: `${en}, a crocheted wall hanging`, ar: `${ar}، لوحة كروشيه` }),
   })),
   {
     slug: "graduate-doll-her",

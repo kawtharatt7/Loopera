@@ -277,3 +277,21 @@
 .loopera-cutout .snp-swatches, .loopera-piece .snp-swatches { flex-wrap: wrap; gap: 10px; }
 .loopera-cutout .snp-swatch, .loopera-piece .snp-swatch { flex-shrink: 0; }
 html, body { overflow-x: clip; }
+
+/* Stitched primary buttons: a dashed "running stitch" just inside the edge. */
+.stitch,
+button.bg-primary,
+a.bg-primary {
+  outline: 1.5px dashed rgb(255 255 255 / 0.55);
+  outline-offset: -5px;
+}
+button.bg-primary:focus-visible,
+a.bg-primary:focus-visible,
+.stitch:focus-visible {
+  outline: 3px solid rgb(var(--ring));
+  outline-offset: 3px;
+}
+
+/* Editorial marquee between the opening and the clothes. */
+@keyframes loop-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+[dir="rtl"] .loop-marquee { animation-direction: reverse; }

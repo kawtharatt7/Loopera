@@ -8,14 +8,14 @@ import { useT } from "@/lib/i18n/client";
 import { formatSar, fromPrice, WALL_DESIGNS, type Product, type WallGroup } from "@/lib/shop/catalog";
 
 type Tab = "all" | WallGroup;
-const TABS: Tab[] = ["all", "saudi-clubs", "global-clubs", "flags", "anime"];
+const TABS: Tab[] = ["all", "originals", "saudi-clubs", "global-clubs", "flags", "anime"];
 
 type Card = { kind: "product"; group: WallGroup; product: Product } | { kind: "design"; group: WallGroup; en: string; ar: string };
 
 /**
- * Wall hangings hub: filter tabs over every design. Pieces with a photo can be ordered as shown;
- * every card can open the custom builder pre-filled with that design. Clubs and characters are made
- * on request from the customer's reference, so they are listed by name.
+ * Wall hangings gallery: filter tabs over every design. Our own originals are sold as shown.
+ * Flags, clubs and characters are a showcase archive: no price and no cart, only a request for a
+ * custom piece (clubs and characters are listed by name, without their logos or artwork).
  */
 export function WallHub({ products }: { products: Product[] }) {
   const { bi, locale } = useT();
@@ -27,7 +27,7 @@ export function WallHub({ products }: { products: Product[] }) {
 
   const cards = useMemo<Card[]>(
     () => [
-      ...products.map((p): Card => ({ kind: "product", group: p.group ?? "flags", product: p })),
+      ...[...products].sort((a, b) => Number(!!a.showcase) - Number(!!b.showcase)).map((p): Card => ({ kind: "product", group: p.group ?? "originals", product: p })),
       ...WALL_DESIGNS.map((d): Card => ({ kind: "design", ...d })),
     ],
     [products],
@@ -60,7 +60,7 @@ export function WallHub({ products }: { products: Product[] }) {
         {shown.map((k) => {
           const id = k.kind === "product" ? k.product.slug : `${k.group}-${k.en}`;
           const name = k.kind === "product" ? bi(k.product.title) : locale === "ar" ? k.ar : k.en;
-          const prefix = k.group === "anime" ? "char" : k.group === "flags" ? "flag" : "club";
+          const prefix = k.group === "anime" ? "char" : k.group === "flags" ? "flag" : k.group === "originals" ? "orig" : "club";
           return (
             <li key={id} className="flex flex-col">
               {k.kind === "product" ? (
@@ -76,26 +76,41 @@ export function WallHub({ products }: { products: Product[] }) {
                   <span className="relative mt-2 text-xs text-muted-foreground">{c.hub.byRequest}</span>
                 </div>
               )}
-              <div className="mt-3 flex items-baseline justify-between gap-2">
-                <h3 className="font-serif text-base leading-snug sm:text-lg">{k.kind === "product" ? name : c.hub.designOf(name)}</h3>
-                <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
-                  {k.kind === "product" ? formatSar(fromPrice(k.product), locale) : `${c.from} ${formatSar(150, locale)}`}
-                </span>
-              </div>
-              <div className="mt-3 grid gap-2">
-                {k.kind === "product" && (
-                  <button
-                    type="button"
-                    onClick={() => add({ slug: k.product.slug, color: k.product.colors[0].id, size: k.product.sizes[0].id }) && setAdded(k.product.slug)}
-                    className={`min-h-11 rounded-sm px-3 text-sm font-medium transition-colors ${added === k.product.slug ? "bg-sage text-white" : "bg-primary text-primary-fg hover:opacity-90"}`}
-                  >
-                    {added === k.product.slug ? c.added : c.hub.orderShown}
-                  </button>
-                )}
-                <button type="button" onClick={() => setCustom(`${prefix}:${k.kind === "product" ? name : locale === "ar" ? k.ar : k.en}`)} className="min-h-11 rounded-sm border border-fg/25 px-3 text-sm hover:border-fg">
-                  {c.hub.customize}
-                </button>
-              </div>
+              {(() => {
+                const forSale = k.kind === "product" && !k.product.showcase;
+                return (
+                  <>
+                    <div className="mt-3 flex items-baseline justify-between gap-2">
+                      <h3 className="font-serif text-base leading-snug sm:text-lg">{k.kind === "product" ? name : c.hub.designOf(name)}</h3>
+                      {forSale && <span className="shrink-0 text-sm tabular-nums text-muted-foreground">{formatSar(fromPrice(k.product), locale)}</span>}
+                    </div>
+                    {!forSale && (
+                      <p className="mt-1 inline-flex w-fit items-center gap-1.5 rounded-sm bg-surface px-2 py-0.5 text-xs text-muted-foreground">
+                        <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-terracotta" />
+                        {c.hub.showcase}
+                      </p>
+                    )}
+                    <div className="mt-3 grid gap-2">
+                      {forSale && (
+                        <button
+                          type="button"
+                          onClick={() => add({ slug: k.product.slug, color: k.product.colors[0].id, size: k.product.sizes[0].id }) && setAdded(k.product.slug)}
+                          className={`min-h-11 rounded-sm px-3 text-sm font-medium transition-colors ${added === k.product.slug ? "bg-sage text-white" : "bg-primary text-primary-fg hover:opacity-90"}`}
+                        >
+                          {added === k.product.slug ? c.added : c.hub.orderShown}
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => setCustom(`${prefix}:${k.kind === "product" ? name : locale === "ar" ? k.ar : k.en}`)}
+                        className={forSale ? "min-h-11 rounded-sm border border-fg/25 px-3 text-sm hover:border-fg" : "min-h-11 rounded-sm bg-primary px-3 text-sm font-medium text-primary-fg hover:opacity-90"}
+                      >
+                        {forSale ? c.hub.customize : c.hub.request}
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
             </li>
           );
         })}

@@ -165,13 +165,22 @@ const ORIGINALS: [id: string, en: string, ar: string, price: number][] = [
   ["black-cat", "Black cat", "القطة السوداء", 160],
   ["geometric", "Geometric", "هندسي", 170],
   ["mandala", "Mandala", "ماندالا", 190],
+  ["cherries", "Cherries on check", "كرز على مربعات", 190],
+  ["great-wave", "The wave", "الموجة", 220],
+  ["moon-night", "Moonlit night", "ليلة مقمرة", 200],
+  ["blue-flowers", "Blue flowers", "ورود زرقاء", 200],
+  ["space", "Planets and galaxy", "كواكب ومجرة", 210],
+  ["bow", "The bow", "الفيونكة", 180],
+  ["cottage", "Little cottage", "البيت الصغير", 230],
+  ["sleeping-cat", "Sleeping cat", "القطة النايمة", 200],
+  ["sun", "Sun", "الشمس", 210],
 ];
 
 /** Showcase archive: fan pieces shown in the gallery only, never sold. */
 const SHOWCASE: [id: string, en: string, ar: string, group: WallGroup][] = [
   ...([["al-hilal", "Al-Hilal", "الهلال"], ["al-nassr", "Al-Nassr", "النصر"], ["al-ittihad", "Al-Ittihad", "الاتحاد"], ["al-ahli", "Al-Ahli", "الأهلي"]] as const).map(([id, en, ar]) => [id, en, ar, "saudi-clubs"] as [string, string, string, WallGroup]),
-  ...([["real-madrid", "Real Madrid", "ريال مدريد"], ["barcelona", "Barcelona", "برشلونة"], ["man-city", "Man City", "مانشستر سيتي"], ["man-united", "Man United", "مانشستر يونايتد"], ["liverpool", "Liverpool", "ليفربول"], ["arsenal", "Arsenal", "آرسنال"], ["chelsea", "Chelsea", "تشيلسي"], ["bayern", "Bayern Munich", "بايرن ميونخ"], ["psg", "PSG", "باريس سان جيرمان"], ["ac-milan", "AC Milan", "ميلان"]] as const).map(([id, en, ar]) => [id, en, ar, "global-clubs"] as [string, string, string, WallGroup]),
-  ...([["spider-man", "Spider-Man", "سبايدر مان"], ["iron-man", "Iron Man", "آيرون مان"], ["captain-america", "Captain America", "كابتن أمريكا"], ["batman", "Batman", "باتمان"], ["naruto", "Naruto", "ناروتو"], ["luffy", "Luffy", "لوفي"], ["zoro", "Zoro", "زورو"], ["gojo", "Gojo", "غوجو"], ["luffy-hanging", "Luffy (hanging)", "لوفي (معلّقة)"], ["goku", "Goku", "غوكو"], ["no-face", "No-Face", "الوجه الخفي"]] as const).map(([id, en, ar]) => [id, en, ar, "anime"] as [string, string, string, WallGroup]),
+  ...([["real-madrid", "Real Madrid", "ريال مدريد"], ["barcelona", "Barcelona", "برشلونة"], ["man-city", "Man City", "مانشستر سيتي"]] as const).map(([id, en, ar]) => [id, en, ar, "global-clubs"] as [string, string, string, WallGroup]),
+  ...([["spider-man", "Spider-Man", "سبايدر مان"], ["iron-man", "Iron Man", "آيرون مان"], ["captain-america", "Captain America", "كابتن أمريكا"], ["batman", "Batman", "باتمان"], ["naruto", "Naruto", "ناروتو"], ["luffy", "Luffy", "لوفي"], ["zoro", "Zoro", "زورو"], ["gojo", "Gojo", "غوجو"], ["luffy-hanging", "Luffy (hanging)", "لوفي (معلّقة)"], ["goku", "Goku", "غوكو"], ["no-face", "No-Face", "الوجه الخفي"], ["totoro", "Totoro", "توتورو"]] as const).map(([id, en, ar]) => [id, en, ar, "anime"] as [string, string, string, WallGroup]),
 ];
 
 type BagRow = [slug: string, en: string, ar: string, enDesc: string, arDesc: string, midi: number, from: string];

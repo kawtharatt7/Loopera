@@ -27,6 +27,8 @@ interface PatternViewerProps {
   allow3D?: boolean;
   /** Tick boxes for finished rounds. */
   progress?: RoundProgress;
+  /** Show the tab with every part placed together (off where the finished piece is shown above). */
+  allowAssembly?: boolean;
 }
 
 function Icon({ d }: { d: string }) {
@@ -37,7 +39,7 @@ function Icon({ d }: { d: string }) {
   );
 }
 
-export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, allow3D = true, progress }: PatternViewerProps) {
+export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, allow3D = true, allowAssembly = true, progress }: PatternViewerProps) {
   const reduce = useReducedMotion() ?? false;
   const { t, locale } = useT();
   const ar = locale === "ar";
@@ -113,7 +115,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
               {ar ? partNameAr(p.name) : p.name}
             </button>
           ))}
-          {allow3D && webgl && hasRevolution && hasAttachments && (
+          {allowAssembly && allow3D && webgl && hasRevolution && hasAttachments && (
             <button
               role="tab"
               type="button"
@@ -126,7 +128,7 @@ export function PatternViewer({ pattern, parts, rowHeightCm, terms, onCanvas, al
                 view === "assembly" ? "bg-primary text-primary-fg" : "border border-line/15 bg-surface/60 hover:bg-surface-2"
               }`}
             >
-              {ar ? "التركيب" : "Assembly"}
+              {ar ? "كل القطع مع بعض" : "All parts together"}
             </button>
           )}
         </div>

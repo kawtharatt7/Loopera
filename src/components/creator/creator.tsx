@@ -470,7 +470,7 @@ function TemplateResult({
           <li>{t.creator.time(hours)}</li>
         </ul>
       </div>
-      <PatternViewer pattern={pattern} parts={parts} rowHeightCm={preset.gauge.rowHeightCm} terms="us" onCanvas={onCanvas} progress={progress} />
+      <PatternViewer pattern={pattern} parts={parts} rowHeightCm={preset.gauge.rowHeightCm} terms="us" onCanvas={onCanvas} progress={progress} allowAssembly={false} />
     </div>
   );
 }

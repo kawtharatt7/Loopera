@@ -1,7 +1,10 @@
 # Third-party components
 
-Copied from 21st.dev. Both are MIT licensed. One change: `sneaker-product-hero.tsx` takes an
-optional `word` prop (the brand word shown behind the product instead of the colour name).
+Copied from 21st.dev. Both are MIT licensed. Changes in `sneaker-product-hero.tsx`, all optional props:
+`word` (the brand word behind the product instead of the colour name), `labels` (every visible word,
+for Arabic), `formatPrice` (prices in riyals), `showReviews={false}` (no stars or review count until
+there are real reviews) and `stockNote` (a made-to-order line instead of stock counts). The default
+gallery framings are named for bags (Front, Stitch detail, Handle…).
 
 | File | Component | Author | Source |
 | --- | --- | --- | --- |

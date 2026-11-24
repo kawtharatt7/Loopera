@@ -73,6 +73,55 @@ export type SneakerSize = {
   stock?: number
 }
 
+/** Loopera: every visible word, so the hero can speak Arabic. */
+export type SneakerLabels = {
+  size: string
+  reviews: string
+  price: string
+  colour: string
+  add: string
+  soldOut: string
+  added: string
+  zoom: string
+  tap: string
+  saved: string
+  removed: string
+  soldOutColour: string
+  onlyLeft: (n: number, size: string) => string
+  inStock: string
+  sizeNote: (size: string) => string
+  sizeGroup: string
+  like: string
+  closePhotos: string
+  prevPhoto: string
+  nextPhoto: string
+  viewAll: (n: number) => string
+}
+
+const DEFAULT_LABELS: SneakerLabels = {
+  size: "SIZE",
+  reviews: "REVIEWS",
+  price: "PRICE",
+  colour: "COLOUR",
+  add: "ADD TO CART",
+  soldOut: "SOLD OUT",
+  added: "ADDED",
+  zoom: "Hold to zoom",
+  tap: "Tap to view",
+  saved: "Saved to favourites",
+  removed: "Removed from favourites",
+  soldOutColour: "Sold out in this colour",
+  onlyLeft: (n, size) => `Only ${n} left in size ${size}`,
+  inStock: "In stock · ships in 2 days",
+  sizeNote: (size) => `size ${size}`,
+  sizeGroup: "Size",
+  like: "Save to favourites",
+  closePhotos: "Close photos",
+  prevPhoto: "Previous photo",
+  nextPhoto: "Next photo",
+  viewAll: (n) => `View all ${n} photos`,
+}
+
 export type SneakerProductHeroProps = {
   variants: SneakerVariant[]
   /** Index of the colourway shown first. */
@@ -95,6 +144,14 @@ export type SneakerProductHeroProps = {
   onLikeChange?: (liked: boolean) => void
   /** Loopera: fixed word behind the product (the brand), instead of the colour name. */
   word?: string
+  /** Loopera: formats a price (e.g. Saudi riyals in Arabic digits) instead of currency + number. */
+  formatPrice?: (amount: number) => string
+  /** Loopera: interface words. */
+  labels?: Partial<SneakerLabels>
+  /** Loopera: hide the stars and review count (until there are real reviews). Default true. */
+  showReviews?: boolean
+  /** Loopera: replaces the stock line (for made-to-order pieces). */
+  stockNote?: string
   /** Any CSS length. The section is at least this tall. Default 100svh. */
   height?: number | string
   className?: string
@@ -108,13 +165,13 @@ const HEART =
 // Seven framings of one side-profile photo, toe left: the gallery a shoe gets
 // when it has no photos of its own. Focus points sit on that layout.
 const FRAMINGS: Omit<SneakerView, "src">[] = [
-  { label: "Side" },
-  { label: "Inside", mirror: true },
-  { label: "Heel", focus: [0.86, 0.42], zoom: 1.8 },
-  { label: "Toe box", focus: [0.16, 0.6], zoom: 1.8 },
-  { label: "Laces", focus: [0.47, 0.34], zoom: 1.8 },
-  { label: "Midsole", focus: [0.45, 0.74], zoom: 1.7 },
-  { label: "Collar", focus: [0.74, 0.32], zoom: 1.9 },
+  { label: "Front" },
+  { label: "Angle", mirror: true },
+  { label: "Stitch detail", focus: [0.86, 0.42], zoom: 1.8 },
+  { label: "Base", focus: [0.16, 0.6], zoom: 1.8 },
+  { label: "Handle", focus: [0.47, 0.34], zoom: 1.8 },
+  { label: "Weave", focus: [0.45, 0.74], zoom: 1.7 },
+  { label: "Closure", focus: [0.74, 0.32], zoom: 1.9 },
 ]
 
 // #region logic
@@ -206,9 +263,14 @@ export default function SneakerProductHero({
   onLikeChange,
   height = "100svh",
   word,
+  labels,
+  showReviews = true,
+  formatPrice,
+  stockNote,
   className,
   style,
 }: SneakerProductHeroProps) {
+  const L = { ...DEFAULT_LABELS, ...labels }
   const count = variants.length
   const [active, setActive] = React.useState(() => Math.min(Math.max(defaultVariant, 0), Math.max(count - 1, 0)))
   const avail = (vi: number, label: string) => availability(sizes.find((s) => s.label === label), variants[vi])
@@ -351,11 +413,11 @@ export default function SneakerProductHero({
     shownStats.current = stats
     const p = priceRef.current
     const c = countRef.current
-    if (!p || !c) return
-    const fmt = (n: number) => currency + Math.round(n)
+    if (!p) return // the review count is optional (Loopera: showReviews)
+    const fmt = (n: number) => (formatPrice ? formatPrice(Math.round(n)) : currency + Math.round(n))
     if (prefersReduced()) {
       p.textContent = fmt(stats.price)
-      c.textContent = `(${stats.reviews})`
+      if (c) c.textContent = `(${stats.reviews})`
       return
     }
     const o = { price: from.price, reviews: from.reviews }
@@ -366,7 +428,7 @@ export default function SneakerProductHero({
       ease: "power2.out",
       onUpdate: () => {
         p.textContent = fmt(o.price)
-        c.textContent = `(${Math.round(o.reviews)})`
+        if (c) c.textContent = `(${Math.round(o.reviews)})`
       },
     })
     if (from.price !== stats.price) gsap.fromTo(p, { y: stats.price > from.price ? 8 : -8, opacity: 0.4 }, { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" })
@@ -434,7 +496,7 @@ export default function SneakerProductHero({
   const like = () => {
     const next = !liked
     setLiked(next)
-    setLikeMsg(next ? "Saved to favourites" : "Removed from favourites")
+    setLikeMsg(next ? L.saved : L.removed)
     onLikeChange?.(next)
     const from = likeRef.current
     const pill = pillRef.current
@@ -486,7 +548,7 @@ export default function SneakerProductHero({
   const showToast = () => {
     const variant = variants[shown.current]
     if (variant) onAddToCart?.({ variant, size, price: stats.price })
-    setToastNote(variant ? `${variant.name} · size ${size}` : "")
+    setToastNote(variant ? `${variant.name} · ${L.sizeNote(size)}` : "")
     const t = toastRef.current
     if (!t) return
     toastTimer.current?.kill()
@@ -587,13 +649,13 @@ export default function SneakerProductHero({
 
   const tintOf = (vv: SneakerVariant) => vv.tint ?? vv.swatch
   const here = avail(active, size)
-  const stockTone = here.soldOut ? "out" : here.stock !== undefined && here.stock <= lowStock ? "low" : "ok"
+  const stockTone = here.soldOut ? "out" : !stockNote && here.stock !== undefined && here.stock <= lowStock ? "low" : "ok"
   const stockText =
     stockTone === "out"
-      ? "Sold out in this colour"
-      : stockTone === "low"
-        ? `Only ${here.stock} left in size ${size}`
-        : "In stock · ships in 2 days"
+      ? L.soldOutColour
+      : stockNote ?? (stockTone === "low"
+        ? L.onlyLeft(here.stock ?? 0, size)
+        : L.inStock)
 
   return (
     <section
@@ -790,7 +852,7 @@ export default function SneakerProductHero({
               ))}
             </span>
             {more > 0 && (
-              <button type="button" className="snp-more" aria-label={`View all ${views.length} photos`} onClick={() => openViewer(3)}>
+              <button type="button" className="snp-more" aria-label={L.viewAll(views.length)} onClick={() => openViewer(3)}>
                 +{more}
               </button>
             )}
@@ -865,14 +927,14 @@ export default function SneakerProductHero({
             <span ref={loupeImgRef} />
           </span>
           <span className="snp-hint" data-seen={hintSeen} aria-hidden="true">
-            <span className="snp-hint-fine">Hold to zoom</span>
-            <span className="snp-hint-touch">Tap to view</span>
+            <span className="snp-hint-fine">{L.zoom}</span>
+            <span className="snp-hint-touch">{L.tap}</span>
           </span>
         </div>
 
         <div className="snp-buy">
-          <span className="snp-label">SIZE</span>
-          <div className="snp-sizes" role="group" aria-label="Size">
+          <span className="snp-label">{L.size}</span>
+          <div className="snp-sizes" role="group" aria-label={L.sizeGroup}>
             {sizes.map((s) => (
               <button
                 key={s.label}
@@ -890,23 +952,23 @@ export default function SneakerProductHero({
           <span className="snp-stock" data-tone={stockTone} aria-live="polite">
             {stockText}
           </span>
-          <div className="snp-row">
-            <span className="snp-label">REVIEWS</span>
+          {showReviews && <div className="snp-row">
+            <span className="snp-label">{L.reviews}</span>
             <span className="snp-rating">
               <Stars value={stats.rating} />
               <span className="snp-count" ref={countRef} aria-label="reviews">
                 ({first.current.reviews})
               </span>
             </span>
-          </div>
+          </div>}
           <div className="snp-row" aria-live="polite">
-            <span className="snp-label">PRICE</span>
+            <span className="snp-label">{L.price}</span>
             <span className="snp-price" ref={priceRef}>
-              {currency + first.current.price}
+              {formatPrice ? formatPrice(first.current.price) : currency + first.current.price}
             </span>
           </div>
-          <span className="snp-label snp-colour">COLOUR</span>
-          <div className="snp-swatches" role="group" aria-label="Colour">
+          <span className="snp-label snp-colour">{L.colour}</span>
+          <div className="snp-swatches" role="group" aria-label={L.colour}>
             {variants.map((vv, i) => (
               <button
                 key={i}
@@ -921,7 +983,7 @@ export default function SneakerProductHero({
           </div>
           <div className="snp-actions">
             <button type="button" className="snp-cta" data-state={cart} onClick={addToCart} disabled={here.soldOut} aria-live="polite">
-              <span className="snp-cta-idle">{here.soldOut ? "SOLD OUT" : "ADD TO CART"}</span>
+              <span className="snp-cta-idle">{here.soldOut ? L.soldOut : L.add}</span>
               <span className="snp-cta-busy" aria-hidden="true">
                 <i />
               </span>
@@ -929,10 +991,10 @@ export default function SneakerProductHero({
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M5 12.5l4.2 4.2L19 7" />
                 </svg>
-                ADDED
+                {L.added}
               </span>
             </button>
-            <button ref={likeRef} type="button" className="snp-like" aria-pressed={liked} aria-label="Save to favourites" onClick={like}>
+            <button ref={likeRef} type="button" className="snp-like" aria-pressed={liked} aria-label={L.like} onClick={like}>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d={HEART} />
               </svg>
@@ -960,14 +1022,14 @@ export default function SneakerProductHero({
 
       {viewer !== null && views[viewer] && (
         <div className="snp-viewer" role="dialog" aria-modal="true" aria-label={`${title} photos`}>
-          <button type="button" className="snp-scrim" aria-label="Close photos" tabIndex={-1} onClick={closeViewer} />
+          <button type="button" className="snp-scrim" aria-label={L.closePhotos} tabIndex={-1} onClick={closeViewer} />
           <div className="snp-box" ref={boxRef}>
             <div className="snp-vbar">
               <strong>{views[viewer].label ?? "Photo"}</strong>
               <span>
                 {viewer + 1} / {views.length}
               </span>
-              <button ref={closeRef} type="button" className="snp-vbtn snp-close" aria-label="Close photos" onClick={closeViewer}>
+              <button ref={closeRef} type="button" className="snp-vbtn snp-close" aria-label={L.closePhotos} onClick={closeViewer}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                   <path d="M6 6l12 12M18 6L6 18" />
                 </svg>
@@ -997,12 +1059,12 @@ export default function SneakerProductHero({
                 role="img"
                 aria-label={`${v?.name} ${views[viewer].label ?? ""}`}
               />
-              <button type="button" className="snp-vbtn snp-nav-l" aria-label="Previous photo" onClick={() => step(-1)}>
+              <button type="button" className="snp-vbtn snp-nav-l" aria-label={L.prevPhoto} onClick={() => step(-1)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                   <path d="M15 5l-7 7 7 7" />
                 </svg>
               </button>
-              <button type="button" className="snp-vbtn snp-nav-r" aria-label="Next photo" onClick={() => step(1)}>
+              <button type="button" className="snp-vbtn snp-nav-r" aria-label={L.nextPhoto} onClick={() => step(1)}>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
                   <path d="M9 5l7 7-7 7" />
                 </svg>

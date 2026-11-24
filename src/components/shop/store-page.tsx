@@ -5,7 +5,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteHeader } from "@/components/layout/site-header";
 import { useT } from "@/lib/i18n/client";
 import { byCategory, CATEGORIES, type Category } from "@/lib/shop/catalog";
-import { BagShowcase } from "./bag-showcase";
+import { BagsGrid } from "./bags-grid";
 import { CardRow } from "./product-card";
 import { ClothesRail } from "./clothes-rail";
 import { GraduationFeature, ProductGrid, WallCustom } from "./store-sections";
@@ -42,7 +42,6 @@ export function StorePage() {
     return () => io.disconnect();
   }, []);
 
-  const label = (c: Category) => bi(CATEGORIES.find((x) => x.id === c)!.label);
   const blurb = (c: Category) => bi(CATEGORIES.find((x) => x.id === c)!.blurb);
 
   return (
@@ -74,11 +73,8 @@ export function StorePage() {
           <ClothesRail products={byCategory("clothes")} />
         </Section>
 
-        <Section id="bags" title={label("bags")} blurb={blurb("bags")} bleed>
-          <BagShowcase bags={byCategory("bags")} />
-          <div className="mx-auto mt-10 max-w-7xl px-5 sm:px-8">
-            <CardRow products={byCategory("bags")} />
-          </div>
+        <Section id="bags" title={t.shop.bagsHeadline} blurb={blurb("bags")}>
+          <BagsGrid bags={byCategory("bags")} />
         </Section>
 
         <Section id="dolls" title={t.shop.dollsHeadline} blurb={blurb("dolls")}>

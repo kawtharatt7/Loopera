@@ -92,6 +92,9 @@ const en = {
     prevLook: "Previous look",
     nextLook: "Next look",
     openPiece: "Open the piece",
+    rail: { eyebrow: "On the rail", caption: "Hover or swipe along the rail. Click a piece to turn it around.", front: "Front", back: "Back", close: "Close", show: "Show" },
+    bagsGrid: "Pick a bag to see it up close",
+    bagLabels: { size: "SIZE", price: "PRICE", colour: "YARN COLOUR", add: "ADD TO BAG", soldOut: "SOLD OUT", added: "ADDED", toast: "Added to your bag", zoom: "Hold to see the stitches", tap: "Tap to view", madeToOrder: (d: number) => `Made to order · ready in about ${d} days`, saved: "Saved to favourites", removed: "Removed from favourites" },
     credits: "Photos: Unsplash and Pexels (free licenses), and Loopera's own pieces.",
   },
   product: {
@@ -323,6 +326,9 @@ const ar: Dict = {
     prevLook: "الإطلالة السابقة",
     nextLook: "الإطلالة التالية",
     openPiece: "افتحي القطعة",
+    rail: { eyebrow: "على الراك", caption: "مرّري الماوس أو اسحبي على الراك. اضغطي على القطعة عشان تلفّينها.", front: "الأمام", back: "الخلف", close: "إغلاق", show: "اعرضي" },
+    bagsGrid: "اختاري شنطة عشان تشوفينها عن قرب",
+    bagLabels: { size: "المقاس", price: "السعر", colour: "لون الخيط", add: "أضيفي للحقيبة", soldOut: "خلصت", added: "انضافت", toast: "انضافت لحقيبتك", zoom: "اضغطي مطوّل عشان تشوفين الغرز", tap: "اضغطي للعرض", madeToOrder: (d: number) => `حسب الطلب · جاهزة خلال ${d} يوم تقريباً`, saved: "انحفظت في المفضلة", removed: "انشالت من المفضلة" },
     credits: "الصور: Unsplash و Pexels (رخص مجانية)، وقطع لوبيرا نفسها.",
   },
   product: {

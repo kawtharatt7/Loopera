@@ -7,7 +7,7 @@ import { useT } from "@/lib/i18n/client";
 import { byCategory, CATEGORIES, type Category } from "@/lib/shop/catalog";
 import { BagShowcase } from "./bag-showcase";
 import { CardRow } from "./product-card";
-import { Runway } from "./runway";
+import { ClothesRail } from "./clothes-rail";
 import { GraduationFeature, ProductGrid, WallCustom } from "./store-sections";
 
 function Section({ id, title, blurb, children, bleed = false }: { id: Category; title: string; blurb?: string; children: ReactNode; bleed?: boolean }) {
@@ -71,7 +71,7 @@ export function StorePage() {
         </nav>
 
         <Section id="clothes" title={t.shop.clothesHeadline} blurb={blurb("clothes")} bleed>
-          <Runway products={byCategory("clothes")} />
+          <ClothesRail products={byCategory("clothes")} />
         </Section>
 
         <Section id="bags" title={label("bags")} blurb={blurb("bags")} bleed>

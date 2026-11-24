@@ -169,7 +169,7 @@ const ORIGINALS: [id: string, en: string, ar: string, price: number][] = [
 
 /** Showcase archive: fan pieces shown in the gallery only, never sold. */
 const SHOWCASE: [id: string, en: string, ar: string, group: WallGroup][] = [
-  ...([["al-hilal", "Al-Hilal", "الهلال"], ["al-nassr", "Al-Nassr", "النصر"], ["al-ittihad", "Al-Ittihad", "الاتحاد"], ["al-ahli", "Al-Ahli", "الأهلي"], ["al-shabab", "Al-Shabab", "الشباب"], ["al-ettifaq", "Al-Ettifaq", "الاتفاق"], ["al-fateh", "Al-Fateh", "الفتح"], ["al-taawoun", "Al-Taawoun", "التعاون"], ["al-qadsiah", "Al-Qadsiah", "القادسية"], ["al-raed", "Al-Raed", "الرائد"]] as const).map(([id, en, ar]) => [id, en, ar, "saudi-clubs"] as [string, string, string, WallGroup]),
+  ...([["al-hilal", "Al-Hilal", "الهلال"], ["al-nassr", "Al-Nassr", "النصر"], ["al-ittihad", "Al-Ittihad", "الاتحاد"], ["al-ahli", "Al-Ahli", "الأهلي"]] as const).map(([id, en, ar]) => [id, en, ar, "saudi-clubs"] as [string, string, string, WallGroup]),
   ...([["real-madrid", "Real Madrid", "ريال مدريد"], ["barcelona", "Barcelona", "برشلونة"], ["man-city", "Man City", "مانشستر سيتي"], ["man-united", "Man United", "مانشستر يونايتد"], ["liverpool", "Liverpool", "ليفربول"], ["arsenal", "Arsenal", "آرسنال"], ["chelsea", "Chelsea", "تشيلسي"], ["bayern", "Bayern Munich", "بايرن ميونخ"], ["psg", "PSG", "باريس سان جيرمان"], ["ac-milan", "AC Milan", "ميلان"]] as const).map(([id, en, ar]) => [id, en, ar, "global-clubs"] as [string, string, string, WallGroup]),
   ...([["spider-man", "Spider-Man", "سبايدر مان"], ["iron-man", "Iron Man", "آيرون مان"], ["captain-america", "Captain America", "كابتن أمريكا"], ["batman", "Batman", "باتمان"], ["naruto", "Naruto", "ناروتو"], ["luffy", "Luffy", "لوفي"], ["zoro", "Zoro", "زورو"], ["gojo", "Gojo", "غوجو"], ["luffy-hanging", "Luffy (hanging)", "لوفي (معلّقة)"], ["goku", "Goku", "غوكو"], ["no-face", "No-Face", "الوجه الخفي"]] as const).map(([id, en, ar]) => [id, en, ar, "anime"] as [string, string, string, WallGroup]),
 ];
@@ -264,6 +264,26 @@ const ALL: Product[] = [
     sizes: WALL(0),
     colors: AS_SHOWN,
     photos: PRODUCT_SHOT(`/images/wall/${id}.webp`, { en: `${en}, a crocheted wall hanging`, ar: `${ar}، لوحة كروشيه` }),
+  })),
+  ...([
+    ["spider-man-doll", "Spider-Man doll", "دمية سبايدر مان"],
+    ["luffy-doll", "Luffy doll", "دمية لوفي"],
+  ] as const).map(([slug, en, ar]): Product => ({
+    slug,
+    category: "dolls",
+    showcase: true,
+    title: { en, ar },
+    maker: LOOPERA,
+    description: { en: "A fan piece from our showcase archive. Shown only, not for sale.", ar: "قطعة من أرشيف أعمالنا. للعرض فقط، غير معروضة للبيع." },
+    details: [{ en: "Amigurumi, cotton yarn", ar: "أميغورومي، خيط قطن" }],
+    madeToOrder: true,
+    leadTimeDays: 10,
+    rating: 0,
+    reviews: 0,
+    sizes: ONE(0),
+    colors: AS_SHOWN,
+    photos: PRODUCT_SHOT(`/images/dolls/${slug}.webp`, { en: `${en}, crocheted`, ar: `${ar}، كروشيه` }),
+    cutout: `/images/dolls/${slug}.webp`,
   })),
   {
     slug: "graduate-doll-her",

@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PatternViewer } from "@/components/viewer/pattern-viewer";
 import { roundKey } from "@/components/viewer/pattern-list";
-import { DAILY_FREE_DESIGNS } from "@/lib/credits/constants";
-import { designsLeft, spendOneDesign } from "@/lib/creator/daily";
+import type { AiDesign } from "@/lib/ai/design";
 import { colorFromText, heightFor, matchTapestry, matchTemplate, recolor, TEMPLATES, type MakeType, type SizeChoice } from "@/lib/creator/templates";
 import { estimate, generatePattern, presetFor, scaleSpec } from "@/lib/engine";
 import type { EditorDoc } from "@/lib/editor/state";
@@ -25,7 +24,7 @@ const LAST_KEY = "loopera-creator-last-v1";
 export const HANDOFF_KEY = "loopera-editor-handoff";
 
 type Result =
-  | { kind: "template"; id: string; templateKey: string; title: Bi; spec: DesignSpec; height: number; fromPhoto: boolean }
+  | { kind: "template"; id: string; templateKey: string; title: Bi; spec: DesignSpec; height: number; fromPhoto: boolean; ai?: "ok" | "fallback" | "off" }
   | { kind: "wall"; id: string; title: Bi; grid: number[][]; palette: string[]; names: Bi[]; fromPhoto: boolean };
 
 function loadLast(): Result | null {
@@ -36,6 +35,16 @@ function loadLast(): Result | null {
     // ignore
   }
   return null;
+}
+
+/** The photo for the AI: at most 1024 px on its longest side, as a JPEG data URL. */
+function toDataUrl(img: ImageBitmap): string {
+  const k = Math.min(1, 1024 / Math.max(img.width, img.height));
+  const c = document.createElement("canvas");
+  c.width = Math.round(img.width * k);
+  c.height = Math.round(img.height * k);
+  c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", 0.85);
 }
 
 function tapestryResult(id: TapestryId): Result {
@@ -61,7 +70,7 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
   const [size, setSize] = useState<SizeChoice>("medium");
   const [width, setWidth] = useState(36);
   const [colors, setColors] = useState(4);
-  const [left, setLeft] = useState<number | null>(null);
+  const [aiReady, setAiReady] = useState<boolean | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
@@ -71,7 +80,10 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
   const progress = useProgress(result?.id ?? null);
 
   useEffect(() => {
-    setLeft(designsLeft());
+    fetch("/api/design")
+      .then((r) => r.json())
+      .then((j: { ai: string | null }) => setAiReady(!!j.ai))
+      .catch(() => setAiReady(false));
     if (initialTapestry) setResult(tapestryResult(initialTapestry));
     else setResult(loadLast());
   }, [initialTapestry]);
@@ -100,12 +112,6 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
       setError(t.creator.needInput);
       return;
     }
-    if (!spendOneDesign()) {
-      setLeft(0);
-      setError(t.creator.noneLeft);
-      return;
-    }
-    setLeft(designsLeft());
     setBusy(true);
     try {
       const img = file ? await decode(file) : null;
@@ -127,20 +133,52 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
         }
       } else {
         const tpl = matchTemplate(type, words);
-        const fromText = colorFromText(words);
-        const picked = img ? dominantColors(img, 2) : [];
-        const palette = fromText ? [fromText, ...picked.slice(0, 1)] : picked;
-        const spec = recolor(tpl.spec, palette);
-        const height = heightFor(tpl, size);
-        next = {
-          kind: "template",
-          id: `${tpl.key}-${hashId(JSON.stringify(spec) + height)}`,
-          templateKey: tpl.key,
-          title: tpl.name,
-          spec,
-          height,
-          fromPhoto: !!img,
-        };
+        // AI first: it reads the parts, proportions and colours from the photo; the engine computes the rounds.
+        let ai: AiDesign | null = null;
+        let aiState: "ok" | "fallback" | "off" = aiReady ? "fallback" : "off";
+        if (aiReady) {
+          try {
+            const res = await fetch("/api/design", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ kind: type, size, text: words, image: img ? toDataUrl(img) : null }),
+            });
+            if (res.ok) {
+              ai = ((await res.json()) as { design: AiDesign }).design;
+              aiState = "ok";
+            } else if (res.status === 503) aiState = "off";
+          } catch {
+            // network trouble: fall back to the template below
+          }
+        }
+        if (ai) {
+          next = {
+            kind: "template",
+            id: `ai-${hashId(JSON.stringify(ai.spec) + ai.heightCm)}`,
+            templateKey: "ai",
+            title: ai.title,
+            spec: ai.spec,
+            height: Math.round(ai.heightCm),
+            fromPhoto: !!img,
+            ai: aiState,
+          };
+        } else {
+          const fromText = colorFromText(words);
+          const picked = img ? dominantColors(img, 2) : [];
+          const palette = fromText ? [fromText, ...picked.slice(0, 1)] : picked;
+          const spec = recolor(tpl.spec, palette);
+          const height = heightFor(tpl, size);
+          next = {
+            kind: "template",
+            id: `${tpl.key}-${hashId(JSON.stringify(spec) + height)}`,
+            templateKey: tpl.key,
+            title: tpl.name,
+            spec,
+            height,
+            fromPhoto: !!img,
+            ai: aiState,
+          };
+        }
       }
       img?.close();
       setResult(next);
@@ -280,17 +318,11 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
           <button
             type="button"
             onClick={generate}
-            disabled={busy || left === 0}
+            disabled={busy}
             className="min-h-12 rounded-sm bg-primary px-8 text-base font-medium text-bg transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {busy ? t.creator.generating : t.creator.generate}
+            {busy ? (file && aiReady && type !== "wall" ? t.creator.aiReading : t.creator.generating) : t.creator.generate}
           </button>
-          {left !== null && (
-            <p className="text-sm text-muted-foreground" aria-live="polite">
-              {left > 0 ? t.creator.left(left, DAILY_FREE_DESIGNS) : t.creator.noneLeft}
-              <span className="block text-xs">{t.creator.resets}</span>
-            </p>
-          )}
         </div>
         {error && (
           <p role="alert" className="mt-4 text-sm text-ember">
@@ -307,7 +339,7 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
                 {bi(result.title)}
               </h2>
               <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                {result.kind === "wall" ? (result.fromPhoto ? t.creator.photoNote : t.creator.chartLegend) : t.creator.templateNote}
+                {result.kind === "wall" ? (result.fromPhoto ? t.creator.photoNote : t.creator.chartLegend) : result.ai === "ok" ? `${t.creator.aiNote}${result.spec.notes ? ` ${result.spec.notes}` : ""}` : result.ai === "fallback" ? t.creator.aiFallback : t.creator.templateNote}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">

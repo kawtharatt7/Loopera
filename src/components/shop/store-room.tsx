@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { SiteHeader } from "@/components/layout/site-header";
@@ -75,6 +76,30 @@ export function StoreRoom() {
 
   useEffect(() => radius.set(box.w / 2), [box.w, radius]);
   useEffect(() => angle.on("change", (a) => setFace(mod(Math.round(a / 90), 4))), [angle]);
+
+  // Come back to the wall you left (from the gallery walk, a product page, or a reload).
+  useEffect(() => {
+    let i = WALLS.indexOf(window.location.hash.slice(1) as WallId);
+    if (i < 0) {
+      try {
+        i = WALLS.indexOf(sessionStorage.getItem("loopera-room-wall") as WallId);
+      } catch {
+        i = -1;
+      }
+    }
+    if (i > 0) {
+      angle.jump(i * 90);
+      turn.jump(i * 90);
+      setTouched(true);
+    }
+  }, [angle, turn]);
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("loopera-room-wall", WALLS[face]);
+    } catch {
+      // private mode: the room still works, it just starts at the clothes
+    }
+  }, [face]);
 
   const go = useCallback(
     (i: number) => {
@@ -410,9 +435,14 @@ function HangingsWall({ items, onBrowse }: { items: Product[]; onBrowse: () => v
             </li>
           ))}
         </ul>
-        <button type="button" onClick={onBrowse} className="min-h-12 rounded-full bg-fg px-7 text-[15px] font-medium text-bg shadow-[0_18px_30px_-16px_rgba(30,15,5,0.6)] transition-opacity hover:opacity-90">
-          {c.room.browseWall}
-        </button>
+        <div className="flex flex-col items-center gap-2">
+          <Link href="/shop/wall" className="inline-flex min-h-12 items-center rounded-full bg-fg px-7 text-[15px] font-medium text-bg shadow-[0_18px_30px_-16px_rgba(30,15,5,0.6)] transition-opacity hover:opacity-90">
+            {c.hub.walk}
+          </Link>
+          <button type="button" onClick={onBrowse} className="min-h-10 px-3 text-sm text-fg/75 underline-offset-4 hover:text-fg hover:underline">
+            {c.room.browseWall}
+          </button>
+        </div>
       </div>
     </div>
   );

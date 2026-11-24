@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useBag } from "@/components/bag/bag-context";
 import { useC } from "@/lib/i18n/collection";
 import { useT } from "@/lib/i18n/client";
-import { addToCart } from "@/lib/shop/cart";
 import { formatSar, type ColorOption, type Product } from "@/lib/shop/catalog";
 import { useRecolored } from "@/lib/shop/recolor";
 
@@ -29,31 +28,6 @@ function Piece({ product, colorId, imgRef }: { product: Product; colorId: string
   );
 }
 
-/** Sends a copy of the piece flying into the bag icon in the header, then gives the icon a small bounce. */
-function flyToBag(img: HTMLImageElement | null) {
-  const target = document.querySelector<HTMLElement>("[data-bag-icon]");
-  if (!img || !target || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-  const a = img.getBoundingClientRect();
-  const b = target.getBoundingClientRect();
-  const dx = b.left + b.width / 2 - (a.left + a.width / 2);
-  const dy = b.top + b.height / 2 - (a.top + a.height / 2);
-  const ghost = img.cloneNode() as HTMLImageElement;
-  Object.assign(ghost.style, { position: "fixed", left: `${a.left}px`, top: `${a.top}px`, width: `${a.width}px`, height: `${a.height}px`, zIndex: "1000", pointerEvents: "none", margin: "0", objectFit: "contain" });
-  document.body.appendChild(ghost);
-  const fly = ghost.animate(
-    [
-      { transform: "translate(0,0) scale(1) rotate(0deg)", opacity: 1 },
-      { transform: `translate(${dx * 0.45}px, ${dy * 0.45 - 60}px) scale(0.55) rotate(-6deg)`, opacity: 1, offset: 0.5 },
-      { transform: `translate(${dx}px, ${dy}px) scale(0.05) rotate(4deg)`, opacity: 0.4 },
-    ],
-    { duration: 950, easing: "cubic-bezier(.55,0,.25,1)" },
-  );
-  fly.onfinish = () => {
-    ghost.remove();
-    target.animate([{ transform: "scale(1)" }, { transform: "scale(1.28)" }, { transform: "scale(1)" }], { duration: 380, easing: "ease-out" });
-  };
-}
-
 /**
  * A garment from the rail, up close: large on its hanger in the middle of the room, with the
  * previous and next pieces a click (or arrow key) away. Size, colour and quantity live only here.
@@ -62,7 +36,7 @@ export function HangerView({ products, index, onIndex, onClose }: { products: Pr
   const { bi, locale } = useT();
   const c = useC();
   const r = c.room;
-  const { setOpen } = useBag();
+  const { setOpen, add: addLine } = useBag();
   const p = products[index];
   const [dir, setDir] = useState(1);
   const [colorId, setColorId] = useState(p.colors[0].id);
@@ -103,8 +77,7 @@ export function HangerView({ products, index, onIndex, onClose }: { products: Pr
   const color = p.colors.find((x) => x.id === colorId) ?? p.colors[0];
 
   const add = () => {
-    if (!addToCart({ slug: p.slug, color: color.id, size: size.id }, qty)) return;
-    flyToBag(imgRef.current);
+    if (!addLine({ slug: p.slug, color: color.id, size: size.id }, qty)) return;
     setAdded(true);
   };
 

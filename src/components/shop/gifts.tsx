@@ -41,9 +41,14 @@ function Group({ title, items, kind, onCustom }: { title: string; items: Product
             </div>
             <div className="mt-3 flex items-baseline justify-between gap-3">
               <h4 className="font-serif text-lg leading-snug">{bi(p.title)}</h4>
-              <span className="shrink-0 text-sm tabular-nums text-muted-foreground">{formatSar(fromPrice(p), locale)}</span>
+              {!p.showcase && <span className="shrink-0 text-sm tabular-nums text-muted-foreground">{formatSar(fromPrice(p), locale)}</span>}
             </div>
-            <p className="mt-1 text-sm text-muted-foreground">{c.readyIn(p.leadTimeDays)}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{p.showcase ? c.hub.showcase : c.readyIn(p.leadTimeDays)}</p>
+            {p.showcase ? (
+              <button type="button" onClick={() => onCustom("")} className="mt-3 min-h-11 rounded-sm border border-fg/25 px-3 text-sm hover:border-fg">
+                {c.hub.request}
+              </button>
+            ) : (
             <div className="mt-3 grid gap-2">
               <button
                 type="button"
@@ -56,6 +61,7 @@ function Group({ title, items, kind, onCustom }: { title: string; items: Product
                 {c.gifts.customize}
               </button>
             </div>
+            )}
           </li>
         ))}
       </ul>

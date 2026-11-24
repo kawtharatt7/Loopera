@@ -77,15 +77,16 @@ export function BagsGrid({ bags }: { bags: Product[] }) {
 }
 
 /** A piece up close (bags, and clothes on the model): sizes, yarn colours, stitch zoom, add to bag. */
-export function ProductDialog({ product: bag, onClose }: { product: Product; onClose: () => void }) {
+export function ProductDialog({ product: bag, onClose, view = "hanger" }: { product: Product; onClose: () => void; view?: "hanger" | "model" }) {
   const { t, bi, locale } = useT();
   const c2 = useC();
   const { add } = useBag();
   const box = useRef<HTMLDivElement | null>(null);
   // Clothes: on their hanger when we have one, otherwise on the model; each with a garment-only mask.
-  const cut = bag.hanger ?? bag.model ?? cutoutOf(bag);
+  const hanger = view === "hanger" ? bag.hanger : undefined;
+  const cut = hanger ?? bag.model ?? cutoutOf(bag);
   const base = cut ?? bag.photos[0].src;
-  const garmentMask = bag.hanger ? bag.masks?.hanger : bag.model ? bag.masks?.model : undefined;
+  const garmentMask = hanger ? bag.masks?.hanger : bag.model ? bag.masks?.model : undefined;
   const [painted, setPainted] = useState<Record<string, string>>({});
 
   // Repaint the bag in every yarn colour it is offered in (our own photo, recoloured in the browser).
@@ -129,7 +130,8 @@ export function ProductDialog({ product: bag, onClose }: { product: Product; onC
           { src, label: viewLabels.stitch, focus: [0.5, 0.6], zoom: 2.2 },
           { src, label: viewLabels.handle, focus: [0.5, 0.15], zoom: 1.9 },
           { src, label: viewLabels.base, focus: [0.5, 0.85], zoom: 1.9 },
-          ...(bag.hanger && bag.model ? [{ src: bag.model, label: c2.tryOn }] : []),
+          ...(hanger && bag.model ? [{ src: bag.model, label: c2.tryOn }] : []),
+          ...(!hanger && bag.hanger ? [{ src: bag.hanger, label: c2.hangerView }] : []),
           ...bag.photos.map((ph) => ({ src: ph.src, label: bi(ph.alt) })),
         ];
         return { name: bi(c.name), swatch: swatchOf(bag, c.hex), tint: swatchOf(bag, c.hex), src, gallery };
@@ -153,7 +155,7 @@ export function ProductDialog({ product: bag, onClose }: { product: Product; onC
             <path d="M3 3l10 10M13 3L3 13" />
           </svg>
         </button>
-        <div className={bag.category === "clothes" && !bag.hanger ? "loopera-cutout loopera-model" : "loopera-cutout"}>
+        <div className={bag.category === "clothes" && !hanger ? "loopera-cutout loopera-model" : "loopera-cutout"}>
           <SneakerProductHero
             variants={variants}
             eyebrow={bi(bag.maker)}

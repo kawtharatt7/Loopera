@@ -50,6 +50,21 @@ describe("POST /api/design with Gemini", () => {
     expect(body.rounds.length).toBeGreaterThan(10);
   });
 
+  it("moves to another model when one is busy (503)", async () => {
+    vi.stubEnv("GEMINI_API_KEY", "test-key");
+    const calls: string[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string) => {
+        calls.push(url);
+        return url.includes("gemini-flash-latest") ? new Response("high demand", { status: 503 }) : geminiReply("ok");
+      }),
+    );
+    const res = await GET(new Request("http://x/api/design?check=1"));
+    expect(await res.json()).toEqual({ ai: "gemini", check: { ok: true, model: "gemini-3.6-flash" } });
+    expect(calls.filter((c) => c.includes("gemini-flash-latest"))).toHaveLength(2);
+  }, 10000);
+
   it("reports a failure instead of inventing a design", async () => {
     vi.stubEnv("GEMINI_API_KEY", "bad");
     vi.stubGlobal("fetch", vi.fn(async () => new Response("API key not valid", { status: 400 })));

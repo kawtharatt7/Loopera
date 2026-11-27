@@ -67,7 +67,7 @@ export async function POST(req: Request) {
     const msg = e instanceof Error ? e.message : String(e);
     console.error("design route", msg);
     // Say what went wrong (without secrets), so a failure is never mistaken for a real design.
-    const reason = /\b429\b/.test(msg) ? "busy" : /\b40[13]\b|API key/i.test(msg) ? "key" : "upstream";
+    const reason = /\b(429|500|503)\b/.test(msg) ? "busy" : /\b40[13]\b|API key/i.test(msg) ? "key" : "upstream";
     return NextResponse.json({ error: reason }, { status: 502 });
   }
 }
@@ -115,14 +115,23 @@ async function callGemini(model: string, body: unknown): Promise<Response> {
   });
 }
 
-/** Tries each model until one answers; a missing model (404) moves on to the next name. */
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * Tries each model until one answers. A busy model (429/500/503) gets one quick retry, then the next
+ * model is tried; a missing model (404) moves straight on. A bad key or request (400/401/403) stops.
+ */
 async function gemini(body: unknown): Promise<{ json: { candidates?: { content?: { parts?: { text?: string }[] } }[] }; model: string }> {
   let last = "";
   for (const model of geminiModels()) {
-    const res = await callGemini(model, body);
-    if (res.ok) return { json: await res.json(), model };
-    last = `gemini ${model} ${res.status}: ${(await res.text()).slice(0, 300)}`;
-    if (res.status !== 404) break;
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const res = await callGemini(model, body);
+      if (res.ok) return { json: await res.json(), model };
+      last = `gemini ${model} ${res.status}: ${(await res.text()).slice(0, 300)}`;
+      if ([400, 401, 403].includes(res.status)) throw new Error(last);
+      if (res.status === 404) break;
+      if (attempt === 0) await sleep(1200);
+    }
   }
   throw new Error(last);
 }

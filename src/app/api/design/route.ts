@@ -33,8 +33,10 @@ function allow(ip: string): boolean {
   return true;
 }
 
-export function GET() {
-  return NextResponse.json({ ai: provider() });
+export async function GET(req: Request) {
+  const which = provider();
+  if (new URL(req.url).searchParams.get("check") && which) return NextResponse.json({ ai: which, check: await checkProvider(which) });
+  return NextResponse.json({ ai: which });
 }
 
 function provider(): "anthropic" | "gemini" | null {
@@ -62,8 +64,11 @@ export async function POST(req: Request) {
     if (!design) return NextResponse.json({ error: "unreadable" }, { status: 502 });
     return NextResponse.json({ design, provider: which });
   } catch (e) {
-    console.error("design route", e instanceof Error ? e.message : e);
-    return NextResponse.json({ error: "upstream" }, { status: 502 });
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("design route", msg);
+    // Say what went wrong (without secrets), so a failure is never mistaken for a real design.
+    const reason = /\b429\b/.test(msg) ? "busy" : /\b40[13]\b|API key/i.test(msg) ? "key" : "upstream";
+    return NextResponse.json({ error: reason }, { status: 502 });
   }
 }
 
@@ -96,6 +101,32 @@ async function askClaude(kind: Parameters<typeof userPrompt>[0], size: Parameter
   return json.content.find((c) => c.type === "tool_use")?.input ?? null;
 }
 
+/** Model names to try, in order: the one set in Vercel, then Google's "latest flash" alias, then stable names. */
+function geminiModels(): string[] {
+  const list = [process.env.GEMINI_MODEL, "gemini-flash-latest", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-2.5-flash"];
+  return [...new Set(list.filter((m): m is string => !!m))];
+}
+
+async function callGemini(model: string, body: unknown): Promise<Response> {
+  return fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY! },
+    body: JSON.stringify(body),
+  });
+}
+
+/** Tries each model until one answers; a missing model (404) moves on to the next name. */
+async function gemini(body: unknown): Promise<{ json: { candidates?: { content?: { parts?: { text?: string }[] } }[] }; model: string }> {
+  let last = "";
+  for (const model of geminiModels()) {
+    const res = await callGemini(model, body);
+    if (res.ok) return { json: await res.json(), model };
+    last = `gemini ${model} ${res.status}: ${(await res.text()).slice(0, 300)}`;
+    if (res.status !== 404) break;
+  }
+  throw new Error(last);
+}
+
 async function askGemini(kind: Parameters<typeof userPrompt>[0], size: Parameters<typeof userPrompt>[1], text: string, image: string | null): Promise<unknown> {
   const parts: unknown[] = [];
   if (image) {
@@ -103,18 +134,29 @@ async function askGemini(kind: Parameters<typeof userPrompt>[0], size: Parameter
     parts.push({ inline_data: { mime_type: mime, data } });
   }
   parts.push({ text: `${userPrompt(kind, size, text)}\nAnswer with JSON only, matching this JSON Schema:\n${JSON.stringify(AI_DESIGN_JSON_SCHEMA)}` });
-  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-goog-api-key": process.env.GEMINI_API_KEY! },
-    body: JSON.stringify({
-      systemInstruction: { parts: [{ text: systemPrompt() }] },
-      contents: [{ role: "user", parts }],
-      generationConfig: { responseMimeType: "application/json" },
-    }),
+  const { json } = await gemini({
+    systemInstruction: { parts: [{ text: systemPrompt() }] },
+    contents: [{ role: "user", parts }],
+    generationConfig: { responseMimeType: "application/json", temperature: 0.3 },
   });
-  if (!res.ok) throw new Error(`gemini ${res.status}: ${(await res.text()).slice(0, 300)}`);
-  const json = (await res.json()) as { candidates?: { content?: { parts?: { text?: string }[] } }[] };
   const out = json.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
   return JSON.parse(out.replace(/^```(?:json)?\s*|\s*```$/g, ""));
+}
+
+/** A tiny real call, so the site owner can check the key works: GET /api/design?check=1 */
+async function checkProvider(which: "anthropic" | "gemini"): Promise<{ ok: boolean; model?: string; error?: string }> {
+  try {
+    if (which === "gemini") {
+      const { model } = await gemini({ contents: [{ role: "user", parts: [{ text: "Reply with the single word: ok" }] }] });
+      return { ok: true, model };
+    }
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-api-key": process.env.ANTHROPIC_API_KEY!, "anthropic-version": "2023-06-01" },
+      body: JSON.stringify({ model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5", max_tokens: 5, messages: [{ role: "user", content: "Reply: ok" }] }),
+    });
+    return res.ok ? { ok: true, model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5" } : { ok: false, error: `anthropic ${res.status}: ${(await res.text()).slice(0, 200)}` };
+  } catch (e) {
+    return { ok: false, error: e instanceof Error ? e.message.replace(/key=[^&\s]+/g, "key=***") : "unknown" };
+  }
 }

@@ -9,7 +9,7 @@ import type { AiDesign } from "@/lib/ai/design";
 import type { EnginePart, Pattern } from "@/lib/engine/types";
 import { hasWebGL } from "@/lib/webgl";
 import { UpgradeDialog } from "@/components/pricing/pricing-plans";
-import { planOf, spendDesign, useDesignsLeft, useSubscription } from "@/lib/credits/plans";
+import { planOf, refundDesign, spendDesign, useDesignsLeft, useSubscription } from "@/lib/credits/plans";
 import { useP } from "@/lib/i18n/pricing";
 import { AnimatePresence } from "framer-motion";
 import { guessMake, type Make } from "@/lib/viewer/piece";
@@ -166,8 +166,19 @@ export function Creator({ initialTapestry, initialType = null }: { initialTapest
               ai = ((await res.json()) as { design: AiDesign }).design;
               aiState = "ok";
             } else if (res.status === 503) aiState = "off";
+            else {
+              // The AI is connected but could not answer: say so, give the design back, show nothing made up.
+              const reason = ((await res.json().catch(() => ({}))) as { error?: string }).error;
+              refundDesign();
+              img?.close();
+              setError(reason === "busy" ? t.creator.aiBusy : reason === "key" ? t.creator.aiKey : reason === "limit" ? t.creator.aiLimit : t.creator.aiFailed);
+              return;
+            }
           } catch {
-            // network trouble: fall back to the template below
+            refundDesign();
+            img?.close();
+            setError(t.creator.aiFailed);
+            return;
           }
         }
         if (ai) {

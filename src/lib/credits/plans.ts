@@ -106,6 +106,18 @@ export function spendDesign(now = new Date()): boolean {
   return true;
 }
 
+/** Gives back a design that could not be made (the AI failed). */
+export function refundDesign(now = new Date()): void {
+  const used = usedThisMonth(now);
+  if (used <= 0) return;
+  try {
+    localStorage.setItem(USE_KEY, JSON.stringify({ month: riyadhMonth(now), used: used - 1 }));
+  } catch {
+    // storage blocked
+  }
+  emit();
+}
+
 export function useSubscription(): Subscription {
   return useSyncExternalStore(subscribe, getSubscription, () => FREE);
 }
